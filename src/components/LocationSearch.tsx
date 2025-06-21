@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { LocationSearchResult } from '../types/weather';
-import weatherService from '../services/weatherService';
-import './LocationSearch.css';
+import React, { useState, useRef, useEffect } from "react";
+import { LocationSearchResult } from "../types/weather";
+import weatherService from "../services/weatherService";
+import "./LocationSearch.css";
 
 interface LocationSearchProps {
   onLocationSelect: (location: LocationSearchResult) => void;
@@ -12,9 +12,9 @@ interface LocationSearchProps {
 const LocationSearch: React.FC<LocationSearchProps> = ({
   onLocationSelect,
   placeholder = "Search for a location...",
-  className
+  className,
 }) => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<LocationSearchResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -50,8 +50,8 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const performSearch = async (searchQuery: string) => {
@@ -62,7 +62,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       setIsOpen(searchResults.length > 0);
       setSelectedIndex(-1);
     } catch (error) {
-      console.error('Location search failed:', error);
+      console.error("Location search failed:", error);
       setResults([]);
       setIsOpen(false);
     } finally {
@@ -90,23 +90,23 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     if (!isOpen) return;
 
     switch (e.key) {
-      case 'ArrowDown':
+      case "ArrowDown":
         e.preventDefault();
-        setSelectedIndex(prev =>
-          prev < results.length - 1 ? prev + 1 : prev
+        setSelectedIndex((prev) =>
+          prev < results.length - 1 ? prev + 1 : prev,
         );
         break;
-      case 'ArrowUp':
+      case "ArrowUp":
         e.preventDefault();
-        setSelectedIndex(prev => prev > 0 ? prev - 1 : -1);
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
         break;
-      case 'Enter':
+      case "Enter":
         e.preventDefault();
         if (selectedIndex >= 0 && selectedIndex < results.length) {
           handleLocationSelect(results[selectedIndex]);
         }
         break;
-      case 'Escape':
+      case "Escape":
         setIsOpen(false);
         setSelectedIndex(-1);
         inputRef.current?.blur();
@@ -115,23 +115,25 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   };
 
   const getLocationIcon = (location: LocationSearchResult): string => {
-    if (location.name.toLowerCase().includes('mauna kea') ||
-        location.name.toLowerCase().includes('atacama') ||
-        location.name.toLowerCase().includes('palomar') ||
-        location.name.toLowerCase().includes('mount wilson')) {
-      return '🔭'; // Observatory
+    if (
+      location.name.toLowerCase().includes("mauna kea") ||
+      location.name.toLowerCase().includes("atacama") ||
+      location.name.toLowerCase().includes("palomar") ||
+      location.name.toLowerCase().includes("mount wilson")
+    ) {
+      return "🔭"; // Observatory
     }
-    return '📍'; // Regular location
+    return "📍"; // Regular location
   };
 
   const getElevationText = (elevation?: number): string => {
-    if (!elevation || elevation <= 0) return '';
+    if (!elevation || elevation <= 0) return "";
     if (elevation < 1000) return `${elevation}m`;
     return `${(elevation / 1000).toFixed(1)}km`;
   };
 
   return (
-    <div className={`location-search ${className || ''}`}>
+    <div className={`location-search ${className || ""}`}>
       <div className="search-input-container">
         <input
           ref={inputRef}
@@ -148,11 +150,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
           aria-autocomplete="list"
         />
         <div className="search-icon">
-          {loading ? (
-            <div className="search-spinner">⏳</div>
-          ) : (
-            <span>🔍</span>
-          )}
+          {loading ? <div className="search-spinner">⏳</div> : <span>🔍</span>}
         </div>
       </div>
 
@@ -168,14 +166,12 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
               {results.map((location, index) => (
                 <li
                   key={`${location.lat}-${location.lon}`}
-                  className={`search-result ${index === selectedIndex ? 'selected' : ''}`}
+                  className={`search-result ${index === selectedIndex ? "selected" : ""}`}
                   onClick={() => handleLocationSelect(location)}
                   role="option"
                   aria-selected={index === selectedIndex}
                 >
-                  <div className="result-icon">
-                    {getLocationIcon(location)}
-                  </div>
+                  <div className="result-icon">{getLocationIcon(location)}</div>
                   <div className="result-content">
                     <div className="result-name">{location.name}</div>
                     <div className="result-details">
@@ -210,43 +206,51 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       {/* Popular locations quick access */}
       {!query && !isOpen && (
         <div className="quick-locations">
-          <div className="quick-locations-title">🌟 Popular Observing Sites:</div>
+          <div className="quick-locations-title">
+            🌟 Popular Observing Sites:
+          </div>
           <div className="quick-locations-list">
             <button
               className="quick-location"
-              onClick={() => handleLocationSelect({
-                name: 'Mauna Kea, Hawaii',
-                country: 'USA',
-                lat: 19.8207,
-                lon: -155.4680,
-                elevation: 4207
-              })}
+              onClick={() =>
+                handleLocationSelect({
+                  name: "Hamburg, Germany",
+                  country: "Germany",
+                  lat: 53.5511,
+                  lon: 9.9937,
+                  elevation: 6,
+                })
+              }
+            >
+              🏙️ Hamburg
+            </button>
+            <button
+              className="quick-location"
+              onClick={() =>
+                handleLocationSelect({
+                  name: "Mauna Kea, Hawaii",
+                  country: "USA",
+                  lat: 19.8207,
+                  lon: -155.468,
+                  elevation: 4207,
+                })
+              }
             >
               🔭 Mauna Kea
             </button>
             <button
               className="quick-location"
-              onClick={() => handleLocationSelect({
-                name: 'Atacama Desert, Chile',
-                country: 'Chile',
-                lat: -24.6282,
-                lon: -70.4044,
-                elevation: 2400
-              })}
+              onClick={() =>
+                handleLocationSelect({
+                  name: "Atacama Desert, Chile",
+                  country: "Chile",
+                  lat: -24.6282,
+                  lon: -70.4044,
+                  elevation: 2400,
+                })
+              }
             >
               🏜️ Atacama
-            </button>
-            <button
-              className="quick-location"
-              onClick={() => handleLocationSelect({
-                name: 'La Palma, Spain',
-                country: 'Spain',
-                lat: 28.7636,
-                lon: -17.8915,
-                elevation: 2396
-              })}
-            >
-              🏔️ La Palma
             </button>
           </div>
         </div>

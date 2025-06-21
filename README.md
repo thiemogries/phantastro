@@ -65,9 +65,9 @@ Phantastro is a specialized React-based weather application designed specificall
 5. **Configure your `.env` file**:
    ```env
    REACT_APP_METEOBLUE_API_KEY=your_api_key_here
-   REACT_APP_DEFAULT_LAT=47.3769
-   REACT_APP_DEFAULT_LON=8.5417
-   REACT_APP_DEFAULT_LOCATION=Zurich, Switzerland
+   REACT_APP_DEFAULT_LAT=53.5511
+   REACT_APP_DEFAULT_LON=9.9937
+   REACT_APP_DEFAULT_LOCATION=Hamburg, Germany
    ```
 
 6. **Start the development server**:
@@ -251,6 +251,39 @@ Having issues or questions?
 - 🐛 **Bug reports**: Open an issue on GitHub
 - 💡 **Feature requests**: Share your ideas in discussions
 - 📧 **General questions**: Check the FAQ or reach out
+
+## 🔧 Troubleshooting
+
+### API Issues
+
+**Problem**: Getting "Data corrupted" or unit-related errors from Meteoblue API
+- **Solution**: The app automatically falls back to mock data if API calls fail
+- **Check**: Ensure your API key is correctly set in `.env`
+- **Verify**: API key should not be `your_meteoblue_api_key_here`
+
+**Problem**: No weather data loading
+- **Check**: Open browser developer console for error messages
+- **Solution**: App uses high-quality mock data when API is unavailable
+- **Verify**: Meteoblue free tier allows 500 calls/day
+
+**Problem**: "Failed to fetch weather data" error
+- **Causes**:
+  - Invalid API key
+  - API rate limit exceeded
+  - Network connectivity issues
+  - Meteoblue API temporary outage
+- **Solution**: App automatically switches to mock data for uninterrupted experience
+
+### Development Mode
+- App works perfectly without an API key using realistic mock data
+- All features are functional in development mode
+- Mock data includes varied weather conditions for testing
+
+### Getting Help
+- Check browser console for detailed error messages
+- Verify `.env` file configuration
+- Test with different locations
+- Try refreshing the page
 
 ---
 
