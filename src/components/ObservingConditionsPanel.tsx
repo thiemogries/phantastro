@@ -69,15 +69,30 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
           </div>
           <div className="condition-score">
             <div className="score-circle">
-              <div
-                className="score-fill"
-                style={{
-                  background: `conic-gradient(${getScoreColor(conditions.cloudScore)} ${conditions.cloudScore * 36}deg, #e5e7eb 0deg)`
-                }}
-              >
-                <div className="score-inner">
-                  {conditions.cloudScore.toFixed(1)}
-                </div>
+              <svg width="80" height="80" className="progress-ring">
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="35"
+                  fill="none"
+                  stroke="rgba(255, 255, 255, 0.1)"
+                  strokeWidth="6"
+                />
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="35"
+                  fill="none"
+                  stroke={getScoreColor(conditions.cloudScore)}
+                  strokeWidth="6"
+                  strokeDasharray={`${Math.max(0, (conditions.cloudScore / 10) * 220)} 220`}
+                  strokeDashoffset="0"
+                  transform="rotate(-90 40 40)"
+                  className="progress-circle"
+                />
+              </svg>
+              <div className="score-inner">
+                {conditions.cloudScore === 0 ? 'N/A' : conditions.cloudScore.toFixed(1)}
               </div>
             </div>
             <div className="score-description">
@@ -100,15 +115,30 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
           </div>
           <div className="condition-score">
             <div className="score-circle">
-              <div
-                className="score-fill"
-                style={{
-                  background: `conic-gradient(${getScoreColor(conditions.seeingScore)} ${conditions.seeingScore * 36}deg, #e5e7eb 0deg)`
-                }}
-              >
-                <div className="score-inner">
-                  {conditions.seeingScore.toFixed(1)}
-                </div>
+              <svg width="80" height="80" className="progress-ring">
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="35"
+                  fill="none"
+                  stroke="rgba(255, 255, 255, 0.1)"
+                  strokeWidth="6"
+                />
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="35"
+                  fill="none"
+                  stroke={getScoreColor(conditions.seeingScore)}
+                  strokeWidth="6"
+                  strokeDasharray={`${Math.max(0, (conditions.seeingScore / 10) * 220)} 220`}
+                  strokeDashoffset="0"
+                  transform="rotate(-90 40 40)"
+                  className="progress-circle"
+                />
+              </svg>
+              <div className="score-inner">
+                {conditions.seeingScore === 0 ? 'N/A' : conditions.seeingScore.toFixed(1)}
               </div>
             </div>
             <div className="score-description">
@@ -131,15 +161,30 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
           </div>
           <div className="condition-score">
             <div className="score-circle">
-              <div
-                className="score-fill"
-                style={{
-                  background: `conic-gradient(${getScoreColor(conditions.transparencyScore)} ${conditions.transparencyScore * 36}deg, #e5e7eb 0deg)`
-                }}
-              >
-                <div className="score-inner">
-                  {conditions.transparencyScore.toFixed(1)}
-                </div>
+              <svg width="80" height="80" className="progress-ring">
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="35"
+                  fill="none"
+                  stroke="rgba(255, 255, 255, 0.1)"
+                  strokeWidth="6"
+                />
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="35"
+                  fill="none"
+                  stroke={getScoreColor(conditions.transparencyScore)}
+                  strokeWidth="6"
+                  strokeDasharray={`${Math.max(0, (conditions.transparencyScore / 10) * 220)} 220`}
+                  strokeDashoffset="0"
+                  transform="rotate(-90 40 40)"
+                  className="progress-circle"
+                />
+              </svg>
+              <div className="score-inner">
+                {conditions.transparencyScore === 0 ? 'N/A' : conditions.transparencyScore.toFixed(1)}
               </div>
             </div>
             <div className="score-description">
@@ -162,15 +207,30 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
           </div>
           <div className="condition-score">
             <div className="score-circle">
-              <div
-                className="score-fill"
-                style={{
-                  background: `conic-gradient(${getScoreColor(conditions.windScore)} ${conditions.windScore * 36}deg, #e5e7eb 0deg)`
-                }}
-              >
-                <div className="score-inner">
-                  {conditions.windScore.toFixed(1)}
-                </div>
+              <svg width="80" height="80" className="progress-ring">
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="35"
+                  fill="none"
+                  stroke="rgba(255, 255, 255, 0.1)"
+                  strokeWidth="6"
+                />
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="35"
+                  fill="none"
+                  stroke={getScoreColor(conditions.windScore)}
+                  strokeWidth="6"
+                  strokeDasharray={`${Math.max(0, (conditions.windScore / 10) * 220)} 220`}
+                  strokeDashoffset="0"
+                  transform="rotate(-90 40 40)"
+                  className="progress-circle"
+                />
+              </svg>
+              <div className="score-inner">
+                {conditions.windScore === 0 ? 'N/A' : conditions.windScore.toFixed(1)}
               </div>
             </div>
             <div className="score-description">
