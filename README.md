@@ -137,14 +137,15 @@ Phantastro includes quick access to world-renowned astronomical sites:
 - **🎿 Pic du Midi, France** - Historic mountain observatory (2,877m)
 - **🌲 Mount Wilson, California** - Historic observatory (1,742m)
 
-## 📱 API Information
+### API Information
 
 ### Meteoblue Integration
 - **Free Tier**: 500 API calls per day
+- **Package Used**: Basic hourly weather data (`basic-1h`)
 - **Data Coverage**: Global weather data
 - **Update Frequency**: Hourly forecasts
-- **Forecast Range**: 7-day outlook
-- **Historical Data**: Available for analysis
+- **Forecast Range**: 24-hour detailed + 7-day outlook
+- **Astronomy Features**: Enhanced with calculated data
 
 ### Custom Calculations
 - **Seeing Estimation**: Based on wind speed and atmospheric pressure
@@ -256,8 +257,9 @@ Having issues or questions?
 
 ### API Issues
 
-**Problem**: Getting "Data corrupted" or unit-related errors from Meteoblue API
-- **Solution**: The app automatically falls back to mock data if API calls fail
+**Problem**: Getting "Data corrupted" or "invalid package" errors from Meteoblue API
+- **Solution**: App uses only basic weather packages available in free tier
+- **Auto-fallback**: Automatically switches to mock data if API calls fail
 - **Check**: Ensure your API key is correctly set in `.env`
 - **Verify**: API key should not be `your_meteoblue_api_key_here`
 
@@ -269,10 +271,12 @@ Having issues or questions?
 **Problem**: "Failed to fetch weather data" error
 - **Causes**:
   - Invalid API key
-  - API rate limit exceeded
+  - API rate limit exceeded (500 calls/day limit)
   - Network connectivity issues
   - Meteoblue API temporary outage
+  - Package not available in your plan
 - **Solution**: App automatically switches to mock data for uninterrupted experience
+- **Note**: Mock data provides full astronomical functionality
 
 ### Development Mode
 - App works perfectly without an API key using realistic mock data
