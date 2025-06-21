@@ -26,9 +26,9 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
   className
 }) => {
   const cloudInfo = getCloudCoverageInfo(weather.cloudCover.totalCloudCover);
-  const dewPoint = calculateDewPoint(weather.temperature, weather.humidity);
+  const dewPoint = (weather.temperature === 0 || weather.humidity === 0) ? null : calculateDewPoint(weather.temperature, weather.humidity);
   const visibilityInfo = weather.visibility ? getVisibilityInfo(weather.visibility) : null;
-  const precipEmoji = getPrecipitationEmoji(weather.precipitation.precipitation, weather.temperature);
+  const precipEmoji = (weather.precipitation.precipitation === 0 && weather.temperature === 0) ? '' : getPrecipitationEmoji(weather.precipitation.precipitation, weather.temperature);
 
   return (
     <div className={`current-weather ${className || ''}`}>
@@ -51,7 +51,7 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
             </span>
             <div className="temperature-details">
               <div className="feels-like">
-                Dew Point: {formatTemperature(dewPoint)}
+                Dew Point: {dewPoint !== null ? formatTemperature(dewPoint) : 'Not available'}
               </div>
               <div className="humidity">
                 Humidity: {formatHumidity(weather.humidity)}
@@ -90,7 +90,7 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
             <div className="detail-content">
               <div className="detail-label">Cloud Coverage</div>
               <div className="detail-value">
-                {Math.round(weather.cloudCover.totalCloudCover)}%
+                {weather.cloudCover.totalCloudCover === 0 ? 'Not available' : `${Math.round(weather.cloudCover.totalCloudCover)}%`}
               </div>
               <div className="detail-description">
                 {cloudInfo.description}
@@ -122,10 +122,10 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
             <div className="detail-content">
               <div className="detail-label">Precipitation</div>
               <div className="detail-value">
-                {weather.precipitation.precipitation.toFixed(1)} mm
+                {weather.precipitation.precipitation === 0 ? 'Not available' : `${weather.precipitation.precipitation.toFixed(1)} mm`}
               </div>
               <div className="detail-description">
-                {weather.precipitation.precipitationProbability}% chance
+                {weather.precipitation.precipitationProbability === 0 ? 'Not available' : `${weather.precipitation.precipitationProbability}% chance`}
               </div>
             </div>
           </div>
@@ -137,7 +137,7 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
               <div className="detail-content">
                 <div className="detail-label">Visibility</div>
                 <div className="detail-value">
-                  {weather.visibility?.toFixed(1)} km
+                  {weather.visibility ? `${weather.visibility.toFixed(1)} km` : 'Not available'}
                 </div>
                 <div
                   className="detail-description"
@@ -166,7 +166,7 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
                 ></div>
               </div>
               <div className="layer-value">
-                {Math.round(weather.cloudCover.lowCloudCover)}%
+                {weather.cloudCover.lowCloudCover === 0 ? 'N/A' : `${Math.round(weather.cloudCover.lowCloudCover)}%`}
               </div>
             </div>
             <div className="cloud-layer">
@@ -181,7 +181,7 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
                 ></div>
               </div>
               <div className="layer-value">
-                {Math.round(weather.cloudCover.midCloudCover)}%
+                {weather.cloudCover.midCloudCover === 0 ? 'N/A' : `${Math.round(weather.cloudCover.midCloudCover)}%`}
               </div>
             </div>
             <div className="cloud-layer">
@@ -196,7 +196,7 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
                 ></div>
               </div>
               <div className="layer-value">
-                {Math.round(weather.cloudCover.highCloudCover)}%
+                {weather.cloudCover.highCloudCover === 0 ? 'N/A' : `${Math.round(weather.cloudCover.highCloudCover)}%`}
               </div>
             </div>
           </div>

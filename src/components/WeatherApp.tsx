@@ -121,8 +121,31 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
             </p>
           </div>
 
+          {/* Data Availability Notice */}
+          {forecast.currentWeather.temperature === 0 && (
+            <div className="data-notice">
+              <div className="notice-icon">📡</div>
+              <div className="notice-content">
+                <h3>Weather Data Not Available</h3>
+                <p>
+                  Weather data is currently unavailable. This could be due to:
+                </p>
+                <ul>
+                  <li>Missing or invalid Meteoblue API key</li>
+                  <li>API rate limit exceeded (500 calls/day limit)</li>
+                  <li>Network connectivity issues</li>
+                  <li>Temporary API service outage</li>
+                </ul>
+                <p>
+                  To get real weather data, please configure your Meteoblue API key in the <code>.env</code> file.
+                  Get your free API key at <a href="https://www.meteoblue.com/en/weather-api" target="_blank" rel="noopener noreferrer">meteoblue.com</a>.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Observing Conditions Overview */}
-          {observingConditions && (
+          {observingConditions && forecast.currentWeather.temperature !== 0 && (
             <ObservingConditionsPanel
               conditions={observingConditions}
               currentWeather={forecast.currentWeather}
@@ -136,20 +159,46 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
           />
 
           {/* Hourly Forecast */}
-          <div className="forecast-section">
-            <h3>🕐 Next 24 Hours</h3>
-            <HourlyForecast
-              hourlyData={forecast.hourlyForecast.slice(0, 24)}
-            />
-          </div>
+          {forecast.hourlyForecast.length > 0 ? (
+            <div className="forecast-section">
+              <h3>🕐 Next 24 Hours</h3>
+              <HourlyForecast
+                hourlyData={forecast.hourlyForecast.slice(0, 24)}
+              />
+            </div>
+          ) : (
+            <div className="forecast-section">
+              <h3>🕐 Next 24 Hours</h3>
+              <div className="no-data-message">
+                <div className="no-data-icon">📊</div>
+                <div className="no-data-text">
+                  <h4>Hourly forecast not available</h4>
+                  <p>Configure your Meteoblue API key to access detailed hourly weather data.</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Daily Forecast */}
-          <div className="forecast-section">
-            <h3>📅 7-Day Outlook</h3>
-            <DailyForecast
-              dailyData={forecast.dailyForecast}
-            />
-          </div>
+          {forecast.dailyForecast.length > 0 ? (
+            <div className="forecast-section">
+              <h3>📅 7-Day Outlook</h3>
+              <DailyForecast
+                dailyData={forecast.dailyForecast}
+              />
+            </div>
+          ) : (
+            <div className="forecast-section">
+              <h3>📅 7-Day Outlook</h3>
+              <div className="no-data-message">
+                <div className="no-data-icon">📅</div>
+                <div className="no-data-text">
+                  <h4>Daily forecast not available</h4>
+                  <p>Configure your Meteoblue API key to access extended weather forecasts.</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Additional Info */}
           <div className="weather-app__footer">

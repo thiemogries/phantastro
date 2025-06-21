@@ -263,9 +263,10 @@ Having issues or questions?
 - **Check**: Ensure your API key is correctly set in `.env`
 - **Verify**: API key should not be `your_meteoblue_api_key_here`
 
-**Problem**: No weather data loading
-- **Check**: Open browser developer console for error messages
-- **Solution**: App uses high-quality mock data when API is unavailable
+**Problem**: Seeing "Not available" for weather data
+- **Cause**: Missing or invalid API key configuration
+- **Solution**: Set up your Meteoblue API key in `.env` file
+- **Check**: Open browser developer console for detailed error messages
 - **Verify**: Meteoblue free tier allows 500 calls/day
 
 **Problem**: "Failed to fetch weather data" error
@@ -275,17 +276,25 @@ Having issues or questions?
   - Network connectivity issues
   - Meteoblue API temporary outage
   - Package not available in your plan
-- **Solution**: App automatically switches to mock data for uninterrupted experience
-- **Note**: Mock data provides full astronomical functionality
+- **Solution**: App shows "Not available" for missing data instead of failing
+- **Note**: Configure API key to access full astronomical functionality
 
 ### Development Mode
-- App works perfectly without an API key using realistic mock data
-- All features are functional in development mode
-- Mock data includes varied weather conditions for testing
+- App works without an API key but shows "Not available" for missing data
+- Location search and UI features remain fully functional
+- Real API key required for actual weather data display
+- Clear indicators show when data is unavailable vs when it's real
+
+### Data Availability
+- **"Not available"** indicates missing API configuration or data
+- **Real values** show when API is properly configured and working
+- **Clear indicators** distinguish between unavailable and actual zero values
+- **Graceful degradation** ensures app never crashes due to missing data
 
 ### Getting Help
 - Check browser console for detailed error messages
 - Verify `.env` file configuration
+- Ensure API key is valid and not expired
 - Test with different locations
 - Try refreshing the page
 

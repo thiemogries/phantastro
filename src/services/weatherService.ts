@@ -23,13 +23,13 @@ class WeatherService {
 
     if (!this.apiKey || this.apiKey === "your_meteoblue_api_key_here") {
       console.warn(
-        "Meteoblue API key not configured. Using mock data for development. " +
+        "Meteoblue API key not configured. Data will show as 'Not available'. " +
         "Get your free API key from https://www.meteoblue.com/en/weather-api"
       );
     } else {
       // Validate API key on startup (async, doesn't block)
       this.validateApiKey().catch(() => {
-        console.warn("API key validation failed on startup - will use mock data");
+        console.warn("API key validation failed on startup - data will show as 'Not available'");
       });
     }
   }
@@ -61,7 +61,7 @@ class WeatherService {
       return true;
     } catch (error: any) {
       console.error("API key validation failed:", error.response?.data || error.message);
-      console.log("Will use mock data instead - this provides full functionality for development and testing");
+      console.log("Weather data will show as 'Not available' - configure API key for real data");
       return false;
     }
   }
@@ -87,12 +87,10 @@ class WeatherService {
 
       const forecast = this.transformMeteoblueData(basicData, location);
 
-      // Always add mock astronomy data since astro package is not available
-      forecast.dailyForecast = this.enhanceWithAstronomyData(forecast.dailyForecast);
-
       return forecast;
     } catch (error) {
-      throw this.handleApiError(error);
+      // Return unavailable data structure instead of throwing
+      return this.getUnavailableWeatherData(lat, lon, locationName);
     }
   }
 
@@ -255,10 +253,8 @@ class WeatherService {
    * Fetch basic weather data from Meteoblue
    */
   private async fetchBasicWeatherData(lat: number, lon: number): Promise<any> {
-    if (!this.apiKey) {
-      // Return mock data for development
-      console.log("No API key found, using mock data");
-      return this.getMockWeatherData(lat, lon);
+    if (!this.apiKey || this.apiKey === "your_meteoblue_api_key_here") {
+      throw new Error("No API key configured");
     }
 
     const params = {
@@ -268,55 +264,18 @@ class WeatherService {
       format: "json",
     };
 
-    try {
-      console.log("Making Meteoblue API request with params:", params);
-      // Use the most basic package available in free tier
-      // 'basic-1h' provides hourly weather data without astronomy extensions
-      // This avoids "invalid package" errors that occur with astro packages
-      const response = await axios.get(`${this.baseUrl}/basic-1h`, {
-        params,
-      });
-      console.log("Meteoblue API response received successfully");
-      return response.data;
-    } catch (error: any) {
-      console.error("Meteoblue API error:", error.response?.data || error.message);
-      console.log("Falling back to mock data due to API error");
-      return this.getMockWeatherData(lat, lon);
-    }
+    console.log("Making Meteoblue API request with params:", params);
+    // Use the most basic package available in free tier
+    // 'basic-1h' provides hourly weather data without astronomy extensions
+    // This avoids "invalid package" errors that occur with astro packages
+    const response = await axios.get(`${this.baseUrl}/basic-1h`, {
+      params,
+    });
+    console.log("Meteoblue API response received successfully");
+    return response.data;
   }
 
-  /**
-   * Generate mock astronomy data for enhanced features
-   */
-  private generateMockAstronomyData(): any {
-    const days = 7;
-    const moonPhases: number[] = [];
-    const sunrises: string[] = [];
-    const sunsets: string[] = [];
 
-    const now = new Date();
-    for (let i = 0; i < days; i++) {
-      const date = new Date(now.getTime() + i * 24 * 60 * 60 * 1000);
-
-      // Mock moon phase (0-1, where 0.5 is full moon)
-      moonPhases.push(Math.random());
-
-      // Mock sunrise/sunset times
-      const sunrise = new Date(date);
-      sunrise.setHours(6, 30 + Math.random() * 60, 0, 0);
-      sunrises.push(sunrise.toISOString());
-
-      const sunset = new Date(date);
-      sunset.setHours(18, 30 + Math.random() * 60, 0, 0);
-      sunsets.push(sunset.toISOString());
-    }
-
-    return {
-      moon_phase: moonPhases,
-      sunrise: sunrises,
-      sunset: sunsets,
-    };
-  }
 
   /**
    * Transform Meteoblue API response to our internal format
@@ -331,26 +290,26 @@ class WeatherService {
       for (let i = 0; i < Math.min(24, data.data_1h.time.length); i++) {
         // 24 hours of hourly data
         const cloudData: CloudData = {
-          totalCloudCover: data.data_1h.cloudcover?.[i] || Math.random() * 100,
-          lowCloudCover: (data.data_1h.cloudcover?.[i] || Math.random() * 100) * 0.3,
-          midCloudCover: (data.data_1h.cloudcover?.[i] || Math.random() * 100) * 0.4,
-          highCloudCover: (data.data_1h.cloudcover?.[i] || Math.random() * 100) * 0.3,
+          totalCloudCover: data.data_1h.cloudcover?.[i] ?? 0,
+          lowCloudCover: data.data_1h.cloudcover_low?.[i] ?? 0,
+          midCloudCover: data.data_1h.cloudcover_mid?.[i] ?? 0,
+          highCloudCover: data.data_1h.cloudcover_high?.[i] ?? 0,
         };
 
         const precipitationData: PrecipitationData = {
-          precipitation: data.data_1h.precipitation?.[i] || 0,
-          precipitationProbability: Math.random() < 0.2 ? Math.random() * 50 : 0,
+          precipitation: data.data_1h.precipitation?.[i] ?? 0,
+          precipitationProbability: data.data_1h.precipitation_probability?.[i] ?? 0,
         };
 
         hourlyForecast.push({
           time: data.data_1h.time[i],
-          temperature: data.data_1h.temperature_2m?.[i] || 15 + Math.random() * 10,
-          humidity: data.data_1h.relativehumidity_2m?.[i] || 50 + Math.random() * 40,
-          windSpeed: data.data_1h.windspeed_10m?.[i] || Math.random() * 15,
-          windDirection: data.data_1h.winddirection_10m?.[i] || Math.random() * 360,
+          temperature: data.data_1h.temperature_2m?.[i] ?? 0,
+          humidity: data.data_1h.relativehumidity_2m?.[i] ?? 0,
+          windSpeed: data.data_1h.windspeed_10m?.[i] ?? 0,
+          windDirection: data.data_1h.winddirection_10m?.[i] ?? 0,
           cloudCover: cloudData,
           precipitation: precipitationData,
-          visibility: 10 + Math.random() * 20,
+          visibility: data.data_1h.visibility?.[i],
         });
       }
     }
@@ -363,28 +322,8 @@ class WeatherService {
         const dayHours = hourlyForecast.slice(dayStart, dayStart + 24);
 
         if (dayHours.length === 0) {
-          // Generate mock data for remaining days
-          const date = new Date();
-          date.setDate(date.getDate() + day);
-
-          const cloudAvg = Math.random() * 100;
-          let observingQuality: DailyForecast["observingQuality"] = "fair";
-          if (cloudAvg < 20) observingQuality = "excellent";
-          else if (cloudAvg < 40) observingQuality = "good";
-          else if (cloudAvg < 70) observingQuality = "fair";
-          else if (cloudAvg < 90) observingQuality = "poor";
-          else observingQuality = "impossible";
-
-          dailyForecast.push({
-            date: date.toISOString().split('T')[0],
-            temperatureMin: 10 + Math.random() * 5,
-            temperatureMax: 20 + Math.random() * 15,
-            cloudCoverAvg: cloudAvg,
-            precipitationTotal: Math.random() < 0.3 ? Math.random() * 10 : 0,
-            precipitationProbability: Math.random() * 100,
-            windSpeedMax: 5 + Math.random() * 20,
-            observingQuality,
-          });
+          // No data available for future days
+          break;
         } else {
           // Calculate from hourly data
           const temps = dayHours.map(h => h.temperature);
@@ -423,19 +362,40 @@ class WeatherService {
   }
 
   /**
-   * Enhance daily forecast with mock astronomy data
+   * Get unavailable weather data structure
    */
-  private enhanceWithAstronomyData(
-    dailyForecast: DailyForecast[],
-  ): DailyForecast[] {
-    const astronomyData = this.generateMockAstronomyData();
+  private getUnavailableWeatherData(lat: number, lon: number, locationName?: string): WeatherForecast {
+    const location: Location = {
+      lat,
+      lon,
+      name: locationName || `${lat.toFixed(2)}, ${lon.toFixed(2)}`,
+    };
 
-    return dailyForecast.map((day, index) => ({
-      ...day,
-      moonPhase: astronomyData.moon_phase[index],
-      sunrise: astronomyData.sunrise[index],
-      sunset: astronomyData.sunset[index],
-    }));
+    const currentTime = new Date().toISOString();
+
+    return {
+      location,
+      currentWeather: {
+        time: currentTime,
+        temperature: 0,
+        humidity: 0,
+        windSpeed: 0,
+        windDirection: 0,
+        cloudCover: {
+          totalCloudCover: 0,
+          lowCloudCover: 0,
+          midCloudCover: 0,
+          highCloudCover: 0,
+        },
+        precipitation: {
+          precipitation: 0,
+          precipitationProbability: 0,
+        },
+      },
+      hourlyForecast: [],
+      dailyForecast: [],
+      lastUpdated: currentTime,
+    };
   }
 
   /**
@@ -479,107 +439,11 @@ class WeatherService {
     };
   }
 
-  /**
-   * Mock weather data for development
-   */
-  private getMockWeatherData(lat: number, lon: number): any {
-    const now = new Date();
-    const hourlyTimes: string[] = [];
-    const temperatures: number[] = [];
-    const humidity: number[] = [];
-    const windSpeeds: number[] = [];
-    const windDirections: number[] = [];
-    const cloudCover: number[] = [];
-    const precipitation: number[] = [];
 
-    // Generate 72 hours of mock data
-    for (let i = 0; i < 72; i++) {
-      const time = new Date(now.getTime() + i * 60 * 60 * 1000);
-      hourlyTimes.push(time.toISOString());
 
-      // Simulate daily temperature variation
-      const hour = time.getHours();
-      const baseTemp = 15 + Math.sin(((hour - 6) * Math.PI) / 12) * 8;
-      temperatures.push(baseTemp + (Math.random() - 0.5) * 4);
 
-      humidity.push(50 + Math.random() * 40);
-      windSpeeds.push(Math.random() * 15);
-      windDirections.push(Math.random() * 360);
-      cloudCover.push(Math.random() * 100);
-      precipitation.push(Math.random() < 0.1 ? Math.random() * 5 : 0);
-    }
 
-    return {
-      metadata: {
-        name: `Mock Location`,
-        latitude: lat,
-        longitude: lon,
-        timezone_abbreviation: "UTC",
-      },
-      data_1h: {
-        time: hourlyTimes,
-        temperature_2m: temperatures,
-        relativehumidity_2m: humidity,
-        windspeed_10m: windSpeeds,
-        winddirection_10m: windDirections,
-        cloudcover: cloudCover,
-        cloudcover_low: cloudCover.map((c) => c * 0.3),
-        cloudcover_mid: cloudCover.map((c) => c * 0.4),
-        cloudcover_high: cloudCover.map((c) => c * 0.3),
-        precipitation: precipitation,
-        precipitation_probability: precipitation.map((p) =>
-          p > 0 ? 60 + Math.random() * 40 : Math.random() * 30,
-        ),
-      },
-      data_day: this.generateMockDailyData(),
-    };
-  }
 
-  /**
-   * Generate mock daily data
-   */
-  private generateMockDailyData(): any {
-    const days = 7;
-    const times: string[] = [];
-    const tempMin: number[] = [];
-    const tempMax: number[] = [];
-    const cloudMean: number[] = [];
-    const precipSum: number[] = [];
-    const precipProb: number[] = [];
-    const windMax: number[] = [];
-
-    const now = new Date();
-    for (let i = 0; i < days; i++) {
-      const date = new Date(now.getTime() + i * 24 * 60 * 60 * 1000);
-      times.push(date.toISOString().split("T")[0]);
-
-      const baseTemp = 15 + (Math.random() - 0.5) * 10;
-      tempMin.push(baseTemp - 5 - Math.random() * 5);
-      tempMax.push(baseTemp + 5 + Math.random() * 10);
-
-      cloudMean.push(Math.random() * 100);
-      precipSum.push(Math.random() < 0.3 ? Math.random() * 10 : 0);
-      precipProb.push(Math.random() * 100);
-      windMax.push(5 + Math.random() * 20);
-    }
-
-    return {
-      time: times,
-      temperature_2m_min: tempMin,
-      temperature_2m_max: tempMax,
-      cloudcover_mean: cloudMean,
-      precipitation_sum: precipSum,
-      precipitation_probability_max: precipProb,
-      windspeed_10m_max: windMax,
-    };
-  }
-
-  /**
-   * Mock astronomy data for development
-   */
-  private getMockAstronomyData(): any {
-    return this.generateMockAstronomyData();
-  }
 }
 
 export const weatherService = new WeatherService();

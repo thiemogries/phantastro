@@ -2,24 +2,31 @@ import { format, parseISO, isToday, isTomorrow } from "date-fns";
 import { HourlyForecast } from "../types/weather";
 
 /**
- * Format temperature with appropriate units
+ * Format temperature with appropriate units or show "Not available"
  */
 export const formatTemperature = (
   temp: number,
   unit: "C" | "F" = "C",
 ): string => {
+  if (temp === 0 || temp === null || temp === undefined) {
+    return "Not available";
+  }
   const rounded = Math.round(temp);
   return `${rounded}°${unit}`;
 };
 
 /**
- * Format wind speed with direction
+ * Format wind speed with direction or show "Not available"
  */
 export const formatWind = (
   speed: number,
   direction: number,
   unit: "ms" | "kmh" | "mph" = "ms",
 ): string => {
+  if (speed === 0 || speed === null || speed === undefined) {
+    return "Not available";
+  }
+
   let convertedSpeed = speed;
   let unitLabel = "m/s";
 
@@ -77,11 +84,14 @@ export const formatCloudCover = (percentage: number): string => {
 };
 
 /**
- * Get cloud coverage description and color
+ * Get cloud coverage description and color or show unavailable info
  */
 export const getCloudCoverageInfo = (
   percentage: number,
 ): { description: string; color: string; emoji: string } => {
+  if (percentage === 0 || percentage === null || percentage === undefined) {
+    return { description: "Not available", color: "#6b7280", emoji: "❓" };
+  }
   if (percentage < 10)
     return { description: "Clear skies", color: "#4f46e5", emoji: "🌌" };
   if (percentage < 25)
@@ -212,11 +222,14 @@ export const getPrecipitationEmoji = (
 };
 
 /**
- * Calculate visibility description
+ * Get visibility description or show "Not available"
  */
 export const getVisibilityInfo = (
-  visibility: number,
+  visibility: number | undefined,
 ): { description: string; color: string } => {
+  if (!visibility || visibility === 0) {
+    return { description: "Not available", color: "#6b7280" };
+  }
   if (visibility > 20) return { description: "Excellent", color: "#22c55e" };
   if (visibility > 10) return { description: "Good", color: "#84cc16" };
   if (visibility > 5) return { description: "Moderate", color: "#eab308" };
@@ -244,15 +257,26 @@ export const calculateDewPoint = (
 export const getObservationRecommendations = (
   forecast: HourlyForecast,
 ): {
-  planetary: boolean;
-  deepSky: boolean;
-  photography: boolean;
-  lunar: boolean;
-  solar: boolean;
+  planetary: boolean | null;
+  deepSky: boolean | null;
+  photography: boolean | null;
+  lunar: boolean | null;
+  solar: boolean | null;
 } => {
   const cloudCover = forecast.cloudCover.totalCloudCover;
   const windSpeed = forecast.windSpeed;
   const seeing = forecast.seeing?.seeing || 2.5;
+
+  // Return null (not available) if essential data is missing
+  if (cloudCover === 0 || windSpeed === 0) {
+    return {
+      planetary: null,
+      deepSky: null,
+      photography: null,
+      lunar: null,
+      solar: null,
+    };
+  }
 
   return {
     planetary: cloudCover < 30 && seeing < 2.0 && windSpeed < 10,
@@ -349,9 +373,12 @@ export const convertWindSpeed = (
 };
 
 /**
- * Format humidity percentage
+ * Format humidity percentage or show "Not available"
  */
 export const formatHumidity = (humidity: number): string => {
+  if (humidity === 0 || humidity === null || humidity === undefined) {
+    return "Not available";
+  }
   return `${Math.round(humidity)}%`;
 };
 
@@ -359,8 +386,15 @@ export const formatHumidity = (humidity: number): string => {
  * Get UV index description
  */
 export const getUVIndexInfo = (
-  uvIndex: number,
+  uvIndex: number | undefined,
 ): { description: string; color: string; advice: string } => {
+  if (!uvIndex || uvIndex === 0) {
+    return {
+      description: "Not available",
+      color: "#6b7280",
+      advice: "UV data not available",
+    };
+  }
   if (uvIndex < 3)
     return {
       description: "Low",

@@ -38,6 +38,8 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
     return 'Very Poor';
   };
 
+  const isDataAvailable = currentWeather.temperature !== 0 && currentWeather.windSpeed !== 0;
+
   return (
     <div className={`observing-conditions-panel ${className || ''}`}>
       <div className="panel-header">
@@ -85,7 +87,7 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
           <div className="condition-details">
             <div className="detail-row">
               <span>Cloud Cover:</span>
-              <span>{Math.round(currentWeather.cloudCover.totalCloudCover)}%</span>
+              <span>{currentWeather.cloudCover.totalCloudCover === 0 ? 'Not available' : `${Math.round(currentWeather.cloudCover.totalCloudCover)}%`}</span>
             </div>
           </div>
         </div>
@@ -116,7 +118,7 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
           <div className="condition-details">
             <div className="detail-row">
               <span>Wind Speed:</span>
-              <span>{Math.round(currentWeather.windSpeed * 3.6)} km/h</span>
+              <span>{currentWeather.windSpeed === 0 ? 'Not available' : `${Math.round(currentWeather.windSpeed * 3.6)} km/h`}</span>
             </div>
           </div>
         </div>
@@ -147,7 +149,7 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
           <div className="condition-details">
             <div className="detail-row">
               <span>Humidity:</span>
-              <span>{Math.round(currentWeather.humidity)}%</span>
+              <span>{currentWeather.humidity === 0 ? 'Not available' : `${Math.round(currentWeather.humidity)}%`}</span>
             </div>
           </div>
         </div>
@@ -188,39 +190,39 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
       <div className="observation-types">
         <h4>🎯 Recommended Observations</h4>
         <div className="observation-grid">
-          <div className={`observation-type ${recommendations.planetary ? 'suitable' : 'not-suitable'}`}>
+          <div className={`observation-type ${recommendations.planetary === null ? 'not-available' : (recommendations.planetary ? 'suitable' : 'not-suitable')}`}>
             <div className="observation-icon">🪐</div>
             <div className="observation-label">Planetary</div>
             <div className="observation-status">
-              {recommendations.planetary ? '✅ Good' : '❌ Poor'}
+              {recommendations.planetary === null ? '❓ Not available' : (recommendations.planetary ? '✅ Good' : '❌ Poor')}
             </div>
           </div>
-          <div className={`observation-type ${recommendations.deepSky ? 'suitable' : 'not-suitable'}`}>
+          <div className={`observation-type ${recommendations.deepSky === null ? 'not-available' : (recommendations.deepSky ? 'suitable' : 'not-suitable')}`}>
             <div className="observation-icon">🌌</div>
             <div className="observation-label">Deep Sky</div>
             <div className="observation-status">
-              {recommendations.deepSky ? '✅ Good' : '❌ Poor'}
+              {recommendations.deepSky === null ? '❓ Not available' : (recommendations.deepSky ? '✅ Good' : '❌ Poor')}
             </div>
           </div>
-          <div className={`observation-type ${recommendations.photography ? 'suitable' : 'not-suitable'}`}>
+          <div className={`observation-type ${recommendations.photography === null ? 'not-available' : (recommendations.photography ? 'suitable' : 'not-suitable')}`}>
             <div className="observation-icon">📸</div>
             <div className="observation-label">Astrophotography</div>
             <div className="observation-status">
-              {recommendations.photography ? '✅ Good' : '❌ Poor'}
+              {recommendations.photography === null ? '❓ Not available' : (recommendations.photography ? '✅ Good' : '❌ Poor')}
             </div>
           </div>
-          <div className={`observation-type ${recommendations.lunar ? 'suitable' : 'not-suitable'}`}>
+          <div className={`observation-type ${recommendations.lunar === null ? 'not-available' : (recommendations.lunar ? 'suitable' : 'not-suitable')}`}>
             <div className="observation-icon">🌙</div>
             <div className="observation-label">Lunar</div>
             <div className="observation-status">
-              {recommendations.lunar ? '✅ Good' : '❌ Poor'}
+              {recommendations.lunar === null ? '❓ Not available' : (recommendations.lunar ? '✅ Good' : '❌ Poor')}
             </div>
           </div>
-          <div className={`observation-type ${recommendations.solar ? 'suitable' : 'not-suitable'}`}>
+          <div className={`observation-type ${recommendations.solar === null ? 'not-available' : (recommendations.solar ? 'suitable' : 'not-suitable')}`}>
             <div className="observation-icon">☀️</div>
             <div className="observation-label">Solar</div>
             <div className="observation-status">
-              {recommendations.solar ? '✅ Good' : '❌ Poor'}
+              {recommendations.solar === null ? '❓ Not available' : (recommendations.solar ? '✅ Good' : '❌ Poor')}
             </div>
           </div>
         </div>
@@ -265,14 +267,12 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
         </div>
         <div className="stat-item">
           <div className="stat-label">Precipitation</div>
-          <div className="stat-value">{currentWeather.precipitation.precipitationProbability}%</div>
+          <div className="stat-value">{currentWeather.precipitation.precipitationProbability === 0 ? 'Not available' : `${currentWeather.precipitation.precipitationProbability}%`}</div>
         </div>
-        {currentWeather.visibility && (
-          <div className="stat-item">
-            <div className="stat-label">Visibility</div>
-            <div className="stat-value">{currentWeather.visibility.toFixed(1)} km</div>
-          </div>
-        )}
+        <div className="stat-item">
+          <div className="stat-label">Visibility</div>
+          <div className="stat-value">{currentWeather.visibility ? `${currentWeather.visibility.toFixed(1)} km` : 'Not available'}</div>
+        </div>
       </div>
     </div>
   );
