@@ -1,0 +1,154 @@
+/* LoadingSpinner.css - Animated loading spinner with stellar theme */
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.spinner-container {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 15px;
+}
+
+.spinner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  animation: rotate 2s linear infinite;
+}
+
+.spinner-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 2px solid rgba(124, 58, 237, 0.2);
+  border-top: 2px solid #7c3aed;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.star {
+  position: absolute;
+  font-size: 1.2rem;
+  animation: twinkle 1.5s ease-in-out infinite alternate;
+}
+
+.star-1 {
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  animation-delay: 0s;
+}
+
+.star-2 {
+  top: 50%;
+  right: 10%;
+  transform: translateY(-50%);
+  animation-delay: 0.3s;
+}
+
+.star-3 {
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  animation-delay: 0.6s;
+}
+
+.star-4 {
+  top: 50%;
+  left: 10%;
+  transform: translateY(-50%);
+  animation-delay: 0.9s;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes twinkle {
+  from {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* Size variations */
+.loading-spinner.small {
+  padding: 10px;
+}
+
+.loading-spinner.small .spinner-container {
+  width: 40px;
+  height: 40px;
+}
+
+.loading-spinner.small .star {
+  font-size: 0.8rem;
+}
+
+.loading-spinner.large {
+  padding: 40px;
+}
+
+.loading-spinner.large .spinner-container {
+  width: 120px;
+  height: 120px;
+}
+
+.loading-spinner.large .star {
+  font-size: 1.8rem;
+}
+
+/* Message styling */
+.spinner-message {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+  text-align: center;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .loading-spinner .spinner-container {
+    width: 60px;
+    height: 60px;
+  }
+
+  .spinner-message {
+    font-size: 0.9rem;
+  }
+}

@@ -1,0 +1,238 @@
+/* HourlyForecast.css - Hourly forecast component styling */
+
+.hourly-forecast {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.hourly-scroll-container {
+  overflow-x: auto;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.hourly-scroll-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.hourly-scroll-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.hourly-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(124, 58, 237, 0.5);
+  border-radius: 3px;
+}
+
+.hourly-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 58, 237, 0.7);
+}
+
+.hourly-items {
+  display: flex;
+  gap: 15px;
+  min-width: max-content;
+  padding: 10px 0;
+}
+
+.hourly-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 15px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  min-width: 80px;
+  transition: all 0.3s ease;
+}
+
+.hourly-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.hourly-time {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+}
+
+.hourly-icon {
+  font-size: 1.5rem;
+}
+
+.hourly-temp {
+  font-size: 1rem;
+  color: white;
+  font-weight: 600;
+}
+
+.hourly-clouds {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.cloud-bar {
+  width: 20px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+
+.cloud-fill {
+  width: 100%;
+  border-radius: 0 0 10px 10px;
+  transition: height 0.3s ease;
+  min-height: 2px;
+}
+
+.cloud-percentage {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.hourly-wind {
+  text-align: center;
+}
+
+.wind-speed {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.observing-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quality-dot {
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+}
+
+.precipitation-indicator {
+  position: absolute;
+  top: -5px;
+  right: -15px;
+  background: rgba(59, 130, 246, 0.8);
+  color: white;
+  font-size: 0.6rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+/* Legend */
+.hourly-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  padding: 15px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hourly-forecast {
+    padding: 20px;
+  }
+
+  .hourly-items {
+    gap: 10px;
+  }
+
+  .hourly-item {
+    min-width: 70px;
+    padding: 12px 8px;
+  }
+
+  .hourly-legend {
+    gap: 10px;
+  }
+
+  .legend-item {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hourly-forecast {
+    padding: 15px;
+  }
+
+  .hourly-item {
+    min-width: 60px;
+    padding: 10px 6px;
+  }
+
+  .hourly-icon {
+    font-size: 1.2rem;
+  }
+
+  .hourly-temp {
+    font-size: 0.9rem;
+  }
+
+  .hourly-legend {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+/* Animation */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.hourly-item {
+  animation: slideIn 0.5s ease-out;
+}
+
+.hourly-item:nth-child(1) { animation-delay: 0.1s; }
+.hourly-item:nth-child(2) { animation-delay: 0.2s; }
+.hourly-item:nth-child(3) { animation-delay: 0.3s; }
+.hourly-item:nth-child(4) { animation-delay: 0.4s; }
+.hourly-item:nth-child(5) { animation-delay: 0.5s; }
