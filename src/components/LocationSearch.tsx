@@ -203,58 +203,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
         </div>
       )}
 
-      {/* Popular locations quick access */}
-      {!query && !isOpen && (
-        <div className="quick-locations">
-          <div className="quick-locations-title">
-            🌟 Popular Observing Sites:
-          </div>
-          <div className="quick-locations-list">
-            <button
-              className="quick-location"
-              onClick={() =>
-                handleLocationSelect({
-                  name: "Hamburg, Germany",
-                  country: "Germany",
-                  lat: 53.5511,
-                  lon: 9.9937,
-                  elevation: 6,
-                })
-              }
-            >
-              🏙️ Hamburg
-            </button>
-            <button
-              className="quick-location"
-              onClick={() =>
-                handleLocationSelect({
-                  name: "Mauna Kea, Hawaii",
-                  country: "USA",
-                  lat: 19.8207,
-                  lon: -155.468,
-                  elevation: 4207,
-                })
-              }
-            >
-              🔭 Mauna Kea
-            </button>
-            <button
-              className="quick-location"
-              onClick={() =>
-                handleLocationSelect({
-                  name: "Atacama Desert, Chile",
-                  country: "Chile",
-                  lat: -24.6282,
-                  lon: -70.4044,
-                  elevation: 2400,
-                })
-              }
-            >
-              🏜️ Atacama
-            </button>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 };
