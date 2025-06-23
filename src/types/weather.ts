@@ -78,45 +78,46 @@ export interface WeatherForecast {
 // Meteoblue API specific response structure
 export interface MeteoblueResponse {
   metadata: {
+    modelrun_updatetime_utc: string;
     name: string;
-    latitude: number;
-    longitude: number;
     height: number;
-    timezone_abbreviation: string;
+    timezone_abbrevation: string;
+    latitude: number;
+    modelrun_utc: string;
+    longitude: number;
     utc_timeoffset: number;
+    generation_time_ms: number;
   };
   units: {
-    time: string;
-    temperature_2m: string;
-    relativehumidity_2m: string;
-    windspeed_10m: string;
-    winddirection_10m: string;
-    cloudcover: string;
     precipitation: string;
+    windspeed: string;
+    precipitation_probability: string;
+    relativehumidity: string;
+    temperature: string;
+    time: string;
+    pressure: string;
+    winddirection: string;
   };
   data_1h?: {
     time: string[];
-    temperature_2m: number[];
-    relativehumidity_2m: number[];
-    windspeed_10m: number[];
-    winddirection_10m: number[];
-    cloudcover: number[];
-    cloudcover_low: number[];
-    cloudcover_mid: number[];
-    cloudcover_high: number[];
-    precipitation: number[];
+    snowfraction: number[];
+    windspeed: number[];
+    temperature: number[];
     precipitation_probability: number[];
-    visibility?: number[];
+    convective_precipitation: number[];
+    rainspot: string[];
+    precipitation: number[];
+    isdaylight: number[];
   };
   data_day?: {
     time: string[];
-    temperature_2m_max: number[];
-    temperature_2m_min: number[];
+    temperature_max: number[];
+    temperature_min: number[];
     sunrise: string[];
     sunset: string[];
     precipitation_sum: number[];
     precipitation_probability_max: number[];
-    windspeed_10m_max: number[];
+    windspeed_max: number[];
     cloudcover_mean: number[];
   };
 }

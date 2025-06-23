@@ -411,7 +411,44 @@ class WeatherService {
       lastTime: data.data_1h?.time?.[data.data_1h?.time?.length - 1]
     });
 
-    if (data.data_1h && data.data_1h.time && data.data_1h.time.length > 0) {
+    // Validate and debug API response structure
+    if (!data.data_1h) {
+      console.error('❌ Missing data_1h in API response');
+      throw new Error('Invalid API response: missing hourly data');
+    }
+
+    if (!data.data_1h.time || !Array.isArray(data.data_1h.time) || data.data_1h.time.length === 0) {
+      console.error('❌ Missing or invalid time array in API response');
+      throw new Error('Invalid API response: missing time data');
+    }
+
+    // Debug: Log sample data from the first few entries to understand the structure
+    console.log('📊 Sample API data for first 3 hours:', {
+      times: data.data_1h.time?.slice(0, 3),
+      temperatures: data.data_1h.temperature?.slice(0, 3),
+      windSpeeds: data.data_1h.windspeed?.slice(0, 3),
+      precipitation: data.data_1h.precipitation?.slice(0, 3),
+      precipitationProbability: data.data_1h.precipitation_probability?.slice(0, 3),
+      snowFraction: data.data_1h.snowfraction?.slice(0, 3),
+      isDaylight: data.data_1h.isdaylight?.slice(0, 3)
+    });
+
+    // Validate data arrays have consistent lengths
+    const timeLength = data.data_1h.time.length;
+    const dataArrays = {
+      temperature: data.data_1h.temperature,
+      windspeed: data.data_1h.windspeed,
+      precipitation: data.data_1h.precipitation,
+      precipitation_probability: data.data_1h.precipitation_probability
+    };
+
+    for (const [fieldName, array] of Object.entries(dataArrays)) {
+      if (array && array.length !== timeLength) {
+        console.warn(`⚠️ Length mismatch for ${fieldName}: expected ${timeLength}, got ${array.length}`);
+      }
+    }
+
+    // Process available hourly data
       // Process all available hours, but generate additional hours if needed
       const availableHours = data.data_1h.time.length;
       const targetHours = 168; // 7 days
@@ -421,10 +458,10 @@ class WeatherService {
       for (let i = 0; i < availableHours; i++) {
         // 24 hours of hourly data
         const cloudData: CloudData = {
-          totalCloudCover: data.data_1h.cloudcover?.[i] ?? null,
-          lowCloudCover: data.data_1h.cloudcover_low?.[i] ?? null,
-          midCloudCover: data.data_1h.cloudcover_mid?.[i] ?? null,
-          highCloudCover: data.data_1h.cloudcover_high?.[i] ?? null,
+          totalCloudCover: null, // Not available in this API response
+          lowCloudCover: null,
+          midCloudCover: null,
+          highCloudCover: null,
         };
 
         const precipitationData: PrecipitationData = {
@@ -432,16 +469,51 @@ class WeatherService {
           precipitationProbability: data.data_1h.precipitation_probability?.[i] ?? null,
         };
 
+        // Validate precipitation data
+        if (precipitationData.precipitation !== null && precipitationData.precipitation < 0) {
+          console.warn(`⚠️ Invalid precipitation value at hour ${i}: ${precipitationData.precipitation}`);
+          precipitationData.precipitation = 0;
+        }
+        if (precipitationData.precipitationProbability !== null &&
+            (precipitationData.precipitationProbability < 0 || precipitationData.precipitationProbability > 100)) {
+          console.warn(`⚠️ Invalid precipitation probability at hour ${i}: ${precipitationData.precipitationProbability}`);
+          precipitationData.precipitationProbability = Math.max(0, Math.min(100, precipitationData.precipitationProbability));
+        }
+
         const hourData = {
           time: data.data_1h.time[i],
-          temperature: data.data_1h.temperature_2m?.[i] ?? null,
-          humidity: data.data_1h.relativehumidity_2m?.[i] ?? null,
-          windSpeed: data.data_1h.windspeed_10m?.[i] ?? null,
-          windDirection: data.data_1h.winddirection_10m?.[i] ?? null,
+          temperature: data.data_1h.temperature?.[i] ?? null,
+          humidity: null, // Not available in this API response
+          windSpeed: data.data_1h.windspeed?.[i] ?? null,
+          windDirection: null, // Not available in this API response
           cloudCover: cloudData,
           precipitation: precipitationData,
-          visibility: data.data_1h.visibility?.[i],
+          visibility: null, // Not available in this API response
         };
+
+        // Validate temperature and wind speed
+        if (hourData.temperature !== null && (hourData.temperature < -100 || hourData.temperature > 60)) {
+          console.warn(`⚠️ Extreme temperature value at hour ${i}: ${hourData.temperature}°C`);
+        }
+        if (hourData.windSpeed !== null && (hourData.windSpeed < 0 || hourData.windSpeed > 200)) {
+          console.warn(`⚠️ Invalid wind speed at hour ${i}: ${hourData.windSpeed} m/s`);
+          hourData.windSpeed = Math.max(0, Math.min(200, hourData.windSpeed));
+        }
+
+        // Debug: Log detailed data for first few hours to verify correct mapping
+        if (i < 2) {
+          console.log(`🕐 Hour ${i} detailed mapping:`, {
+            time: hourData.time,
+            rawTemperature: data.data_1h.temperature?.[i],
+            mappedTemperature: hourData.temperature,
+            rawWindSpeed: data.data_1h.windspeed?.[i],
+            mappedWindSpeed: hourData.windSpeed,
+            rawPrecipitation: data.data_1h.precipitation?.[i],
+            mappedPrecipitation: hourData.precipitation.precipitation,
+            rawPrecipProb: data.data_1h.precipitation_probability?.[i],
+            mappedPrecipProb: hourData.precipitation.precipitationProbability
+          });
+        }
 
         hourlyForecast.push(hourData);
 
@@ -492,9 +564,19 @@ class WeatherService {
       }
 
       console.log(`✅ Processed ${hourlyForecast.length} hours total (${availableHours} real + ${hourlyForecast.length - availableHours} forecast)`);
-    } else {
-      console.warn('⚠️ No hourly data available in API response');
-    }
+
+      // Final validation of processed data
+      const validDataSample = hourlyForecast.slice(0, 3).map(hour => ({
+        time: hour.time,
+        hasTemperature: hour.temperature !== null,
+        hasWindSpeed: hour.windSpeed !== null,
+        hasPrecipitation: hour.precipitation.precipitation !== null,
+        hasPrecipitationProb: hour.precipitation.precipitationProbability !== null
+      }));
+      console.log('✅ Final data validation sample:', validDataSample);
+
+      // Run comprehensive data integrity check
+      this.checkDataIntegrity(hourlyForecast);
 
     // Generate daily forecast from hourly data if daily data is not available
     const dailyForecast: DailyForecast[] = [];
@@ -512,24 +594,29 @@ class WeatherService {
           const clouds = dayHours.map(h => h.cloudCover.totalCloudCover).filter(c => c !== null) as number[];
           const windSpeeds = dayHours.map(h => h.windSpeed).filter(w => w !== null) as number[];
 
-          const cloudAvg = clouds.length > 0 ? clouds.reduce((sum, c) => sum + c, 0) / clouds.length : 0;
-          let observingQuality: DailyForecast["observingQuality"] = "fair";
-          if (cloudAvg < 20) observingQuality = "excellent";
-          else if (cloudAvg < 40) observingQuality = "good";
-          else if (cloudAvg < 70) observingQuality = "fair";
-          else if (cloudAvg < 90) observingQuality = "poor";
-          else observingQuality = "impossible";
-
+          // Since cloud data is not available in current API, use precipitation as a proxy for observing conditions
           const precips = dayHours.map(h => h.precipitation.precipitation).filter(p => p !== null) as number[];
           const precipProbs = dayHours.map(h => h.precipitation.precipitationProbability).filter(p => p !== null) as number[];
+
+          const cloudAvg = clouds.length > 0 ? clouds.reduce((sum, c) => sum + c, 0) / clouds.length : 50; // Default to 50% when no cloud data
+          const maxPrecipProb = precipProbs.length > 0 ? Math.max(...precipProbs) : 0;
+          const totalPrecip = precips.length > 0 ? precips.reduce((sum, p) => sum + p, 0) : 0;
+
+          // Determine observing quality based on available data (precipitation probability and amount)
+          let observingQuality: DailyForecast["observingQuality"] = "fair";
+          if (maxPrecipProb < 10 && totalPrecip < 0.1) observingQuality = "excellent";
+          else if (maxPrecipProb < 30 && totalPrecip < 1) observingQuality = "good";
+          else if (maxPrecipProb < 60 && totalPrecip < 5) observingQuality = "fair";
+          else if (maxPrecipProb < 80 && totalPrecip < 10) observingQuality = "poor";
+          else observingQuality = "impossible";
 
           dailyForecast.push({
             date: dayHours[0].time.split('T')[0],
             temperatureMin: temps.length > 0 ? Math.min(...temps) : 0,
             temperatureMax: temps.length > 0 ? Math.max(...temps) : 0,
             cloudCoverAvg: cloudAvg,
-            precipitationTotal: precips.length > 0 ? precips.reduce((sum, p) => sum + p, 0) : 0,
-            precipitationProbability: precipProbs.length > 0 ? Math.max(...precipProbs) : 0,
+            precipitationTotal: totalPrecip,
+            precipitationProbability: maxPrecipProb,
             windSpeedMax: windSpeeds.length > 0 ? Math.max(...windSpeeds) : 0,
             observingQuality,
           });
@@ -595,10 +682,80 @@ class WeatherService {
         details: error.message,
       };
     }
+
     return {
       message: error.message || "Unknown error occurred",
       details: error.toString(),
     };
+  }
+
+  /**
+   * Check data integrity and log potential issues
+   */
+  private checkDataIntegrity(hourlyForecast: HourlyForecast[]): void {
+    console.log('🔍 Running data integrity check...');
+
+    // Check data completeness
+    const dataCompleteness = {
+      temperature: hourlyForecast.filter(h => h.temperature !== null).length / hourlyForecast.length * 100,
+      windSpeed: hourlyForecast.filter(h => h.windSpeed !== null).length / hourlyForecast.length * 100,
+      precipitation: hourlyForecast.filter(h => h.precipitation.precipitation !== null).length / hourlyForecast.length * 100,
+      precipitationProbability: hourlyForecast.filter(h => h.precipitation.precipitationProbability !== null).length / hourlyForecast.length * 100
+    };
+    console.log('📊 Data completeness percentages:', dataCompleteness);
+
+    // Check for data anomalies
+    const temperatures = hourlyForecast.map(h => h.temperature).filter(t => t !== null) as number[];
+    const windSpeeds = hourlyForecast.map(h => h.windSpeed).filter(w => w !== null) as number[];
+    const precipitations = hourlyForecast.map(h => h.precipitation.precipitation).filter(p => p !== null) as number[];
+
+    if (temperatures.length > 0) {
+      const tempStats = {
+        min: Math.min(...temperatures),
+        max: Math.max(...temperatures),
+        avg: temperatures.reduce((sum, t) => sum + t, 0) / temperatures.length
+      };
+      console.log('🌡️ Temperature stats:', tempStats);
+    }
+
+    if (windSpeeds.length > 0) {
+      const windStats = {
+        min: Math.min(...windSpeeds),
+        max: Math.max(...windSpeeds),
+        avg: windSpeeds.reduce((sum, w) => sum + w, 0) / windSpeeds.length
+      };
+      console.log('💨 Wind speed stats:', windStats);
+    }
+
+    if (precipitations.length > 0) {
+      const precipStats = {
+        min: Math.min(...precipitations),
+        max: Math.max(...precipitations),
+        total: precipitations.reduce((sum, p) => sum + p, 0)
+      };
+      console.log('🌧️ Precipitation stats:', precipStats);
+    }
+
+    // Check time sequence continuity
+    const timeGaps: string[] = [];
+    for (let i = 1; i < hourlyForecast.length; i++) {
+      const currentTime = new Date(hourlyForecast[i].time);
+      const prevTime = new Date(hourlyForecast[i - 1].time);
+      const expectedDiff = 60 * 60 * 1000; // 1 hour in milliseconds
+      const actualDiff = currentTime.getTime() - prevTime.getTime();
+
+      if (Math.abs(actualDiff - expectedDiff) > 60000) { // Allow 1 minute tolerance
+        timeGaps.push(`Gap at index ${i}: ${actualDiff / 1000 / 60} minutes instead of 60`);
+      }
+    }
+
+    if (timeGaps.length > 0) {
+      console.warn('⚠️ Time sequence issues found:', timeGaps);
+    } else {
+      console.log('✅ Time sequence is continuous');
+    }
+
+    console.log('✅ Data integrity check completed');
   }
 
   /**

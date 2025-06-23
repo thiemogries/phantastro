@@ -34,8 +34,18 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
   // Calculate observing conditions when forecast changes
   useEffect(() => {
     if (forecast?.currentWeather) {
+      console.log('🔭 WeatherApp: Calculating observing conditions for current weather:', {
+        temperature: forecast.currentWeather.temperature,
+        windSpeed: forecast.currentWeather.windSpeed,
+        cloudCover: forecast.currentWeather.cloudCover.totalCloudCover,
+        precipitation: forecast.currentWeather.precipitation.precipitation
+      });
+
       const conditions = weatherService.calculateObservingConditions(forecast.currentWeather);
+      console.log('✨ WeatherApp: Observing conditions calculated:', conditions);
       setObservingConditions(conditions);
+    } else {
+      console.log('⚠️ WeatherApp: No current weather data available for observing conditions');
     }
   }, [forecast]);
 
@@ -46,12 +56,33 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
     setLoading(true);
     setError(null);
 
+    console.log('🌍 WeatherApp: Starting weather data load for:', { lat, lon, locationName });
+
     try {
+      const startTime = Date.now();
       const weatherData = await weatherService.getWeatherForecast(lat, lon, locationName);
+      const loadTime = Date.now() - startTime;
+
+      console.log(`✅ WeatherApp: Weather data loaded successfully in ${loadTime}ms`);
+      console.log('📊 WeatherApp: Received weather data structure:', {
+        hasLocation: !!weatherData.location,
+        hasCurrentWeather: !!weatherData.currentWeather,
+        hourlyCount: weatherData.hourlyForecast?.length || 0,
+        dailyCount: weatherData.dailyForecast?.length || 0,
+        currentTemp: weatherData.currentWeather?.temperature,
+        currentWind: weatherData.currentWeather?.windSpeed,
+        firstHourTemp: weatherData.hourlyForecast?.[0]?.temperature,
+        lastUpdated: weatherData.lastUpdated
+      });
+
       setForecast(weatherData);
     } catch (err: any) {
+      console.error('❌ WeatherApp: Weather data loading failed:', {
+        error: err.message,
+        stack: err.stack,
+        location: { lat, lon, locationName }
+      });
       setError(err.message || 'Failed to load weather data');
-      console.error('Weather data loading failed:', err);
     } finally {
       setLoading(false);
     }
@@ -62,20 +93,25 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
     const defaultLon = parseFloat(process.env.REACT_APP_DEFAULT_LON || '9.9937');
     const defaultName = process.env.REACT_APP_DEFAULT_LOCATION || 'Hamburg, Germany';
 
+    console.log('🏠 WeatherApp: Loading default location:', { defaultLat, defaultLon, defaultName });
     await loadWeatherData(defaultLat, defaultLon, defaultName);
   };
 
   const handleLocationSelect = async (location: LocationSearchResult) => {
     if (loading) return; // Prevent duplicate requests
+    console.log('📍 WeatherApp: Location selected:', location);
     setSelectedLocation(location);
     await loadWeatherData(location.lat, location.lon, location.name);
   };
 
   const handleRefresh = () => {
     if (loading) return; // Prevent duplicate requests
+    console.log('🔄 WeatherApp: Refresh requested');
     if (selectedLocation) {
+      console.log('🔄 WeatherApp: Refreshing selected location:', selectedLocation);
       loadWeatherData(selectedLocation.lat, selectedLocation.lon, selectedLocation.name);
     } else {
+      console.log('🔄 WeatherApp: Refreshing default location');
       loadDefaultLocation();
     }
   };
