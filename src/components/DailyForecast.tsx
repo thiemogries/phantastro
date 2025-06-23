@@ -64,7 +64,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({
                     style={{
                       width: `${day.cloudCoverAvg}%`,
                       backgroundColor: cloudInfo.color,
-                      opacity: day.cloudCoverAvg ? Math.min(1, (day.cloudCoverAvg / 100) * 0.8 + 0.2) : 0.2
+                      opacity: day.cloudCoverAvg ? day.cloudCoverAvg / 100 : 0
                     }}
                   ></div>
                 </div>

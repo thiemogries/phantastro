@@ -104,7 +104,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                       }
 
                       const cloudInfo = getCloudCoverageInfo(hour.cloudCover.totalCloudCover);
-                      const opacity = hour.cloudCover.totalCloudCover ? Math.min(1, (hour.cloudCover.totalCloudCover / 100) * 0.8 + 0.2) : 0.1;
+                      const opacity = hour.cloudCover.totalCloudCover ? hour.cloudCover.totalCloudCover / 100 : 0;
 
                       return (
                         <div
