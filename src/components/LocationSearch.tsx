@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { LocationSearchResult } from "../types/weather";
-import weatherService from "../services/weatherService";
+import { useLocationSearch } from "../hooks/useWeatherData";
 import "./LocationSearch.css";
 
 interface LocationSearchProps {
@@ -17,11 +17,29 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<LocationSearchResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Use TanStack Query mutation for location search
+  const locationSearchMutation = useLocationSearch();
+  const loading = locationSearchMutation.isPending;
+
+  const performSearch = React.useCallback((searchQuery: string) => {
+    locationSearchMutation.mutate(searchQuery, {
+      onSuccess: (searchResults) => {
+        setResults(searchResults);
+        setIsOpen(searchResults.length > 0);
+        setSelectedIndex(-1);
+      },
+      onError: (error) => {
+        console.error("Location search failed:", error);
+        setResults([]);
+        setIsOpen(false);
+      }
+    });
+  }, [locationSearchMutation]);
 
   // Debounce search
   useEffect(() => {
@@ -35,7 +53,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [query]);
+  }, [query, performSearch]);
 
   // Handle click outside
   useEffect(() => {
@@ -53,22 +71,6 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  const performSearch = async (searchQuery: string) => {
-    setLoading(true);
-    try {
-      const searchResults = await weatherService.searchLocations(searchQuery);
-      setResults(searchResults);
-      setIsOpen(searchResults.length > 0);
-      setSelectedIndex(-1);
-    } catch (error) {
-      console.error("Location search failed:", error);
-      setResults([]);
-      setIsOpen(false);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);

@@ -1,6 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { WeatherForecast, LocationSearchResult, ObservingConditions } from '../types/weather';
-import weatherService from '../services/weatherService';
+import React, { useState } from 'react';
+import { LocationSearchResult } from '../types/weather';
+import {
+  useWeatherData,
+  useObservingConditions,
+  useRefreshWeatherData,
+  WeatherQueryParams
+} from '../hooks/useWeatherData';
 import LocationSearch from './LocationSearch';
 import CurrentWeather from './CurrentWeather';
 import HourlyForecast from './HourlyForecast';
@@ -16,104 +21,41 @@ interface WeatherAppProps {
 }
 
 const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
-  const [forecast, setForecast] = useState<WeatherForecast | null>(null);
-  const [observingConditions, setObservingConditions] = useState<ObservingConditions | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<LocationSearchResult | null>(null);
-  const [hasInitialized, setHasInitialized] = useState(false);
+  const [weatherParams, setWeatherParams] = useState<WeatherQueryParams | null>(null);
 
-  // Load default location on mount
-  useEffect(() => {
-    if (!hasInitialized) {
-      setHasInitialized(true);
-      loadDefaultLocation();
+  // Initialize with default location
+  React.useEffect(() => {
+    if (!weatherParams) {
+      const defaultLat = parseFloat(process.env.REACT_APP_DEFAULT_LAT || '53.5511');
+      const defaultLon = parseFloat(process.env.REACT_APP_DEFAULT_LON || '9.9937');
+      const defaultName = process.env.REACT_APP_DEFAULT_LOCATION || 'Hamburg, Germany';
+
+      console.log('🏠 WeatherApp: Loading default location:', { defaultLat, defaultLon, defaultName });
+      setWeatherParams({ lat: defaultLat, lon: defaultLon, locationName: defaultName });
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [weatherParams]);
 
-  // Calculate observing conditions when forecast changes
-  useEffect(() => {
-    if (forecast?.currentWeather) {
-      console.log('🔭 WeatherApp: Calculating observing conditions for current weather:', {
-        temperature: forecast.currentWeather.temperature,
-        windSpeed: forecast.currentWeather.windSpeed,
-        cloudCover: forecast.currentWeather.cloudCover.totalCloudCover,
-        precipitation: forecast.currentWeather.precipitation.precipitation
-      });
+  // Use TanStack Query hooks
+  const { data: forecast, isLoading: loading, error: queryError } = useWeatherData(weatherParams);
+  const { data: observingConditions } = useObservingConditions(forecast);
+  const refreshWeatherData = useRefreshWeatherData();
 
-      const conditions = weatherService.calculateObservingConditions(forecast.currentWeather);
-      console.log('✨ WeatherApp: Observing conditions calculated:', conditions);
-      setObservingConditions(conditions);
-    } else {
-      console.log('⚠️ WeatherApp: No current weather data available for observing conditions');
-    }
-  }, [forecast]);
+  const error = queryError ? (queryError as Error).message : null;
 
-  const loadWeatherData = async (lat: number, lon: number, locationName: string) => {
-    // Prevent duplicate API calls
-    if (loading) return;
 
-    setLoading(true);
-    setError(null);
 
-    console.log('🌍 WeatherApp: Starting weather data load for:', { lat, lon, locationName });
-
-    try {
-      const startTime = Date.now();
-      const weatherData = await weatherService.getWeatherForecast(lat, lon, locationName);
-      const loadTime = Date.now() - startTime;
-
-      console.log(`✅ WeatherApp: Weather data loaded successfully in ${loadTime}ms`);
-      console.log('📊 WeatherApp: Received weather data structure:', {
-        hasLocation: !!weatherData.location,
-        hasCurrentWeather: !!weatherData.currentWeather,
-        hourlyCount: weatherData.hourlyForecast?.length || 0,
-        dailyCount: weatherData.dailyForecast?.length || 0,
-        currentTemp: weatherData.currentWeather?.temperature,
-        currentWind: weatherData.currentWeather?.windSpeed,
-        firstHourTemp: weatherData.hourlyForecast?.[0]?.temperature,
-        lastUpdated: weatherData.lastUpdated
-      });
-
-      setForecast(weatherData);
-    } catch (err: any) {
-      console.error('❌ WeatherApp: Weather data loading failed:', {
-        error: err.message,
-        stack: err.stack,
-        location: { lat, lon, locationName }
-      });
-      setError(err.message || 'Failed to load weather data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadDefaultLocation = async () => {
-    const defaultLat = parseFloat(process.env.REACT_APP_DEFAULT_LAT || '53.5511');
-    const defaultLon = parseFloat(process.env.REACT_APP_DEFAULT_LON || '9.9937');
-    const defaultName = process.env.REACT_APP_DEFAULT_LOCATION || 'Hamburg, Germany';
-
-    console.log('🏠 WeatherApp: Loading default location:', { defaultLat, defaultLon, defaultName });
-    await loadWeatherData(defaultLat, defaultLon, defaultName);
-  };
-
-  const handleLocationSelect = async (location: LocationSearchResult) => {
+  const handleLocationSelect = (location: LocationSearchResult) => {
     if (loading) return; // Prevent duplicate requests
     console.log('📍 WeatherApp: Location selected:', location);
     setSelectedLocation(location);
-    await loadWeatherData(location.lat, location.lon, location.name);
+    setWeatherParams({ lat: location.lat, lon: location.lon, locationName: location.name });
   };
 
   const handleRefresh = () => {
-    if (loading) return; // Prevent duplicate requests
-    console.log('🔄 WeatherApp: Refresh requested');
-    if (selectedLocation) {
-      console.log('🔄 WeatherApp: Refreshing selected location:', selectedLocation);
-      loadWeatherData(selectedLocation.lat, selectedLocation.lon, selectedLocation.name);
-    } else {
-      console.log('🔄 WeatherApp: Refreshing default location');
-      loadDefaultLocation();
-    }
+    if (loading || !weatherParams) return; // Prevent duplicate requests
+    console.log('🔄 WeatherApp: Refresh requested for:', weatherParams);
+    refreshWeatherData.mutate(weatherParams);
   };
 
   return (
@@ -207,7 +149,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
           {/* Current Weather */}
           <CurrentWeather
             weather={forecast.currentWeather}
-            observingConditions={observingConditions}
+            observingConditions={observingConditions || null}
           />
 
           {/* Hourly Forecast */}
@@ -325,7 +267,12 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
             </div>
             <button
               className="get-started-button"
-              onClick={loadDefaultLocation}
+              onClick={() => {
+                const defaultLat = parseFloat(process.env.REACT_APP_DEFAULT_LAT || '53.5511');
+                const defaultLon = parseFloat(process.env.REACT_APP_DEFAULT_LON || '9.9937');
+                const defaultName = process.env.REACT_APP_DEFAULT_LOCATION || 'Hamburg, Germany';
+                setWeatherParams({ lat: defaultLat, lon: defaultLon, locationName: defaultName });
+              }}
             >
               Get Started
             </button>

@@ -14,9 +14,6 @@ import {
 class WeatherService {
   private apiKey: string;
   private baseUrl: string;
-  private cache: Map<string, { data: any; timestamp: number }> = new Map();
-  private pendingRequests: Map<string, Promise<any>> = new Map();
-  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
   private requestCounter = 0;
 
   constructor() {
@@ -73,32 +70,7 @@ class WeatherService {
     lon: number,
     locationName?: string,
   ): Promise<WeatherForecast> {
-    const cacheKey = `${lat.toFixed(4)},${lon.toFixed(4)}`;
-
-    // Check cache first
-    const cached = this.getCachedData(cacheKey);
-    if (cached) {
-      console.log("Using cached weather data");
-      return cached;
-    }
-
-    // Check if request is already pending
-    if (this.pendingRequests.has(cacheKey)) {
-      console.log("🔄 Request already pending, waiting for result");
-      return await this.pendingRequests.get(cacheKey)!;
-    }
-
-    // Create new request
-    const requestPromise = this.performWeatherRequest(lat, lon, locationName);
-    this.pendingRequests.set(cacheKey, requestPromise);
-
-    try {
-      const result = await requestPromise;
-      this.setCachedData(cacheKey, result);
-      return result;
-    } finally {
-      this.pendingRequests.delete(cacheKey);
-    }
+    return this.performWeatherRequest(lat, lon, locationName);
   }
 
   /**
@@ -164,39 +136,7 @@ class WeatherService {
     }
   }
 
-  /**
-   * Get cached data if available and not expired
-   */
-  private getCachedData(key: string): WeatherForecast | null {
-    const cached = this.cache.get(key);
-    if (!cached) return null;
 
-    const isExpired = Date.now() - cached.timestamp > this.CACHE_DURATION;
-    if (isExpired) {
-      console.log("🗑️ Cache expired for", key);
-      this.cache.delete(key);
-      return null;
-    }
-
-    console.log("💾 Using cached data for", key);
-    return cached.data;
-  }
-
-  /**
-   * Cache data with timestamp
-   */
-  private setCachedData(key: string, data: WeatherForecast): void {
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now()
-    });
-
-    // Clean up old cache entries
-    if (this.cache.size > 10) {
-      const oldestKey = this.cache.keys().next().value;
-      this.cache.delete(oldestKey);
-    }
-  }
 
   /**
    * Search for locations by name
@@ -452,10 +392,9 @@ class WeatherService {
   /**
    * Get API request statistics
    */
-  getRequestStats(): { totalRequests: number; cacheSize: number } {
+  getRequestStats(): { totalRequests: number } {
     return {
-      totalRequests: this.requestCounter,
-      cacheSize: this.cache.size
+      totalRequests: this.requestCounter
     };
   }
 
