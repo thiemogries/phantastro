@@ -43,6 +43,18 @@ export interface MoonlightData {
   zenithAngle: number | null;            // degrees (solar zenith angle)
 }
 
+// Sun and Moon rise/set data
+export interface SunMoonData {
+  sunrise: string | null;               // "hh:mm" format
+  sunset: string | null;                // "hh:mm" format
+  moonrise: string | null;              // "hh:mm" format or "---" if no rise
+  moonset: string | null;               // "hh:mm" format or "---" if no set
+  moonPhaseAngle: number | null;        // degrees (0-360)
+  moonIlluminatedFraction: number | null; // percentage (0-100)
+  moonPhaseName: string | null;         // "new", "waxing crescent", etc.
+  moonAge: number | null;               // days since new moon
+}
+
 // Combined hourly forecast data
 export interface HourlyForecast extends WeatherDataPoint {
   cloudCover: CloudData;
@@ -64,6 +76,7 @@ export interface DailyForecast {
   moonPhase?: number; // 0-1 (0 = new moon, 0.5 = full moon)
   sunrise?: string;
   sunset?: string;
+  sunMoon?: SunMoonData; // Sun and moon rise/set times and moon phase data
 }
 
 // Complete weather forecast response
@@ -123,16 +136,24 @@ export interface MeteoblueResponse {
     nightskybrightness_clearsky?: number[];
     zenithangle?: number[];
   };
+  // Sun and Moon data from sunmoon API
   data_day?: {
     time: string[];
-    temperature_max: number[];
-    temperature_min: number[];
+    temperature_max?: number[];
+    temperature_min?: number[];
     sunrise: string[];
     sunset: string[];
-    precipitation_sum: number[];
-    precipitation_probability_max: number[];
-    windspeed_max: number[];
-    cloudcover_mean: number[];
+    precipitation_sum?: number[];
+    precipitation_probability_max?: number[];
+    windspeed_max?: number[];
+    cloudcover_mean?: number[];
+    moonrise: string[];
+    moonset: string[];
+    moonphaseangle: number[];
+    moonilluminatedfraction: number[];
+    moonphasename: string[];
+    moonage: number[];
+    moonphasetransittime?: string[];
   };
 }
 

@@ -373,6 +373,61 @@ class WeatherService {
   }
 
   /**
+   * Fetch sun and moon rise/set data from Meteoblue sunmoon API
+   *
+   * This method uses the sunmoon API endpoint to get daily sun and moon
+   * rising and setting times, moon phase information, and lunar data.
+   *
+   * API endpoint: https://my.meteoblue.com/packages/sunmoon
+   *
+   * Returns:
+   * - sunrise/sunset: Daily sun rising and setting times
+   * - moonrise/moonset: Daily moon rising and setting times
+   * - moonphaseangle: Moon phase angle (0-360 degrees)
+   * - moonilluminatedfraction: Moon illumination percentage
+   * - moonphasename: Descriptive moon phase name
+   * - moonage: Days since new moon
+   */
+  async fetchSunMoonData(lat: number, lon: number): Promise<any> {
+    if (!this.apiKey || this.apiKey === "your_meteoblue_api_key_here") {
+      throw new Error("No API key configured");
+    }
+
+    const params = {
+      apikey: this.apiKey,
+      lat,
+      lon,
+      format: "json"
+    };
+
+    this.requestCounter++;
+    console.log(`☀️🌙 Making Meteoblue sunmoon API request #${this.requestCounter} with params:`, params);
+    try {
+      const response = await axios.get(`${this.baseUrl}/sunmoon`, {
+        params,
+      });
+      console.log(`✅ Meteoblue sunmoon API response #${this.requestCounter} received successfully`);
+      return response.data;
+    } catch (error) {
+      console.warn(`⚠️ Failed to fetch sun/moon data, continuing without sun/moon information:`, error instanceof Error ? error.message : 'Unknown error');
+      // Return empty sun/moon data structure if API fails
+      return {
+        data_day: {
+          time: [],
+          sunrise: [],
+          sunset: [],
+          moonrise: [],
+          moonset: [],
+          moonphaseangle: [],
+          moonilluminatedfraction: [],
+          moonphasename: [],
+          moonage: []
+        }
+      };
+    }
+  }
+
+  /**
    * Get API request statistics
    */
   getRequestStats(): { totalRequests: number } {
@@ -391,6 +446,7 @@ class WeatherService {
     location: Location,
     cloudData?: any,
     moonlightData?: any,
+    sunMoonData?: any,
   ): WeatherForecast {
     // Transform hourly data
     const hourlyForecast: HourlyForecast[] = [];
@@ -669,6 +725,24 @@ class WeatherService {
 
 
 
+          // Add sun/moon data if available
+          let sunMoonDataForDay: any = undefined;
+          if (sunMoonData?.data_day) {
+            const dayIndex = sunMoonData.data_day.time?.findIndex((t: string) => t === dayHours[0].time.split('T')[0]);
+            if (dayIndex !== -1 && dayIndex !== undefined) {
+              sunMoonDataForDay = {
+                sunrise: sunMoonData.data_day.sunrise?.[dayIndex] || null,
+                sunset: sunMoonData.data_day.sunset?.[dayIndex] || null,
+                moonrise: sunMoonData.data_day.moonrise?.[dayIndex] === "---" ? null : sunMoonData.data_day.moonrise?.[dayIndex] || null,
+                moonset: sunMoonData.data_day.moonset?.[dayIndex] === "---" ? null : sunMoonData.data_day.moonset?.[dayIndex] || null,
+                moonPhaseAngle: sunMoonData.data_day.moonphaseangle?.[dayIndex] || null,
+                moonIlluminatedFraction: sunMoonData.data_day.moonilluminatedfraction?.[dayIndex] || null,
+                moonPhaseName: sunMoonData.data_day.moonphasename?.[dayIndex] || null,
+                moonAge: sunMoonData.data_day.moonage?.[dayIndex] || null,
+              };
+            }
+          }
+
           dailyForecast.push({
             date: dayHours[0].time.split('T')[0],
             temperatureMin: temps.length > 0 ? Math.min(...temps) : 0,
@@ -677,6 +751,7 @@ class WeatherService {
             precipitationTotal: totalPrecip,
             precipitationProbability: maxPrecipProb,
             windSpeedMax: windSpeeds.length > 0 ? Math.max(...windSpeeds) : 0,
+            sunMoon: sunMoonDataForDay,
           });
         }
       }

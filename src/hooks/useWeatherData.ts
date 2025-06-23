@@ -13,6 +13,7 @@ export const WEATHER_QUERY_KEYS = {
   basicWeather: (lat: number, lon: number) => ['basicWeather', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
   cloudData: (lat: number, lon: number) => ['cloudData', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
   moonlightData: (lat: number, lon: number) => ['moonlightData', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
+  sunMoonData: (lat: number, lon: number) => ['sunMoonData', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
   locations: (query: string) => ['locations', query] as const,
 } as const;
 
@@ -20,10 +21,11 @@ export const WEATHER_QUERY_KEYS = {
  * Custom hook for fetching weather data with separate cloud data caching
  */
 export const useWeatherData = (params: WeatherQueryParams | null) => {
-  // Use separate queries for basic weather, cloud data, and moonlight data
+  // Use separate queries for basic weather, cloud data, moonlight data, and sun/moon data
   const basicWeatherQuery = useBasicWeatherData(params);
   const cloudDataQuery = useCloudData(params);
   const moonlightDataQuery = useMoonlightData(params);
+  const sunMoonDataQuery = useSunMoonData(params);
 
   return useQuery<WeatherForecast>({
     queryKey: params ? WEATHER_QUERY_KEYS.weather(params.lat, params.lon) : ['weather', 'disabled'],
@@ -33,6 +35,7 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
       const basicData = basicWeatherQuery.data;
       const cloudData = cloudDataQuery.data;
       const moonlightData = moonlightDataQuery.data;
+      const sunMoonData = sunMoonDataQuery.data;
 
       if (!basicData) throw new Error('Basic weather data not available');
 
@@ -45,7 +48,7 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
         timezone: basicData.metadata?.timezone_abbreviation,
       };
 
-      const result = weatherService.transformMeteoblueData(basicData, location, cloudData, moonlightData);
+      const result = weatherService.transformMeteoblueData(basicData, location, cloudData, moonlightData, sunMoonData);
       console.log('✅ Weather data combined successfully');
       return result;
     },
@@ -143,6 +146,35 @@ export const useMoonlightData = (params: WeatherQueryParams | null) => {
 };
 
 /**
+ * Custom hook for fetching sun and moon rise/set data independently
+ */
+export const useSunMoonData = (params: WeatherQueryParams | null) => {
+  return useQuery<any>({
+    queryKey: params ? WEATHER_QUERY_KEYS.sunMoonData(params.lat, params.lon) : ['sunMoonData', 'disabled'],
+    queryFn: async (): Promise<any> => {
+      if (!params) throw new Error('No location parameters provided');
+      console.log('☀️🌙 Fetching sun/moon data for:', params);
+      const startTime = Date.now();
+      const result = await weatherService.fetchSunMoonData(params.lat, params.lon);
+      const loadTime = Date.now() - startTime;
+      console.log(`✅ Sun/moon data loaded successfully in ${loadTime}ms`);
+      return result;
+    },
+    enabled: !!params,
+    staleTime: 60 * 60 * 1000, // 1 hour (sun/moon times don't change frequently)
+    gcTime: 2 * 60 * 60 * 1000, // 2 hours
+    retry: (failureCount, error) => {
+      // Be lenient with sun/moon data since it's supplementary
+      if (error.message.includes('API key') || error.message.includes('401')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+};
+
+/**
  * Custom hook for searching locations
  */
 export const useLocationSearch = () => {
@@ -196,6 +228,9 @@ export const useRefreshWeatherData = () => {
           queryKey: WEATHER_QUERY_KEYS.moonlightData(params.lat, params.lon)
         }),
         queryClient.invalidateQueries({
+          queryKey: WEATHER_QUERY_KEYS.sunMoonData(params.lat, params.lon)
+        }),
+        queryClient.invalidateQueries({
           queryKey: WEATHER_QUERY_KEYS.weather(params.lat, params.lon)
         })
       ]);
@@ -229,7 +264,7 @@ export const usePrefetchWeatherData = () => {
   const queryClient = useQueryClient();
 
   return (params: WeatherQueryParams) => {
-    // Prefetch basic weather, cloud data, and moonlight data separately
+    // Prefetch basic weather, cloud data, moonlight data, and sun/moon data separately
     queryClient.prefetchQuery({
       queryKey: WEATHER_QUERY_KEYS.basicWeather(params.lat, params.lon),
       queryFn: () => weatherService.fetchBasicWeatherData(params.lat, params.lon),
@@ -246,6 +281,12 @@ export const usePrefetchWeatherData = () => {
       queryKey: WEATHER_QUERY_KEYS.moonlightData(params.lat, params.lon),
       queryFn: () => weatherService.fetchMoonlightData(params.lat, params.lon),
       staleTime: 5 * 60 * 1000,
+    });
+
+    queryClient.prefetchQuery({
+      queryKey: WEATHER_QUERY_KEYS.sunMoonData(params.lat, params.lon),
+      queryFn: () => weatherService.fetchSunMoonData(params.lat, params.lon),
+      staleTime: 60 * 60 * 1000,
     });
   };
 };

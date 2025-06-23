@@ -465,7 +465,7 @@ export const getNightSkyBrightnessInfo = (
 };
 
 /**
- * Determine best observation type based on moonlight conditions
+ * Get optimal observation types based on moonlight conditions
  */
 export const getOptimalObservationTypes = (
   moonlightClearSky: number | null,
@@ -498,4 +498,153 @@ export const getOptimalObservationTypes = (
   }
 
   return recommendations.length > 0 ? recommendations : ["Limited observation opportunities"];
+};
+
+/**
+ * Format sun/moon rise/set time with special case handling
+ */
+export const formatSunMoonTime = (timeString: string | null | undefined): string => {
+  if (!timeString || timeString === '---') return '---';
+  if (timeString === '00:00') return 'All day';
+  if (timeString === '24:00') return 'All day';
+  return timeString;
+};
+
+/**
+ * Get moon phase emoji based on phase name
+ */
+export const getMoonPhaseEmoji = (phaseName: string | null): string => {
+  if (!phaseName) return '🌙';
+
+  switch (phaseName.toLowerCase()) {
+    case 'new':
+    case 'new moon':
+      return '🌑';
+    case 'waxing crescent':
+      return '🌒';
+    case 'first quarter':
+      return '🌓';
+    case 'waxing gibbous':
+      return '🌔';
+    case 'full':
+    case 'full moon':
+      return '🌕';
+    case 'waning gibbous':
+      return '🌖';
+    case 'last quarter':
+    case 'third quarter':
+      return '🌗';
+    case 'waning crescent':
+      return '🌘';
+    default:
+      return '🌙';
+  }
+};
+
+/**
+ * Get moon phase description and astronomical significance
+ */
+export const getMoonPhaseDetails = (
+  phaseName: string | null,
+  illuminatedFraction: number | null,
+): { description: string; observingAdvice: string } => {
+  if (!phaseName) {
+    return {
+      description: "Unknown phase",
+      observingAdvice: "Moon phase data not available"
+    };
+  }
+
+  const illumination = illuminatedFraction !== null ? Math.round(illuminatedFraction) : 0;
+
+  switch (phaseName.toLowerCase()) {
+    case 'new':
+    case 'new moon':
+      return {
+        description: "New Moon",
+        observingAdvice: "Excellent for deep sky observation - darkest skies"
+      };
+    case 'waxing crescent':
+      return {
+        description: `Waxing Crescent (${illumination}% lit)`,
+        observingAdvice: "Good for deep sky - moon sets early"
+      };
+    case 'first quarter':
+      return {
+        description: `First Quarter (${illumination}% lit)`,
+        observingAdvice: "Good for lunar features and bright objects"
+      };
+    case 'waxing gibbous':
+      return {
+        description: `Waxing Gibbous (${illumination}% lit)`,
+        observingAdvice: "Bright moonlight - best for lunar observation"
+      };
+    case 'full':
+    case 'full moon':
+      return {
+        description: `Full Moon (${illumination}% lit)`,
+        observingAdvice: "Excellent for lunar surface details, avoid deep sky"
+      };
+    case 'waning gibbous':
+      return {
+        description: `Waning Gibbous (${illumination}% lit)`,
+        observingAdvice: "Late night dark skies after moonset"
+      };
+    case 'last quarter':
+    case 'third quarter':
+      return {
+        description: `Last Quarter (${illumination}% lit)`,
+        observingAdvice: "Early evening dark skies before moonrise"
+      };
+    case 'waning crescent':
+      return {
+        description: `Waning Crescent (${illumination}% lit)`,
+        observingAdvice: "Excellent for deep sky - moon rises late"
+      };
+    default:
+      return {
+        description: phaseName,
+        observingAdvice: "Check moon rise/set times for optimal observing"
+      };
+  }
+};
+
+/**
+ * Calculate dark hours between sunset and moonrise or moonset and sunrise
+ */
+export const calculateDarkHours = (
+  sunrise: string | null,
+  sunset: string | null,
+  moonrise: string | null,
+  moonset: string | null,
+): { evening: number | null; morning: number | null } => {
+  if (!sunrise || !sunset) {
+    return { evening: null, morning: null };
+  }
+
+  const parseTime = (time: string): number => {
+    if (time === '---' || time === '00:00' || time === '24:00') return -1;
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours + minutes / 60;
+  };
+
+  const sunsetHour = parseTime(sunset);
+  const sunriseHour = parseTime(sunrise);
+  const moonriseHour = moonrise ? parseTime(moonrise) : -1;
+  const moonsetHour = moonset ? parseTime(moonset) : -1;
+
+  let eveningDark = null;
+  let morningDark = null;
+
+  // Evening dark hours (sunset to moonrise)
+  if (moonriseHour > sunsetHour && moonriseHour !== -1) {
+    eveningDark = moonriseHour - sunsetHour;
+  }
+
+  // Morning dark hours (moonset to sunrise)
+  if (moonsetHour < sunriseHour && moonsetHour !== -1) {
+    morningDark = sunriseHour - moonsetHour;
+  }
+
+  return { evening: eveningDark, morning: morningDark };
 };
