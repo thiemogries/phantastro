@@ -3,7 +3,6 @@ import { HourlyForecast } from '../types/weather';
 import {
   formatTime,
   getCloudCoverageInfo,
-  getObservingQualityColor,
   getRainState
 } from '../utils/weatherUtils';
 import './WeeklyOverview.css';
@@ -166,16 +165,24 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                       const visibility = hour.visibility;
                       const hasVisibility = visibility !== null && visibility !== undefined;
 
-                      // Good visibility is >20km, poor is <5km
-                      const visibilityQuality = hasVisibility
-                        ? visibility > 20 ? 'excellent'
-                          : visibility > 15 ? 'good'
-                          : visibility > 10 ? 'fair'
-                          : 'poor'
-                        : 'poor';
+                      // Create smooth red-to-green gradient based on visibility distance
+                      // Red for poor visibility (<5km), green for excellent visibility (>20km)
+                      const getVisibilityColor = (vis: number): string => {
+                        // Clamp visibility between 0 and 25km for color calculation
+                        const clampedVis = Math.max(0, Math.min(25, vis));
+                        const ratio = clampedVis / 25; // 0 = red, 1 = green
 
-                      const visibilityColor = getObservingQualityColor(visibilityQuality);
-                      const opacity = hasVisibility ? Math.min(1, Math.max(0.3, visibility / 30)) : 0.2;
+                        // Interpolate from red (255,68,68) to green (34,197,94)
+                        const red = Math.round(255 - (255 - 34) * ratio);
+                        const green = Math.round(68 + (197 - 68) * ratio);
+                        const blue = Math.round(68 + (94 - 68) * ratio);
+
+                        return `rgb(${red}, ${green}, ${blue})`;
+                      };
+
+                      const visibilityColor = hasVisibility ? getVisibilityColor(visibility) : '#6b7280';
+                      // Use consistent opacity for better color visibility, scaling from 0.5 to 1.0
+                      const opacity = hasVisibility ? Math.min(1.0, Math.max(0.5, 0.5 + (visibility / 40))) : 0.3;
 
                       return (
                         <div

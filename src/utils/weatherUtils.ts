@@ -244,11 +244,11 @@ export const getVisibilityInfo = (
   if (!visibility || visibility === 0) {
     return { description: "Not available", color: "#6b7280" };
   }
-  if (visibility > 20) return { description: "Excellent", color: "#22c55e" };
-  if (visibility > 10) return { description: "Good", color: "#84cc16" };
-  if (visibility > 5) return { description: "Moderate", color: "#eab308" };
-  if (visibility > 2) return { description: "Poor", color: "#f97316" };
-  return { description: "Very poor", color: "#ef4444" };
+  if (visibility >= 20) return { description: "Excellent", color: "#22c55e" };
+  if (visibility >= 15) return { description: "Very Good", color: "#84cc16" };
+  if (visibility >= 10) return { description: "Good", color: "#eab308" };
+  if (visibility >= 5) return { description: "Fair", color: "#f97316" };
+  return { description: "Poor", color: "#ef4444" };
 };
 
 /**
