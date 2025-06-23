@@ -63,7 +63,8 @@ const DailyForecast: React.FC<DailyForecastProps> = ({
                     className="cloud-bar-fill"
                     style={{
                       width: `${day.cloudCoverAvg}%`,
-                      backgroundColor: cloudInfo.color
+                      backgroundColor: cloudInfo.color,
+                      opacity: day.cloudCoverAvg ? Math.min(1, (day.cloudCoverAvg / 100) * 0.8 + 0.2) : 0.2
                     }}
                   ></div>
                 </div>

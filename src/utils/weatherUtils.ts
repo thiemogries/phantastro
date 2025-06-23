@@ -93,16 +93,16 @@ export const getCloudCoverageInfo = (
     return { description: "Not available", color: "#6b7280", emoji: "❓" };
   }
   if (percentage < 10)
-    return { description: "Clear skies", color: "#4f46e5", emoji: "🌌" };
+    return { description: "Clear skies", color: "#ffffff", emoji: "🌌" };
   if (percentage < 25)
-    return { description: "Mostly clear", color: "#7c3aed", emoji: "🌙" };
+    return { description: "Mostly clear", color: "#ffffff", emoji: "🌙" };
   if (percentage < 50)
-    return { description: "Partly cloudy", color: "#a855f7", emoji: "⛅" };
+    return { description: "Partly cloudy", color: "#ffffff", emoji: "⛅" };
   if (percentage < 75)
-    return { description: "Mostly cloudy", color: "#94a3b8", emoji: "☁️" };
+    return { description: "Mostly cloudy", color: "#ffffff", emoji: "☁️" };
   if (percentage < 90)
-    return { description: "Overcast", color: "#64748b", emoji: "☁️" };
-  return { description: "Heavy overcast", color: "#475569", emoji: "☁️" };
+    return { description: "Overcast", color: "#ffffff", emoji: "☁️" };
+  return { description: "Heavy overcast", color: "#ffffff", emoji: "☁️" };
 };
 
 

@@ -55,7 +55,8 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({
                       className="cloud-fill"
                       style={{
                         height: `${hour.cloudCover.totalCloudCover || 0}%`,
-                        backgroundColor: cloudInfo.color
+                        backgroundColor: cloudInfo.color,
+                        opacity: hour.cloudCover.totalCloudCover ? Math.min(1, (hour.cloudCover.totalCloudCover / 100) * 0.8 + 0.2) : 0.2
                       }}
                     ></div>
                   </div>

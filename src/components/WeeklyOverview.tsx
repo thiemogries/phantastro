@@ -104,7 +104,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                       }
 
                       const cloudInfo = getCloudCoverageInfo(hour.cloudCover.totalCloudCover);
-                      const opacity = hour.cloudCover.totalCloudCover ? hour.cloudCover.totalCloudCover / 100 : 0;
+                      const opacity = hour.cloudCover.totalCloudCover ? Math.min(1, (hour.cloudCover.totalCloudCover / 100) * 0.8 + 0.2) : 0.1;
 
                       return (
                         <div
@@ -112,7 +112,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                           className="hourly-cell cloud-cell"
                           style={{
                             backgroundColor: cloudInfo.color,
-                            opacity: Math.max(0.2, opacity)
+                            opacity: opacity
                           }}
                           title={`${formatTime(hour.time)}: ${hour.cloudCover.totalCloudCover !== null ? Math.round(hour.cloudCover.totalCloudCover) : 'N/A'}% clouds`}
                         ></div>

@@ -91,7 +91,7 @@ Phantastro features a **cosmic dark theme** inspired by the night sky:
 ### Understanding the Data
 
 ### Hourly 7-Day Grid
-- **Cloud Coverage Row**: Color intensity shows cloud percentage (darker = more clouds)
+- **Cloud Coverage Row**: White opacity shows cloud percentage (more opaque = more clouds)
 - **Wind Quality Row**: Green = excellent, yellow = fair, red = poor wind conditions for stability  
 - **Precipitation Row**: Blue cells indicate rain/snow with intensity showing probability
 - **Interactive Tooltips**: Hover over any hour cell for detailed conditions
