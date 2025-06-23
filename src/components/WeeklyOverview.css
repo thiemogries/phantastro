@@ -181,10 +181,13 @@
 
 .moonlight-cell {
   border-radius: 3px;
+  background-color: #4338ca; /* Dark blue/purple base color */
+  border: 1px solid rgba(67, 56, 202, 0.3);
 }
 
 .moonlight-cell:hover {
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
 }
 
 /* Summary Row */

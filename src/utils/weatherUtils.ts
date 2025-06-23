@@ -464,9 +464,9 @@ export const formatMoonlight = (moonlight: number | null): string => {
  * Get moonlight impact on astronomical observation
  */
 export const getMoonlightImpact = (
-  moonlightActual: number | null,
+  moonlightClearSky: number | null,
 ): { description: string; color: string; advice: string; quality: string } => {
-  if (moonlightActual === null || moonlightActual === undefined) {
+  if (moonlightClearSky === null || moonlightClearSky === undefined) {
     return {
       description: "Not available",
       color: "#6b7280",
@@ -475,7 +475,7 @@ export const getMoonlightImpact = (
     };
   }
 
-  if (moonlightActual < 5) {
+  if (moonlightClearSky < 5) {
     return {
       description: "New Moon",
       color: "#22c55e",
@@ -483,7 +483,7 @@ export const getMoonlightImpact = (
       quality: "excellent",
     };
   }
-  if (moonlightActual < 15) {
+  if (moonlightClearSky < 15) {
     return {
       description: "Dark Skies",
       color: "#84cc16",
@@ -491,7 +491,7 @@ export const getMoonlightImpact = (
       quality: "good",
     };
   }
-  if (moonlightActual < 35) {
+  if (moonlightClearSky < 35) {
     return {
       description: "Some Moonlight",
       color: "#eab308",
@@ -499,7 +499,7 @@ export const getMoonlightImpact = (
       quality: "fair",
     };
   }
-  if (moonlightActual < 65) {
+  if (moonlightClearSky < 65) {
     return {
       description: "Moderate Moonlight",
       color: "#f97316",
@@ -545,12 +545,12 @@ export const getNightSkyBrightnessInfo = (
  * Determine best observation type based on moonlight conditions
  */
 export const getOptimalObservationTypes = (
-  moonlightActual: number | null,
+  moonlightClearSky: number | null,
   cloudCover: number | null,
 ): string[] => {
   const recommendations: string[] = [];
 
-  if (moonlightActual === null || cloudCover === null) {
+  if (moonlightClearSky === null || cloudCover === null) {
     return ["Data not available"];
   }
 
@@ -558,19 +558,19 @@ export const getOptimalObservationTypes = (
     return ["Poor conditions for all observation types"];
   }
 
-  if (moonlightActual < 15 && cloudCover < 30) {
+  if (moonlightClearSky < 15 && cloudCover < 30) {
     recommendations.push("Deep sky objects", "Galaxy hunting", "Nebula photography");
   }
 
-  if (moonlightActual < 35 && cloudCover < 50) {
+  if (moonlightClearSky < 35 && cloudCover < 50) {
     recommendations.push("Star clusters", "Double stars", "Variable stars");
   }
 
-  if (moonlightActual > 35 || cloudCover < 70) {
+  if (moonlightClearSky > 35 || cloudCover < 70) {
     recommendations.push("Planetary observation", "Lunar features", "Bright targets");
   }
 
-  if (moonlightActual > 60) {
+  if (moonlightClearSky > 60) {
     recommendations.push("Moon observation", "Bright planets only");
   }
 

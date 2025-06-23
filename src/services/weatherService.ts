@@ -677,16 +677,16 @@ class WeatherService {
                 ? Math.max(0, Math.min(100, lastRealHour.moonlight.moonlightActual + (Math.random() - 0.5) * 5))
                 : null,
               moonlightClearSky: lastRealHour.moonlight?.moonlightClearSky !== null && lastRealHour.moonlight?.moonlightClearSky !== undefined
-                ? Math.max(0, Math.min(100, lastRealHour.moonlight.moonlightClearSky + (Math.random() - 0.5) * 5))
+                ? Math.max(0, Math.min(100, lastRealHour.moonlight.moonlightClearSky + (Math.random() - 0.5) * 3))
                 : null,
               nightSkyBrightnessActual: lastRealHour.moonlight?.nightSkyBrightnessActual !== null && lastRealHour.moonlight?.nightSkyBrightnessActual !== undefined
-                ? Math.max(0, lastRealHour.moonlight.nightSkyBrightnessActual + (Math.random() - 0.5) * 100)
+                ? Math.max(0, lastRealHour.moonlight.nightSkyBrightnessActual + (Math.random() - 0.5) * 50)
                 : null,
               nightSkyBrightnessClearSky: lastRealHour.moonlight?.nightSkyBrightnessClearSky !== null && lastRealHour.moonlight?.nightSkyBrightnessClearSky !== undefined
-                ? Math.max(0, lastRealHour.moonlight.nightSkyBrightnessClearSky + (Math.random() - 0.5) * 100)
+                ? Math.max(0, lastRealHour.moonlight.nightSkyBrightnessClearSky + (Math.random() - 0.5) * 20)
                 : null,
               zenithAngle: lastRealHour.moonlight?.zenithAngle !== null && lastRealHour.moonlight?.zenithAngle !== undefined
-                ? (lastRealHour.moonlight.zenithAngle + (Math.random() - 0.5) * 5) % 360
+                ? Math.max(0, Math.min(360, lastRealHour.moonlight.zenithAngle + (Math.random() - 0.5) * 3))
                 : null,
             },
             visibility: lastRealHour.visibility !== null && lastRealHour.visibility !== undefined ? Math.max(5, lastRealHour.visibility + (Math.random() - 0.5) * 5) : null,
@@ -837,9 +837,8 @@ class WeatherService {
       midCloudCover: hourlyForecast.filter(h => h.cloudCover.midCloudCover !== null).length / hourlyForecast.length * 100,
       highCloudCover: hourlyForecast.filter(h => h.cloudCover.highCloudCover !== null).length / hourlyForecast.length * 100,
       visibility: hourlyForecast.filter(h => h.visibility !== null).length / hourlyForecast.length * 100,
-      moonlightActual: hourlyForecast.filter(h => h.moonlight.moonlightActual !== null).length / hourlyForecast.length * 100,
       moonlightClearSky: hourlyForecast.filter(h => h.moonlight.moonlightClearSky !== null).length / hourlyForecast.length * 100,
-      nightSkyBrightnessActual: hourlyForecast.filter(h => h.moonlight.nightSkyBrightnessActual !== null).length / hourlyForecast.length * 100,
+      nightSkyBrightnessClearSky: hourlyForecast.filter(h => h.moonlight.nightSkyBrightnessClearSky !== null).length / hourlyForecast.length * 100,
       zenithAngle: hourlyForecast.filter(h => h.moonlight.zenithAngle !== null).length / hourlyForecast.length * 100
     };
     console.log('📊 Data completeness percentages:', dataCompleteness);
@@ -853,9 +852,8 @@ class WeatherService {
     const midCloudCover = hourlyForecast.map(h => h.cloudCover.midCloudCover).filter(c => c !== null) as number[];
     const highCloudCover = hourlyForecast.map(h => h.cloudCover.highCloudCover).filter(c => c !== null) as number[];
     const visibilities = hourlyForecast.map(h => h.visibility).filter(v => v !== null) as number[];
-    const moonlightActual = hourlyForecast.map(h => h.moonlight.moonlightActual).filter(m => m !== null) as number[];
     const moonlightClearSky = hourlyForecast.map(h => h.moonlight.moonlightClearSky).filter(m => m !== null) as number[];
-    const nightSkyBrightnessActual = hourlyForecast.map(h => h.moonlight.nightSkyBrightnessActual).filter(n => n !== null) as number[];
+    const nightSkyBrightnessClearSky = hourlyForecast.map(h => h.moonlight.nightSkyBrightnessClearSky).filter(n => n !== null) as number[];
     const zenithAngles = hourlyForecast.map(h => h.moonlight.zenithAngle).filter(z => z !== null) as number[];
 
     if (temperatures.length > 0) {
@@ -923,31 +921,22 @@ class WeatherService {
       });
     }
 
-    if (moonlightActual.length > 0) {
-      const moonlightStats = {
-        min: Math.min(...moonlightActual),
-        max: Math.max(...moonlightActual),
-        avg: moonlightActual.reduce((sum, m) => sum + m, 0) / moonlightActual.length
-      };
-      console.log('🌙 Moonlight actual stats:', moonlightStats);
-    }
-
     if (moonlightClearSky.length > 0) {
-      const moonlightClearStats = {
+      const moonlightStats = {
         min: Math.min(...moonlightClearSky),
         max: Math.max(...moonlightClearSky),
         avg: moonlightClearSky.reduce((sum, m) => sum + m, 0) / moonlightClearSky.length
       };
-      console.log('🌝 Moonlight clear sky stats:', moonlightClearStats);
+      console.log('🌙 Moonlight clear sky stats:', moonlightStats);
     }
 
-    if (nightSkyBrightnessActual.length > 0) {
+    if (nightSkyBrightnessClearSky.length > 0) {
       const nightSkyStats = {
-        min: Math.min(...nightSkyBrightnessActual),
-        max: Math.max(...nightSkyBrightnessActual),
-        avg: nightSkyBrightnessActual.reduce((sum, n) => sum + n, 0) / nightSkyBrightnessActual.length
+        min: Math.min(...nightSkyBrightnessClearSky),
+        max: Math.max(...nightSkyBrightnessClearSky),
+        avg: nightSkyBrightnessClearSky.reduce((sum, n) => sum + n, 0) / nightSkyBrightnessClearSky.length
       };
-      console.log('✨ Night sky brightness stats (lux):', nightSkyStats);
+      console.log('✨ Night sky brightness clear sky stats (lux):', nightSkyStats);
     }
 
     if (zenithAngles.length > 0) {
@@ -1002,10 +991,10 @@ class WeatherService {
         precipitationProbability: 10,
       },
       moonlight: {
-        moonlightActual: 25,
-        moonlightClearSky: 30,
-        nightSkyBrightnessActual: 0.1,
-        nightSkyBrightnessClearSky: 0.05,
+        moonlightActual: 20,
+        moonlightClearSky: 25,
+        nightSkyBrightnessActual: 0.08,
+        nightSkyBrightnessClearSky: 0.03,
         zenithAngle: 90,
       },
       visibility: 15,

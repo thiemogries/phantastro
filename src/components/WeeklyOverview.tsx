@@ -70,7 +70,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           </div>
         </div>
         <div className="legend-note">
-          <small>🌙 Moonlight: Lower is better for deep sky observations</small>
+          <small>🌙 Moonlight: Transparent = no moon (best), Dark blue = full moon (worst for deep sky)</small>
         </div>
       </div>
 
@@ -202,21 +202,17 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                         return <div key={i} className="hourly-cell empty"></div>;
                       }
 
-                      const moonlight = hour.moonlight?.moonlightActual;
+                      const moonlight = hour.moonlight?.moonlightClearSky;
                       const hasMoonlight = moonlight !== null && moonlight !== undefined;
 
                       // Moonlight intensity: 0% = new moon (best for deep sky), 100% = full moon (worst for deep sky)
-                      // For astronomical observation, lower moonlight is better
-                      const moonlightQuality = hasMoonlight
-                        ? moonlight < 10 ? 'excellent'  // Dark skies, ideal for deep sky
-                          : moonlight < 25 ? 'good'     // Some moonlight, still good
-                          : moonlight < 50 ? 'fair'     // Moderate moonlight
-                          : 'poor'                      // Bright moonlight, poor for deep sky
-                        : 'poor';
-
-                      const moonlightColor = getObservingQualityColor(moonlightQuality);
-                      // Higher moonlight = higher opacity (more interference)
-                      const opacity = hasMoonlight ? Math.min(1, Math.max(0.2, moonlight / 100)) : 0.2;
+                      // Use dark blue/purple for moonlight with transparency for no moonlight
+                      const moonlightColor = '#4338ca'; // Dark blue/purple color
+                      // Use logarithmic scaling to better show small values while preserving true zero
+                      // 0% moonlight = transparent, small values more visible, 100% = fully opaque
+                      const opacity = hasMoonlight && moonlight > 0
+                        ? Math.min(1, 0.2 + (moonlight / 100) * 0.8) // Min 0.2 for visibility, max 1.0
+                        : 0; // True zero remains transparent
 
                       return (
                         <div
@@ -226,7 +222,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                             backgroundColor: moonlightColor,
                             opacity
                           }}
-                          title={`${formatTime(hour.time)}: ${hasMoonlight ? `${moonlight.toFixed(1)}%` : 'N/A'} moonlight`}
+                          title={`${formatTime(hour.time)}: ${hasMoonlight ? `${moonlight.toFixed(2)}%` : 'N/A'} moonlight`}
                         ></div>
                       );
                     })}
@@ -275,14 +271,14 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
         <div className="summary-item">
           <span className="summary-label">Dark Hours:</span>
           <span className="summary-value">
-            {hourlyData.filter(hour => hour.moonlight?.moonlightActual !== null && hour.moonlight.moonlightActual < 25).length}h moonlight &lt;25%
+            {hourlyData.filter(hour => hour.moonlight?.moonlightClearSky !== null && hour.moonlight.moonlightClearSky < 25).length}h moonlight &lt;25%
           </span>
         </div>
         <div className="summary-item">
           <span className="summary-label">Avg Moonlight:</span>
           <span className="summary-value">
-            {hourlyData.filter(h => h.moonlight?.moonlightActual !== null).length > 0
-              ? `${Math.round(hourlyData.filter(h => h.moonlight?.moonlightActual !== null).reduce((sum, hour) => sum + (hour.moonlight?.moonlightActual || 0), 0) / hourlyData.filter(h => h.moonlight?.moonlightActual !== null).length)}%`
+            {hourlyData.filter(h => h.moonlight?.moonlightClearSky !== null).length > 0
+              ? `${Math.round(hourlyData.filter(h => h.moonlight?.moonlightClearSky !== null).reduce((sum, hour) => sum + (hour.moonlight?.moonlightClearSky || 0), 0) / hourlyData.filter(h => h.moonlight?.moonlightClearSky !== null).length)}%`
               : 'N/A'
             }
           </span>
