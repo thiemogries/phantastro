@@ -3,7 +3,8 @@ import { HourlyForecast } from '../types/weather';
 import {
   formatTime,
   getCloudCoverageInfo,
-  getObservingQualityColor
+  getObservingQualityColor,
+  getRainState
 } from '../utils/weatherUtils';
 import './WeeklyOverview.css';
 
@@ -132,18 +133,17 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                         return <div key={i} className="hourly-cell empty"></div>;
                       }
 
-                      const hasRain = hour.precipitation.precipitation !== null && hour.precipitation.precipitation > 0;
-                      const rainIntensity = hour.precipitation.precipitation ? Math.min(hour.precipitation.precipitation / 5, 1) : 0; // Scale to 0-1
+                      const rainState = getRainState(hour.precipitation.precipitationProbability);
 
                       return (
                         <div
                           key={i}
-                          className={`hourly-cell precip-cell ${hasRain ? 'has-rain' : ''}`}
+                          className={`hourly-cell precip-cell ${rainState.hasRain ? 'has-rain' : ''}`}
                           style={{
-                            backgroundColor: hasRain ? '#3b82f6' : 'transparent',
-                            opacity: hasRain ? Math.max(0.3, rainIntensity) : 0.1
+                            backgroundColor: rainState.hasRain ? '#3b82f6' : 'transparent',
+                            opacity: rainState.hasRain ? Math.max(0.3, rainState.intensity) : 0.1
                           }}
-                          title={`${formatTime(hour.time)}: ${hour.precipitation.precipitation !== null ? hour.precipitation.precipitation.toFixed(1) : 'N/A'}mm rain`}
+                          title={`${formatTime(hour.time)}: ${hour.precipitation.precipitationProbability !== null ? hour.precipitation.precipitationProbability + '% chance' : 'N/A'} of rain`}
                         ></div>
                       );
                     })}

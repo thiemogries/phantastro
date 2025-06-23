@@ -140,7 +140,7 @@ export const useObservingConditions = (forecast: WeatherForecast | undefined | n
         temperature: forecast.currentWeather.temperature,
         windSpeed: forecast.currentWeather.windSpeed,
         cloudCover: forecast.currentWeather.cloudCover.totalCloudCover,
-        precipitation: forecast.currentWeather.precipitation.precipitation
+        precipitationProbability: forecast.currentWeather.precipitation.precipitationProbability
       });
 
       const conditions = weatherService.calculateObservingConditions(forecast.currentWeather);

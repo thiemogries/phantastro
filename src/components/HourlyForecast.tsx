@@ -4,7 +4,8 @@ import {
   formatTime,
   formatTemperature,
   getCloudCoverageInfo,
-  getObservingQualityColor
+  getObservingQualityColor,
+  getRainState
 } from '../utils/weatherUtils';
 import './HourlyForecast.css';
 
@@ -79,11 +80,14 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({
                   <div className="quality-dot"></div>
                 </div>
 
-                {hour.precipitation.precipitation !== null && hour.precipitation.precipitation > 0 && (
-                  <div className="precipitation-indicator">
-                    🌧️ {hour.precipitation.precipitation.toFixed(1)}mm
-                  </div>
-                )}
+                {(() => {
+                  const rainState = getRainState(hour.precipitation.precipitationProbability);
+                  return rainState.hasRain && (
+                    <div className="precipitation-indicator">
+                      🌧️ {hour.precipitation.precipitationProbability}%
+                    </div>
+                  );
+                })()}
               </div>
             );
           })}

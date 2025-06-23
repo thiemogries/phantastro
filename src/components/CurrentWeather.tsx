@@ -9,7 +9,8 @@ import {
   formatHumidity,
   calculateDewPoint,
   getVisibilityInfo,
-  getPrecipitationEmoji
+  getPrecipitationEmoji,
+  getRainState
 } from '../utils/weatherUtils';
 import './CurrentWeather.css';
 
@@ -27,7 +28,8 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
   const cloudInfo = getCloudCoverageInfo(weather.cloudCover.totalCloudCover);
   const dewPoint = (weather.temperature === null || weather.humidity === null) ? null : calculateDewPoint(weather.temperature, weather.humidity);
   const visibilityInfo = weather.visibility ? getVisibilityInfo(weather.visibility) : null;
-  const precipEmoji = (weather.precipitation.precipitation === null || weather.temperature === null) ? '' : getPrecipitationEmoji(weather.precipitation.precipitation, weather.temperature);
+  const precipEmoji = (weather.precipitation.precipitationProbability === null || weather.temperature === null) ? '' : getPrecipitationEmoji(weather.precipitation.precipitationProbability, weather.temperature);
+  const rainState = getRainState(weather.precipitation.precipitationProbability);
 
   return (
     <div className={`current-weather ${className || ''}`}>
@@ -122,10 +124,10 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
             <div className="detail-content">
               <div className="detail-label">Precipitation</div>
               <div className="detail-value">
-                {weather.precipitation.precipitation === null ? 'Not available' : `${weather.precipitation.precipitation.toFixed(1)} mm`}
+                {weather.precipitation.precipitationProbability === null ? 'Not available' : `${weather.precipitation.precipitationProbability}%`}
               </div>
               <div className="detail-description">
-                {weather.precipitation.precipitationProbability === null ? 'Not available' : `${weather.precipitation.precipitationProbability}% chance`}
+                {rainState.description}
               </div>
             </div>
           </div>

@@ -199,17 +199,40 @@ export const getMoonPhaseInfo = (
 };
 
 /**
- * Get precipitation type emoji
+ * Get precipitation type emoji based on probability
  */
 export const getPrecipitationEmoji = (
-  amount: number | null,
+  probability: number | null,
   temperature: number | null,
 ): string => {
-  if (amount === null || temperature === null || amount === 0) return "";
+  if (probability === null || temperature === null || probability === 0) return "";
   if (temperature < 0) return "❄️";
-  if (amount < 1) return "🌦️";
-  if (amount < 5) return "🌧️";
+  if (probability < 30) return "🌦️";
+  if (probability < 70) return "🌧️";
   return "⛈️";
+};
+
+/**
+ * Get rain state based on precipitation probability
+ */
+export const getRainState = (probability: number | null): {
+  hasRain: boolean;
+  intensity: number;
+  description: string;
+} => {
+  if (probability === null || probability === 0) {
+    return { hasRain: false, intensity: 0, description: "No rain" };
+  }
+  if (probability < 30) {
+    return { hasRain: true, intensity: 0.3, description: "Light chance" };
+  }
+  if (probability < 50) {
+    return { hasRain: true, intensity: 0.5, description: "Moderate chance" };
+  }
+  if (probability < 70) {
+    return { hasRain: true, intensity: 0.7, description: "High chance" };
+  }
+  return { hasRain: true, intensity: 1.0, description: "Very high chance" };
 };
 
 /**
