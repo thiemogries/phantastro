@@ -26,9 +26,9 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
   className
 }) => {
   const cloudInfo = getCloudCoverageInfo(weather.cloudCover.totalCloudCover);
-  const dewPoint = (weather.temperature === 0 || weather.humidity === 0) ? null : calculateDewPoint(weather.temperature, weather.humidity);
+  const dewPoint = (weather.temperature === null || weather.humidity === null) ? null : calculateDewPoint(weather.temperature, weather.humidity);
   const visibilityInfo = weather.visibility ? getVisibilityInfo(weather.visibility) : null;
-  const precipEmoji = (weather.precipitation.precipitation === 0 && weather.temperature === 0) ? '' : getPrecipitationEmoji(weather.precipitation.precipitation, weather.temperature);
+  const precipEmoji = (weather.precipitation.precipitation === null || weather.temperature === null) ? '' : getPrecipitationEmoji(weather.precipitation.precipitation, weather.temperature);
 
   return (
     <div className={`current-weather ${className || ''}`}>
@@ -90,7 +90,7 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
             <div className="detail-content">
               <div className="detail-label">Cloud Coverage</div>
               <div className="detail-value">
-                {weather.cloudCover.totalCloudCover === 0 ? 'Not available' : `${Math.round(weather.cloudCover.totalCloudCover)}%`}
+                {weather.cloudCover.totalCloudCover === null ? 'Not available' : `${Math.round(weather.cloudCover.totalCloudCover)}%`}
               </div>
               <div className="detail-description">
                 {cloudInfo.description}
@@ -107,7 +107,8 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
                 {formatWind(weather.windSpeed, weather.windDirection)}
               </div>
               <div className="detail-description">
-                {weather.windSpeed < 5 ? 'Light breeze' :
+                {weather.windSpeed === null ? 'Not available' :
+                 weather.windSpeed < 5 ? 'Light breeze' :
                  weather.windSpeed < 10 ? 'Moderate' :
                  weather.windSpeed < 15 ? 'Strong' : 'Very strong'}
               </div>
@@ -122,10 +123,10 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
             <div className="detail-content">
               <div className="detail-label">Precipitation</div>
               <div className="detail-value">
-                {weather.precipitation.precipitation === 0 ? 'Not available' : `${weather.precipitation.precipitation.toFixed(1)} mm`}
+                {weather.precipitation.precipitation === null ? 'Not available' : `${weather.precipitation.precipitation.toFixed(1)} mm`}
               </div>
               <div className="detail-description">
-                {weather.precipitation.precipitationProbability === 0 ? 'Not available' : `${weather.precipitation.precipitationProbability}% chance`}
+                {weather.precipitation.precipitationProbability === null ? 'Not available' : `${weather.precipitation.precipitationProbability}% chance`}
               </div>
             </div>
           </div>
@@ -160,13 +161,13 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
                 <div
                   className="layer-fill"
                   style={{
-                    width: `${weather.cloudCover.lowCloudCover}%`,
+                    width: `${weather.cloudCover.lowCloudCover || 0}%`,
                     backgroundColor: '#94a3b8'
                   }}
                 ></div>
               </div>
               <div className="layer-value">
-                {weather.cloudCover.lowCloudCover === 0 ? 'N/A' : `${Math.round(weather.cloudCover.lowCloudCover)}%`}
+                {weather.cloudCover.lowCloudCover === null ? 'N/A' : `${Math.round(weather.cloudCover.lowCloudCover)}%`}
               </div>
             </div>
             <div className="cloud-layer">
@@ -175,13 +176,13 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
                 <div
                   className="layer-fill"
                   style={{
-                    width: `${weather.cloudCover.midCloudCover}%`,
+                    width: `${weather.cloudCover.midCloudCover || 0}%`,
                     backgroundColor: '#64748b'
                   }}
                 ></div>
               </div>
               <div className="layer-value">
-                {weather.cloudCover.midCloudCover === 0 ? 'N/A' : `${Math.round(weather.cloudCover.midCloudCover)}%`}
+                {weather.cloudCover.midCloudCover === null ? 'N/A' : `${Math.round(weather.cloudCover.midCloudCover)}%`}
               </div>
             </div>
             <div className="cloud-layer">
@@ -190,13 +191,13 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
                 <div
                   className="layer-fill"
                   style={{
-                    width: `${weather.cloudCover.highCloudCover}%`,
+                    width: `${weather.cloudCover.highCloudCover || 0}%`,
                     backgroundColor: '#475569'
                   }}
                 ></div>
               </div>
               <div className="layer-value">
-                {weather.cloudCover.highCloudCover === 0 ? 'N/A' : `${Math.round(weather.cloudCover.highCloudCover)}%`}
+                {weather.cloudCover.highCloudCover === null ? 'N/A' : `${Math.round(weather.cloudCover.highCloudCover)}%`}
               </div>
             </div>
           </div>

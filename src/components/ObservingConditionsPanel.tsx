@@ -38,7 +38,7 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
     return 'Very Poor';
   };
 
-  const isDataAvailable = currentWeather.temperature !== 0 && currentWeather.windSpeed !== 0;
+  const isDataAvailable = currentWeather.temperature !== null && currentWeather.windSpeed !== null;
 
   return (
     <div className={`observing-conditions-panel ${className || ''}`}>
@@ -92,7 +92,7 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
                 />
               </svg>
               <div className="score-inner">
-                {conditions.cloudScore === 0 ? 'N/A' : conditions.cloudScore.toFixed(1)}
+                {currentWeather.cloudCover.totalCloudCover === null ? 'N/A' : conditions.cloudScore.toFixed(1)}
               </div>
             </div>
             <div className="score-description">
@@ -102,7 +102,7 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
           <div className="condition-details">
             <div className="detail-row">
               <span>Cloud Cover:</span>
-              <span>{currentWeather.cloudCover.totalCloudCover === 0 ? 'Not available' : `${Math.round(currentWeather.cloudCover.totalCloudCover)}%`}</span>
+              <span>{currentWeather.cloudCover.totalCloudCover === null ? 'Not available' : `${Math.round(currentWeather.cloudCover.totalCloudCover)}%`}</span>
             </div>
           </div>
         </div>
@@ -138,7 +138,7 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
                 />
               </svg>
               <div className="score-inner">
-                {conditions.seeingScore === 0 ? 'N/A' : conditions.seeingScore.toFixed(1)}
+                {currentWeather.windSpeed === null ? 'N/A' : conditions.seeingScore.toFixed(1)}
               </div>
             </div>
             <div className="score-description">
@@ -148,7 +148,7 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
           <div className="condition-details">
             <div className="detail-row">
               <span>Wind Speed:</span>
-              <span>{currentWeather.windSpeed === 0 ? 'Not available' : `${Math.round(currentWeather.windSpeed * 3.6)} km/h`}</span>
+              <span>{currentWeather.windSpeed === null ? 'Not available' : `${Math.round(currentWeather.windSpeed * 3.6)} km/h`}</span>
             </div>
           </div>
         </div>
@@ -184,7 +184,7 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
                 />
               </svg>
               <div className="score-inner">
-                {conditions.transparencyScore === 0 ? 'N/A' : conditions.transparencyScore.toFixed(1)}
+                {currentWeather.humidity === null ? 'N/A' : conditions.transparencyScore.toFixed(1)}
               </div>
             </div>
             <div className="score-description">
@@ -194,7 +194,7 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
           <div className="condition-details">
             <div className="detail-row">
               <span>Humidity:</span>
-              <span>{currentWeather.humidity === 0 ? 'Not available' : `${Math.round(currentWeather.humidity)}%`}</span>
+              <span>{currentWeather.humidity === null ? 'Not available' : `${Math.round(currentWeather.humidity)}%`}</span>
             </div>
           </div>
         </div>
@@ -230,7 +230,7 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
                 />
               </svg>
               <div className="score-inner">
-                {conditions.windScore === 0 ? 'N/A' : conditions.windScore.toFixed(1)}
+                {currentWeather.windSpeed === null ? 'N/A' : conditions.windScore.toFixed(1)}
               </div>
             </div>
             <div className="score-description">
@@ -327,7 +327,7 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
         </div>
         <div className="stat-item">
           <div className="stat-label">Precipitation</div>
-          <div className="stat-value">{currentWeather.precipitation.precipitationProbability === 0 ? 'Not available' : `${currentWeather.precipitation.precipitationProbability}%`}</div>
+          <div className="stat-value">{currentWeather.precipitation.precipitationProbability === null ? 'Not available' : `${currentWeather.precipitation.precipitationProbability}%`}</div>
         </div>
         <div className="stat-item">
           <div className="stat-label">Visibility</div>

@@ -18,7 +18,8 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({
   hourlyData,
   className
 }) => {
-  const getObservingQuality = (cloudCover: number, windSpeed: number): string => {
+  const getObservingQuality = (cloudCover: number | null, windSpeed: number | null): string => {
+    if (cloudCover === null || windSpeed === null) return 'poor';
     if (cloudCover < 20 && windSpeed < 8) return 'excellent';
     if (cloudCover < 40 && windSpeed < 12) return 'good';
     if (cloudCover < 70 && windSpeed < 18) return 'fair';
@@ -53,19 +54,19 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({
                     <div
                       className="cloud-fill"
                       style={{
-                        height: `${hour.cloudCover.totalCloudCover}%`,
+                        height: `${hour.cloudCover.totalCloudCover || 0}%`,
                         backgroundColor: cloudInfo.color
                       }}
                     ></div>
                   </div>
                   <div className="cloud-percentage">
-                    {Math.round(hour.cloudCover.totalCloudCover)}%
+                    {hour.cloudCover.totalCloudCover === null ? 'N/A' : `${Math.round(hour.cloudCover.totalCloudCover)}%`}
                   </div>
                 </div>
 
                 <div className="hourly-wind">
                   <div className="wind-speed">
-                    {Math.round(hour.windSpeed * 3.6)} km/h
+                    {hour.windSpeed === null ? 'N/A' : `${Math.round(hour.windSpeed * 3.6)} km/h`}
                   </div>
                 </div>
 
@@ -79,7 +80,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({
                   <div className="quality-dot"></div>
                 </div>
 
-                {hour.precipitation.precipitation > 0 && (
+                {hour.precipitation.precipitation !== null && hour.precipitation.precipitation > 0 && (
                   <div className="precipitation-indicator">
                     🌧️ {hour.precipitation.precipitation.toFixed(1)}mm
                   </div>

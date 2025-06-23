@@ -6,6 +6,7 @@ import CurrentWeather from './CurrentWeather';
 import HourlyForecast from './HourlyForecast';
 import DailyForecast from './DailyForecast';
 import ObservingConditionsPanel from './ObservingConditionsPanel';
+import WeeklyOverview from './WeeklyOverview';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
 import './WeatherApp.css';
@@ -20,11 +21,15 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<LocationSearchResult | null>(null);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   // Load default location on mount
   useEffect(() => {
-    loadDefaultLocation();
-  }, []);
+    if (!hasInitialized) {
+      setHasInitialized(true);
+      loadDefaultLocation();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Calculate observing conditions when forecast changes
   useEffect(() => {
@@ -34,15 +39,10 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
     }
   }, [forecast]);
 
-  const loadDefaultLocation = async () => {
-    const defaultLat = parseFloat(process.env.REACT_APP_DEFAULT_LAT || '47.3769');
-    const defaultLon = parseFloat(process.env.REACT_APP_DEFAULT_LON || '8.5417');
-    const defaultName = process.env.REACT_APP_DEFAULT_LOCATION || 'Zurich, Switzerland';
-
-    await loadWeatherData(defaultLat, defaultLon, defaultName);
-  };
-
   const loadWeatherData = async (lat: number, lon: number, locationName: string) => {
+    // Prevent duplicate API calls
+    if (loading) return;
+
     setLoading(true);
     setError(null);
 
@@ -57,12 +57,22 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
     }
   };
 
+  const loadDefaultLocation = async () => {
+    const defaultLat = parseFloat(process.env.REACT_APP_DEFAULT_LAT || '53.5511');
+    const defaultLon = parseFloat(process.env.REACT_APP_DEFAULT_LON || '9.9937');
+    const defaultName = process.env.REACT_APP_DEFAULT_LOCATION || 'Hamburg, Germany';
+
+    await loadWeatherData(defaultLat, defaultLon, defaultName);
+  };
+
   const handleLocationSelect = async (location: LocationSearchResult) => {
+    if (loading) return; // Prevent duplicate requests
     setSelectedLocation(location);
     await loadWeatherData(location.lat, location.lon, location.name);
   };
 
   const handleRefresh = () => {
+    if (loading) return; // Prevent duplicate requests
     if (selectedLocation) {
       loadWeatherData(selectedLocation.lat, selectedLocation.lon, selectedLocation.name);
     } else {
@@ -122,7 +132,10 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
           </div>
 
           {/* Data Availability Notice */}
-          {forecast.currentWeather.temperature === 0 && (
+          {(forecast.hourlyForecast.length === 0 ||
+            (forecast.currentWeather.temperature === null &&
+             forecast.currentWeather.windSpeed === null &&
+             forecast.currentWeather.cloudCover.totalCloudCover === null)) && (
             <div className="data-notice">
               <div className="notice-icon">📡</div>
               <div className="notice-content">
@@ -144,8 +157,11 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
             </div>
           )}
 
+          {/* Compact 7-Day Overview */}
+          <WeeklyOverview hourlyData={forecast.hourlyForecast} />
+
           {/* Observing Conditions Overview */}
-          {observingConditions && forecast.currentWeather.temperature !== 0 && (
+          {observingConditions && forecast.hourlyForecast.length > 0 && (
             <ObservingConditionsPanel
               conditions={observingConditions}
               currentWeather={forecast.currentWeather}

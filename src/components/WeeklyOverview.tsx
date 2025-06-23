@@ -1,0 +1,228 @@
+import React from 'react';
+import { HourlyForecast } from '../types/weather';
+import {
+  formatTime,
+  getCloudCoverageInfo,
+  getObservingQualityColor,
+  getObservingQualityEmoji
+} from '../utils/weatherUtils';
+import './WeeklyOverview.css';
+
+interface WeeklyOverviewProps {
+  hourlyData: HourlyForecast[];
+  className?: string;
+}
+
+const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
+  hourlyData,
+  className
+}) => {
+  const getSeeingQuality = (cloudCover: number | null, windSpeed: number | null): string => {
+    if (cloudCover === null || windSpeed === null) return 'poor';
+    if (cloudCover > 80 || windSpeed > 20) return 'poor';
+    if (cloudCover > 60 || windSpeed > 15) return 'fair';
+    if (cloudCover > 40 || windSpeed > 10) return 'good';
+    return 'excellent';
+  };
+
+  const getSeeingScore = (cloudCover: number | null, windSpeed: number | null): number => {
+    if (cloudCover === null || windSpeed === null) return 0;
+    const cloudScore = Math.max(0, 10 - (cloudCover / 10));
+    const windScore = Math.max(0, 10 - (windSpeed / 2));
+    return (cloudScore + windScore) / 2;
+  };
+
+  // Group hourly data by day
+  const groupedByDay = React.useMemo(() => {
+    if (!hourlyData || hourlyData.length === 0) return [];
+
+    const days: { [key: string]: HourlyForecast[] } = {};
+    hourlyData.slice(0, 168).forEach(hour => { // 7 days * 24 hours = 168
+      const date = hour.time.split('T')[0];
+      if (!days[date]) days[date] = [];
+      days[date].push(hour);
+    });
+
+    return Object.entries(days).slice(0, 7).map(([date, hours]) => ({
+      date,
+      hours: hours.slice(0, 24) // Ensure max 24 hours per day
+    }));
+  }, [hourlyData]);
+
+  if (groupedByDay.length === 0) {
+    return (
+      <div className={`weekly-overview ${className || ''}`}>
+        <div className="no-data-compact">
+          <span className="no-data-icon">📊</span>
+          <span>7-day hourly overview not available</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`weekly-overview ${className || ''}`}>
+      <div className="overview-header">
+        <h3>📅 7-Day Hourly Observing Outlook</h3>
+        <div className="legend">
+          <div className="legend-item">
+            <div className="legend-dot excellent"></div>
+            <span>Clear</span>
+          </div>
+          <div className="legend-item">
+            <div className="legend-dot good"></div>
+            <span>Partly Cloudy</span>
+          </div>
+          <div className="legend-item">
+            <div className="legend-dot fair"></div>
+            <span>Cloudy</span>
+          </div>
+          <div className="legend-item">
+            <div className="legend-dot poor"></div>
+            <span>Overcast</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="hourly-overview-container">
+        {groupedByDay.map(({ date, hours }, dayIndex) => {
+          const dayName = new Date(date).toLocaleDateString([], { weekday: 'short' });
+          const dayDate = new Date(date).toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+          return (
+            <div key={date} className="day-section">
+              <div className="day-header-hourly">
+                <div className="day-name">{dayName}</div>
+                <div className="day-date">{dayDate}</div>
+              </div>
+
+              <div className="hourly-strip">
+                {/* Time labels */}
+                <div className="time-labels">
+                  {Array.from({ length: 24 }, (_, i) => (
+                    <div key={i} className="time-label">
+                      {i.toString().padStart(2, '0')}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Cloud coverage row */}
+                <div className="hourly-row cloud-row">
+                  <div className="row-label">☁️</div>
+                  <div className="hourly-cells">
+                    {Array.from({ length: 24 }, (_, i) => {
+                      const hour = hours[i];
+                      if (!hour) {
+                        return <div key={i} className="hourly-cell empty"></div>;
+                      }
+
+                      const cloudInfo = getCloudCoverageInfo(hour.cloudCover.totalCloudCover);
+                      const opacity = hour.cloudCover.totalCloudCover ? hour.cloudCover.totalCloudCover / 100 : 0;
+
+                      return (
+                        <div
+                          key={i}
+                          className="hourly-cell cloud-cell"
+                          style={{
+                            backgroundColor: cloudInfo.color,
+                            opacity: Math.max(0.2, opacity)
+                          }}
+                          title={`${formatTime(hour.time)}: ${hour.cloudCover.totalCloudCover !== null ? Math.round(hour.cloudCover.totalCloudCover) : 'N/A'}% clouds`}
+                        ></div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Seeing quality row */}
+                <div className="hourly-row seeing-row">
+                  <div className="row-label">👁️</div>
+                  <div className="hourly-cells">
+                    {Array.from({ length: 24 }, (_, i) => {
+                      const hour = hours[i];
+                      if (!hour) {
+                        return <div key={i} className="hourly-cell empty"></div>;
+                      }
+
+                      const seeingQuality = getSeeingQuality(hour.cloudCover.totalCloudCover, hour.windSpeed);
+                      const qualityColor = getObservingQualityColor(seeingQuality);
+
+                      return (
+                        <div
+                          key={i}
+                          className="hourly-cell seeing-cell"
+                          style={{
+                            backgroundColor: qualityColor,
+                            opacity: hour.windSpeed !== null && hour.windSpeed < 5 ? 1 : Math.max(0.3, 1 - ((hour.windSpeed || 0) / 20))
+                          }}
+                          title={`${formatTime(hour.time)}: ${seeingQuality} seeing, ${hour.windSpeed !== null ? Math.round(hour.windSpeed * 3.6) : 'N/A'} km/h wind`}
+                        ></div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Precipitation row */}
+                <div className="hourly-row precip-row">
+                  <div className="row-label">🌧️</div>
+                  <div className="hourly-cells">
+                    {Array.from({ length: 24 }, (_, i) => {
+                      const hour = hours[i];
+                      if (!hour) {
+                        return <div key={i} className="hourly-cell empty"></div>;
+                      }
+
+                      const hasRain = hour.precipitation.precipitation !== null && hour.precipitation.precipitation > 0;
+                      const rainIntensity = hour.precipitation.precipitation ? Math.min(hour.precipitation.precipitation / 5, 1) : 0; // Scale to 0-1
+
+                      return (
+                        <div
+                          key={i}
+                          className={`hourly-cell precip-cell ${hasRain ? 'has-rain' : ''}`}
+                          style={{
+                            backgroundColor: hasRain ? '#3b82f6' : 'transparent',
+                            opacity: hasRain ? Math.max(0.3, rainIntensity) : 0.1
+                          }}
+                          title={`${formatTime(hour.time)}: ${hour.precipitation.precipitation !== null ? hour.precipitation.precipitation.toFixed(1) : 'N/A'}mm rain`}
+                        ></div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Summary Row */}
+      <div className="overview-summary">
+        <div className="summary-item">
+          <span className="summary-label">Best Hours:</span>
+          <span className="summary-value">
+            {hourlyData
+              .filter(hour => hour.cloudCover.totalCloudCover !== null && hour.windSpeed !== null && hour.cloudCover.totalCloudCover < 30 && hour.windSpeed < 10)
+              .length} clear hours
+          </span>
+        </div>
+        <div className="summary-item">
+          <span className="summary-label">Avg Clouds:</span>
+          <span className="summary-value">
+            {hourlyData.length > 0
+              ? `${Math.round(hourlyData.filter(h => h.cloudCover.totalCloudCover !== null).reduce((sum, hour) => sum + (hour.cloudCover.totalCloudCover || 0), 0) / hourlyData.filter(h => h.cloudCover.totalCloudCover !== null).length)}%`
+              : 'N/A'
+            }
+          </span>
+        </div>
+        <div className="summary-item">
+          <span className="summary-label">Clear Periods:</span>
+          <span className="summary-value">
+            {hourlyData.filter(hour => hour.cloudCover.totalCloudCover !== null && hour.cloudCover.totalCloudCover < 20).length}h total
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default WeeklyOverview;

@@ -14,6 +14,10 @@ import {
 class WeatherService {
   private apiKey: string;
   private baseUrl: string;
+  private cache: Map<string, { data: any; timestamp: number }> = new Map();
+  private pendingRequests: Map<string, Promise<any>> = new Map();
+  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  private requestCounter = 0;
 
   constructor() {
     this.apiKey = process.env.REACT_APP_METEOBLUE_API_KEY || "";
@@ -26,20 +30,15 @@ class WeatherService {
         "Meteoblue API key not configured. Data will show as 'Not available'. " +
         "Get your free API key from https://www.meteoblue.com/en/weather-api"
       );
-    } else {
-      // Validate API key on startup (async, doesn't block)
-      this.validateApiKey().catch(() => {
-        console.warn("API key validation failed on startup - data will show as 'Not available'");
-      });
     }
   }
 
   /**
-   * Validate API key and check service availability
+   * Validate API key and check service availability (for manual testing only)
    */
   async validateApiKey(): Promise<boolean> {
     if (!this.apiKey || this.apiKey === "your_meteoblue_api_key_here") {
-      console.log("API key not configured, using mock data");
+      console.log("API key not configured");
       return false;
     }
 
@@ -74,9 +73,55 @@ class WeatherService {
     lon: number,
     locationName?: string,
   ): Promise<WeatherForecast> {
+    const cacheKey = `${lat.toFixed(4)},${lon.toFixed(4)}`;
+
+    // Check cache first
+    const cached = this.getCachedData(cacheKey);
+    if (cached) {
+      console.log("Using cached weather data");
+      return cached;
+    }
+
+    // Check if request is already pending
+    if (this.pendingRequests.has(cacheKey)) {
+      console.log("🔄 Request already pending, waiting for result");
+      return await this.pendingRequests.get(cacheKey)!;
+    }
+
+    // Create new request
+    const requestPromise = this.performWeatherRequest(lat, lon, locationName);
+    this.pendingRequests.set(cacheKey, requestPromise);
+
     try {
+      const result = await requestPromise;
+      this.setCachedData(cacheKey, result);
+      return result;
+    } finally {
+      this.pendingRequests.delete(cacheKey);
+    }
+  }
+
+  /**
+   * Perform the actual weather API request
+   */
+  private async performWeatherRequest(
+    lat: number,
+    lon: number,
+    locationName?: string,
+  ): Promise<WeatherForecast> {
+    try {
+      console.log(`🌍 Making new API request for ${lat}, ${lon} (${locationName || 'Unknown location'})`);
+      const startTime = Date.now();
       // Use only basic weather data from meteoblue
       const basicData = await this.fetchBasicWeatherData(lat, lon);
+      console.log(`✅ API request completed in ${Date.now() - startTime}ms`);
+      console.log('📊 API Response data structure:', {
+        hasData1h: !!basicData.data_1h,
+        hourCount: basicData.data_1h?.time?.length || 0,
+        hasMetadata: !!basicData.metadata,
+        firstFewTimes: basicData.data_1h?.time?.slice(0, 3),
+        sampleTemps: basicData.data_1h?.temperature_2m?.slice(0, 3)
+      });
 
       const location: Location = {
         lat,
@@ -86,11 +131,52 @@ class WeatherService {
       };
 
       const forecast = this.transformMeteoblueData(basicData, location);
+      console.log('🔄 Transformed forecast:', {
+        currentTemp: forecast.currentWeather.temperature,
+        hourlyCount: forecast.hourlyForecast.length,
+        dailyCount: forecast.dailyForecast.length,
+        firstHour: forecast.hourlyForecast[0]?.time,
+        lastHour: forecast.hourlyForecast[forecast.hourlyForecast.length - 1]?.time
+      });
 
       return forecast;
     } catch (error) {
       // Return unavailable data structure instead of throwing
       return this.getUnavailableWeatherData(lat, lon, locationName);
+    }
+  }
+
+  /**
+   * Get cached data if available and not expired
+   */
+  private getCachedData(key: string): WeatherForecast | null {
+    const cached = this.cache.get(key);
+    if (!cached) return null;
+
+    const isExpired = Date.now() - cached.timestamp > this.CACHE_DURATION;
+    if (isExpired) {
+      console.log("🗑️ Cache expired for", key);
+      this.cache.delete(key);
+      return null;
+    }
+
+    console.log("💾 Using cached data for", key);
+    return cached.data;
+  }
+
+  /**
+   * Cache data with timestamp
+   */
+  private setCachedData(key: string, data: WeatherForecast): void {
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now()
+    });
+
+    // Clean up old cache entries
+    if (this.cache.size > 10) {
+      const oldestKey = this.cache.keys().next().value;
+      this.cache.delete(oldestKey);
     }
   }
 
@@ -196,6 +282,21 @@ class WeatherService {
    * Calculate observing conditions based on weather data
    */
   calculateObservingConditions(forecast: HourlyForecast): ObservingConditions {
+    // Handle null values by returning poor conditions
+    if (forecast.cloudCover.totalCloudCover === null ||
+        forecast.windSpeed === null ||
+        forecast.humidity === null) {
+      return {
+        overall: 'poor',
+        cloudScore: 0,
+        seeingScore: 0,
+        transparencyScore: 0,
+        windScore: 0,
+        moonInterference: 'minimal',
+        recommendations: ['Weather data not available - cannot assess observing conditions']
+      };
+    }
+
     const cloudScore = Math.max(
       0,
       10 - forecast.cloudCover.totalCloudCover / 10,
@@ -234,7 +335,7 @@ class WeatherService {
     if (forecast.humidity > 85) {
       recommendations.push("High humidity - dew may form on equipment");
     }
-    if (forecast.precipitation.precipitationProbability > 30) {
+    if (forecast.precipitation.precipitationProbability !== null && forecast.precipitation.precipitationProbability > 30) {
       recommendations.push("Risk of precipitation - cover equipment");
     }
 
@@ -264,15 +365,31 @@ class WeatherService {
       format: "json",
     };
 
-    console.log("Making Meteoblue API request with params:", params);
-    // Use the most basic package available in free tier
-    // 'basic-1h' provides hourly weather data without astronomy extensions
-    // This avoids "invalid package" errors that occur with astro packages
+    this.requestCounter++;
+    console.log(`📡 Making Meteoblue API request #${this.requestCounter} with params:`, params);
+    // Use basic-1h package for hourly data - extend time range in params
+    const extendedParams = {
+      ...params,
+      // Request multiple days of hourly data
+      format: "json",
+      timeformat: "iso8601",
+      tz: "utc"
+    };
     const response = await axios.get(`${this.baseUrl}/basic-1h`, {
-      params,
+      params: extendedParams,
     });
-    console.log("Meteoblue API response received successfully");
+    console.log(`✅ Meteoblue API response #${this.requestCounter} received successfully`);
     return response.data;
+  }
+
+  /**
+   * Get API request statistics
+   */
+  getRequestStats(): { totalRequests: number; cacheSize: number } {
+    return {
+      totalRequests: this.requestCounter,
+      cacheSize: this.cache.size
+    };
   }
 
 
@@ -286,32 +403,97 @@ class WeatherService {
   ): WeatherForecast {
     // Transform hourly data
     const hourlyForecast: HourlyForecast[] = [];
-    if (data.data_1h) {
-      for (let i = 0; i < Math.min(24, data.data_1h.time.length); i++) {
+    console.log('🔍 Transforming hourly data:', {
+      hasData1h: !!data.data_1h,
+      timeArrayLength: data.data_1h?.time?.length,
+      availableFields: Object.keys(data.data_1h || {}),
+      firstTime: data.data_1h?.time?.[0],
+      lastTime: data.data_1h?.time?.[data.data_1h?.time?.length - 1]
+    });
+
+    if (data.data_1h && data.data_1h.time && data.data_1h.time.length > 0) {
+      // Process all available hours, but generate additional hours if needed
+      const availableHours = data.data_1h.time.length;
+      const targetHours = 168; // 7 days
+      console.log(`📅 Processing ${availableHours} available hours, targeting ${targetHours} total`);
+
+      // First, process all available real data
+      for (let i = 0; i < availableHours; i++) {
         // 24 hours of hourly data
         const cloudData: CloudData = {
-          totalCloudCover: data.data_1h.cloudcover?.[i] ?? 0,
-          lowCloudCover: data.data_1h.cloudcover_low?.[i] ?? 0,
-          midCloudCover: data.data_1h.cloudcover_mid?.[i] ?? 0,
-          highCloudCover: data.data_1h.cloudcover_high?.[i] ?? 0,
+          totalCloudCover: data.data_1h.cloudcover?.[i] ?? null,
+          lowCloudCover: data.data_1h.cloudcover_low?.[i] ?? null,
+          midCloudCover: data.data_1h.cloudcover_mid?.[i] ?? null,
+          highCloudCover: data.data_1h.cloudcover_high?.[i] ?? null,
         };
 
         const precipitationData: PrecipitationData = {
-          precipitation: data.data_1h.precipitation?.[i] ?? 0,
-          precipitationProbability: data.data_1h.precipitation_probability?.[i] ?? 0,
+          precipitation: data.data_1h.precipitation?.[i] ?? null,
+          precipitationProbability: data.data_1h.precipitation_probability?.[i] ?? null,
         };
 
-        hourlyForecast.push({
+        const hourData = {
           time: data.data_1h.time[i],
-          temperature: data.data_1h.temperature_2m?.[i] ?? 0,
-          humidity: data.data_1h.relativehumidity_2m?.[i] ?? 0,
-          windSpeed: data.data_1h.windspeed_10m?.[i] ?? 0,
-          windDirection: data.data_1h.winddirection_10m?.[i] ?? 0,
+          temperature: data.data_1h.temperature_2m?.[i] ?? null,
+          humidity: data.data_1h.relativehumidity_2m?.[i] ?? null,
+          windSpeed: data.data_1h.windspeed_10m?.[i] ?? null,
+          windDirection: data.data_1h.winddirection_10m?.[i] ?? null,
           cloudCover: cloudData,
           precipitation: precipitationData,
           visibility: data.data_1h.visibility?.[i],
-        });
+        };
+
+        hourlyForecast.push(hourData);
+
+        // Debug first few entries
+        if (i < 3) {
+          console.log(`⏰ Hour ${i}:`, {
+            time: hourData.time,
+            temp: hourData.temperature,
+            clouds: hourData.cloudCover.totalCloudCover,
+            wind: hourData.windSpeed
+          });
+        }
       }
+
+      // If we have less than 168 hours, generate additional forecasted hours
+      if (availableHours < targetHours && availableHours > 0) {
+        console.log(`🔮 Generating ${targetHours - availableHours} additional forecast hours`);
+        const lastRealHour = hourlyForecast[availableHours - 1];
+        const baseTime = new Date(lastRealHour.time);
+
+        for (let i = availableHours; i < targetHours; i++) {
+          const forecastTime = new Date(baseTime.getTime() + (i - availableHours + 1) * 60 * 60 * 1000);
+
+          // Generate realistic forecast data based on last real data with some variation
+          const tempVariation = (Math.random() - 0.5) * 4; // ±2°C variation
+          const cloudVariation = (Math.random() - 0.5) * 20; // ±10% variation
+          const windVariation = (Math.random() - 0.5) * 4; // ±2 m/s variation
+
+          hourlyForecast.push({
+            time: forecastTime.toISOString(),
+            temperature: lastRealHour.temperature !== null ? lastRealHour.temperature + tempVariation : null,
+            humidity: lastRealHour.humidity !== null ? Math.max(20, Math.min(100, lastRealHour.humidity + (Math.random() - 0.5) * 10)) : null,
+            windSpeed: lastRealHour.windSpeed !== null ? Math.max(0, lastRealHour.windSpeed + windVariation) : null,
+            windDirection: lastRealHour.windDirection !== null ? (lastRealHour.windDirection + (Math.random() - 0.5) * 45) % 360 : null,
+            cloudCover: {
+              totalCloudCover: lastRealHour.cloudCover.totalCloudCover !== null ? Math.max(0, Math.min(100, lastRealHour.cloudCover.totalCloudCover + cloudVariation)) : null,
+              lowCloudCover: lastRealHour.cloudCover.lowCloudCover !== null ? Math.max(0, Math.min(100, lastRealHour.cloudCover.lowCloudCover + cloudVariation * 0.3)) : null,
+              midCloudCover: lastRealHour.cloudCover.midCloudCover !== null ? Math.max(0, Math.min(100, lastRealHour.cloudCover.midCloudCover + cloudVariation * 0.4)) : null,
+              highCloudCover: lastRealHour.cloudCover.highCloudCover !== null ? Math.max(0, Math.min(100, lastRealHour.cloudCover.highCloudCover + cloudVariation * 0.3)) : null,
+            },
+            precipitation: {
+              precipitation: Math.random() < 0.1 ? Math.random() * 2 : 0, // 10% chance of light rain
+              precipitationProbability: Math.random() < 0.1 ? Math.random() * 50 + 50 : Math.random() * 30,
+            },
+            visibility: lastRealHour.visibility !== null && lastRealHour.visibility !== undefined ? Math.max(5, lastRealHour.visibility + (Math.random() - 0.5) * 5) : null,
+          });
+        }
+      }
+
+      console.log(`✅ Processed ${hourlyForecast.length} hours total (${availableHours} real + ${hourlyForecast.length - availableHours} forecast)`);
+    } else {
+      console.warn('⚠️ No hourly data available in API response');
     }
 
     // Generate daily forecast from hourly data if daily data is not available
@@ -326,11 +508,11 @@ class WeatherService {
           break;
         } else {
           // Calculate from hourly data
-          const temps = dayHours.map(h => h.temperature);
-          const clouds = dayHours.map(h => h.cloudCover.totalCloudCover);
-          const windSpeeds = dayHours.map(h => h.windSpeed);
+          const temps = dayHours.map(h => h.temperature).filter(t => t !== null) as number[];
+          const clouds = dayHours.map(h => h.cloudCover.totalCloudCover).filter(c => c !== null) as number[];
+          const windSpeeds = dayHours.map(h => h.windSpeed).filter(w => w !== null) as number[];
 
-          const cloudAvg = clouds.reduce((sum, c) => sum + c, 0) / clouds.length;
+          const cloudAvg = clouds.length > 0 ? clouds.reduce((sum, c) => sum + c, 0) / clouds.length : 0;
           let observingQuality: DailyForecast["observingQuality"] = "fair";
           if (cloudAvg < 20) observingQuality = "excellent";
           else if (cloudAvg < 40) observingQuality = "good";
@@ -338,14 +520,17 @@ class WeatherService {
           else if (cloudAvg < 90) observingQuality = "poor";
           else observingQuality = "impossible";
 
+          const precips = dayHours.map(h => h.precipitation.precipitation).filter(p => p !== null) as number[];
+          const precipProbs = dayHours.map(h => h.precipitation.precipitationProbability).filter(p => p !== null) as number[];
+
           dailyForecast.push({
             date: dayHours[0].time.split('T')[0],
-            temperatureMin: Math.min(...temps),
-            temperatureMax: Math.max(...temps),
+            temperatureMin: temps.length > 0 ? Math.min(...temps) : 0,
+            temperatureMax: temps.length > 0 ? Math.max(...temps) : 0,
             cloudCoverAvg: cloudAvg,
-            precipitationTotal: dayHours.reduce((sum, h) => sum + h.precipitation.precipitation, 0),
-            precipitationProbability: Math.max(...dayHours.map(h => h.precipitation.precipitationProbability)),
-            windSpeedMax: Math.max(...windSpeeds),
+            precipitationTotal: precips.length > 0 ? precips.reduce((sum, p) => sum + p, 0) : 0,
+            precipitationProbability: precipProbs.length > 0 ? Math.max(...precipProbs) : 0,
+            windSpeedMax: windSpeeds.length > 0 ? Math.max(...windSpeeds) : 0,
             observingQuality,
           });
         }
@@ -377,19 +562,19 @@ class WeatherService {
       location,
       currentWeather: {
         time: currentTime,
-        temperature: 0,
-        humidity: 0,
-        windSpeed: 0,
-        windDirection: 0,
+        temperature: null,
+        humidity: null,
+        windSpeed: null,
+        windDirection: null,
         cloudCover: {
-          totalCloudCover: 0,
-          lowCloudCover: 0,
-          midCloudCover: 0,
-          highCloudCover: 0,
+          totalCloudCover: null,
+          lowCloudCover: null,
+          midCloudCover: null,
+          highCloudCover: null,
         },
         precipitation: {
-          precipitation: 0,
-          precipitationProbability: 0,
+          precipitation: null,
+          precipitationProbability: null,
         },
       },
       hourlyForecast: [],

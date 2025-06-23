@@ -10,19 +10,19 @@ export interface Location {
 // Basic weather data point
 export interface WeatherDataPoint {
   time: string;
-  temperature: number;
-  humidity: number;
-  windSpeed: number;
-  windDirection: number;
-  pressure?: number;
+  temperature: number | null;
+  humidity: number | null;
+  windSpeed: number | null;
+  windDirection: number | null;
+  pressure?: number | null;
 }
 
 // Cloud coverage data
 export interface CloudData {
-  totalCloudCover: number; // 0-100%
-  lowCloudCover: number;   // 0-100%
-  midCloudCover: number;   // 0-100%
-  highCloudCover: number;  // 0-100%
+  totalCloudCover: number | null; // 0-100%
+  lowCloudCover: number | null;   // 0-100%
+  midCloudCover: number | null;   // 0-100%
+  highCloudCover: number | null;  // 0-100%
 }
 
 // Astronomical seeing conditions
@@ -34,8 +34,8 @@ export interface SeeingConditions {
 
 // Precipitation data
 export interface PrecipitationData {
-  precipitation: number;    // mm
-  precipitationProbability: number; // 0-100%
+  precipitation: number | null;    // mm
+  precipitationProbability: number | null; // 0-100%
   precipitationType?: 'rain' | 'snow' | 'sleet' | 'none';
 }
 
@@ -45,7 +45,7 @@ export interface HourlyForecast extends WeatherDataPoint {
   seeing?: SeeingConditions;
   precipitation: PrecipitationData;
   uvIndex?: number;
-  visibility?: number; // km
+  visibility?: number | null; // km
 }
 
 // Daily forecast summary

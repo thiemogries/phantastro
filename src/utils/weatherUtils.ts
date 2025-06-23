@@ -5,10 +5,10 @@ import { HourlyForecast } from "../types/weather";
  * Format temperature with appropriate units or show "Not available"
  */
 export const formatTemperature = (
-  temp: number,
+  temp: number | null,
   unit: "C" | "F" = "C",
 ): string => {
-  if (temp === 0 || temp === null || temp === undefined) {
+  if (temp === null || temp === undefined) {
     return "Not available";
   }
   const rounded = Math.round(temp);
@@ -19,11 +19,11 @@ export const formatTemperature = (
  * Format wind speed with direction or show "Not available"
  */
 export const formatWind = (
-  speed: number,
-  direction: number,
+  speed: number | null,
+  direction: number | null,
   unit: "ms" | "kmh" | "mph" = "ms",
 ): string => {
-  if (speed === 0 || speed === null || speed === undefined) {
+  if (speed === null || speed === undefined || direction === null || direction === undefined) {
     return "Not available";
   }
 
@@ -87,9 +87,9 @@ export const formatCloudCover = (percentage: number): string => {
  * Get cloud coverage description and color or show unavailable info
  */
 export const getCloudCoverageInfo = (
-  percentage: number,
+  percentage: number | null,
 ): { description: string; color: string; emoji: string } => {
-  if (percentage === 0 || percentage === null || percentage === undefined) {
+  if (percentage === null || percentage === undefined) {
     return { description: "Not available", color: "#6b7280", emoji: "❓" };
   }
   if (percentage < 10)
@@ -211,10 +211,10 @@ export const getMoonPhaseInfo = (
  * Get precipitation type emoji
  */
 export const getPrecipitationEmoji = (
-  amount: number,
-  temperature: number,
+  amount: number | null,
+  temperature: number | null,
 ): string => {
-  if (amount === 0) return "";
+  if (amount === null || temperature === null || amount === 0) return "";
   if (temperature < 0) return "❄️";
   if (amount < 1) return "🌦️";
   if (amount < 5) return "🌧️";
@@ -241,9 +241,12 @@ export const getVisibilityInfo = (
  * Calculate dew point
  */
 export const calculateDewPoint = (
-  temperature: number,
-  humidity: number,
-): number => {
+  temperature: number | null,
+  humidity: number | null,
+): number | null => {
+  if (temperature === null || humidity === null) {
+    return null;
+  }
   const a = 17.27;
   const b = 237.7;
   const alpha =
@@ -268,7 +271,7 @@ export const getObservationRecommendations = (
   const seeing = forecast.seeing?.seeing || 2.5;
 
   // Return null (not available) if essential data is missing
-  if (cloudCover === 0 || windSpeed === 0) {
+  if (cloudCover === null || windSpeed === null) {
     return {
       planetary: null,
       deepSky: null,
@@ -307,6 +310,14 @@ export const getBestObservingHours = (
  * Calculate a comprehensive observing score
  */
 export const calculateObservingScore = (forecast: HourlyForecast): number => {
+  // Return 0 if essential data is missing
+  if (forecast.cloudCover.totalCloudCover === null ||
+      forecast.windSpeed === null ||
+      forecast.humidity === null ||
+      forecast.precipitation.precipitationProbability === null) {
+    return 0;
+  }
+
   const cloudScore = Math.max(0, 100 - forecast.cloudCover.totalCloudCover);
   const windScore = Math.max(0, 100 - forecast.windSpeed * 5);
   const humidityScore = Math.max(0, 100 - forecast.humidity);
@@ -375,8 +386,8 @@ export const convertWindSpeed = (
 /**
  * Format humidity percentage or show "Not available"
  */
-export const formatHumidity = (humidity: number): string => {
-  if (humidity === 0 || humidity === null || humidity === undefined) {
+export const formatHumidity = (humidity: number | null): string => {
+  if (humidity === null || humidity === undefined) {
     return "Not available";
   }
   return `${Math.round(humidity)}%`;
@@ -386,9 +397,9 @@ export const formatHumidity = (humidity: number): string => {
  * Get UV index description
  */
 export const getUVIndexInfo = (
-  uvIndex: number | undefined,
+  uvIndex: number | null | undefined,
 ): { description: string; color: string; advice: string } => {
-  if (!uvIndex || uvIndex === 0) {
+  if (uvIndex === null || uvIndex === undefined) {
     return {
       description: "Not available",
       color: "#6b7280",

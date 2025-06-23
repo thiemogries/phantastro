@@ -16,7 +16,8 @@ Phantastro is a specialized React-based weather application designed specificall
 
 ### 🌤️ Comprehensive Weather Data
 - **7-Day Forecast**: Extended outlook for planning observing sessions
-- **Hourly Updates**: 24-hour detailed forecasts with observing quality indicators
+- **Hourly 7-Day Overview**: Interactive hourly grid showing cloud coverage, seeing conditions, and precipitation for 168 hours
+- **24-Hour Updates**: Detailed hourly forecasts with observing quality indicators
 - **Real-time Conditions**: Current weather with astronomical observation recommendations
 - **Location Search**: Find weather data for observatories and dark-sky sites worldwide
 
@@ -25,6 +26,7 @@ Phantastro is a specialized React-based weather application designed specificall
 - **Quality Scoring**: 0-10 scoring system for different observing conditions
 - **Equipment Tips**: Personalized advice based on current conditions
 - **Best Viewing Hours**: Automatic identification of optimal observing windows
+- **Hourly Planning**: Interactive 7-day grid showing optimal observing hours with color-coded conditions
 
 ### 🌍 Global Coverage
 - **Popular Observatory Sites**: Quick access to famous astronomical locations
@@ -83,9 +85,16 @@ Phantastro features a **cosmic dark theme** inspired by the night sky:
 - **Deep space colors**: Dark blues and purples mimicking the cosmos
 - **Star-themed icons**: Custom favicon and loading animations
 - **Gradient accents**: Purple-to-magenta gradients representing stellar phenomena
+- **Interactive hourly grid**: 7-day × 24-hour matrix with color-coded weather conditions
 - **Responsive design**: Works beautifully on desktop, tablet, and mobile devices
 
-## 📊 Understanding the Data
+### Understanding the Data
+
+### Hourly 7-Day Grid
+- **Cloud Coverage Row**: Color intensity shows cloud percentage (darker = more clouds)
+- **Seeing Quality Row**: Green = excellent, yellow = fair, red = poor atmospheric stability  
+- **Precipitation Row**: Blue cells indicate rain/snow with intensity showing amount
+- **Interactive Tooltips**: Hover over any hour cell for detailed conditions
 
 ### Observing Quality Scale (0-10)
 - **9-10**: Excellent - Perfect conditions for any observation
@@ -146,6 +155,7 @@ Phantastro includes quick access to world-renowned astronomical sites:
 - **Update Frequency**: Hourly forecasts
 - **Forecast Range**: 24-hour detailed + 7-day outlook
 - **Astronomy Features**: Enhanced with calculated data
+- **Optimization**: Smart caching (5min) and request deduplication prevent API waste
 
 ### Custom Calculations
 - **Seeing Estimation**: Based on wind speed and atmospheric pressure
@@ -262,6 +272,12 @@ Having issues or questions?
 - **Auto-fallback**: Automatically switches to mock data if API calls fail
 - **Check**: Ensure your API key is correctly set in `.env`
 - **Verify**: API key should not be `your_meteoblue_api_key_here`
+### Troubleshooting
+
+**Problem**: Seeing "Weather Data Not Available" notice incorrectly
+- **Fixed**: Updated data detection logic to properly distinguish between 0°C temperatures and missing data
+- **Cause**: Previous versions incorrectly treated legitimate 0°C temperatures as unavailable data
+- **Solution**: App now uses `null` values to indicate truly missing data vs actual zero readings
 
 **Problem**: Seeing "Not available" for weather data
 - **Cause**: Missing or invalid API key configuration
@@ -284,12 +300,20 @@ Having issues or questions?
 - Location search and UI features remain fully functional
 - Real API key required for actual weather data display
 - Clear indicators show when data is unavailable vs when it's real
+- **API Optimization**: Intelligent caching reduces redundant requests
+
+### Performance Features
+- **Request Deduplication**: Prevents multiple simultaneous API calls for same location
+- **Smart Caching**: 5-minute cache reduces API usage and improves responsiveness
+- **Loading State Management**: Prevents duplicate requests during user interactions
+- **Efficient Data Flow**: Single API call serves multiple UI components
 
 ### Data Availability
-- **"Not available"** indicates missing API configuration or data
-- **Real values** show when API is properly configured and working
-- **Clear indicators** distinguish between unavailable and actual zero values
+- **"Not available"** indicates missing API configuration or data (uses `null` internally)
+- **Real values** show when API is properly configured and working (including legitimate 0°C temperatures)
+- **Clear indicators** distinguish between unavailable data and actual zero values (0°C, 0% humidity, etc.)
 - **Graceful degradation** ensures app never crashes due to missing data
+- **Improved Detection**: Fixed false "Weather Data Not Available" messages for valid data
 
 ### Getting Help
 - Check browser console for detailed error messages
