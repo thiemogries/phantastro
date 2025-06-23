@@ -449,3 +449,130 @@ export const getUVIndexInfo = (
     advice: "Avoid outdoor activities",
   };
 };
+
+/**
+ * Format moonlight percentage or show "Not available"
+ */
+export const formatMoonlight = (moonlight: number | null): string => {
+  if (moonlight === null || moonlight === undefined) {
+    return "Not available";
+  }
+  return `${Math.round(moonlight)}%`;
+};
+
+/**
+ * Get moonlight impact on astronomical observation
+ */
+export const getMoonlightImpact = (
+  moonlightActual: number | null,
+): { description: string; color: string; advice: string; quality: string } => {
+  if (moonlightActual === null || moonlightActual === undefined) {
+    return {
+      description: "Not available",
+      color: "#6b7280",
+      advice: "Moonlight data not available",
+      quality: "poor",
+    };
+  }
+
+  if (moonlightActual < 5) {
+    return {
+      description: "New Moon",
+      color: "#22c55e",
+      advice: "Excellent for deep sky objects and faint targets",
+      quality: "excellent",
+    };
+  }
+  if (moonlightActual < 15) {
+    return {
+      description: "Dark Skies",
+      color: "#84cc16",
+      advice: "Very good for deep sky observation",
+      quality: "good",
+    };
+  }
+  if (moonlightActual < 35) {
+    return {
+      description: "Some Moonlight",
+      color: "#eab308",
+      advice: "Good for planets and bright targets",
+      quality: "fair",
+    };
+  }
+  if (moonlightActual < 65) {
+    return {
+      description: "Moderate Moonlight",
+      color: "#f97316",
+      advice: "Challenging for deep sky, good for moon/planets",
+      quality: "poor",
+    };
+  }
+  return {
+    description: "Bright Moonlight",
+    color: "#ef4444",
+    advice: "Best for lunar and planetary observation only",
+    quality: "poor",
+  };
+};
+
+/**
+ * Get night sky brightness description
+ */
+export const getNightSkyBrightnessInfo = (
+  brightness: number | null,
+): { description: string; color: string } => {
+  if (brightness === null || brightness === undefined) {
+    return { description: "Not available", color: "#6b7280" };
+  }
+
+  // Brightness in lux - lower is better for astronomy
+  if (brightness < 0.001) {
+    return { description: "Excellent", color: "#22c55e" };
+  }
+  if (brightness < 0.01) {
+    return { description: "Very Good", color: "#84cc16" };
+  }
+  if (brightness < 0.1) {
+    return { description: "Good", color: "#eab308" };
+  }
+  if (brightness < 1) {
+    return { description: "Fair", color: "#f97316" };
+  }
+  return { description: "Poor", color: "#ef4444" };
+};
+
+/**
+ * Determine best observation type based on moonlight conditions
+ */
+export const getOptimalObservationTypes = (
+  moonlightActual: number | null,
+  cloudCover: number | null,
+): string[] => {
+  const recommendations: string[] = [];
+
+  if (moonlightActual === null || cloudCover === null) {
+    return ["Data not available"];
+  }
+
+  if (cloudCover > 70) {
+    return ["Poor conditions for all observation types"];
+  }
+
+  if (moonlightActual < 15 && cloudCover < 30) {
+    recommendations.push("Deep sky objects", "Galaxy hunting", "Nebula photography");
+  }
+
+  if (moonlightActual < 35 && cloudCover < 50) {
+    recommendations.push("Star clusters", "Double stars", "Variable stars");
+  }
+
+  if (moonlightActual > 35 || cloudCover < 70) {
+    recommendations.push("Planetary observation", "Lunar features", "Bright targets");
+  }
+
+  if (moonlightActual > 60) {
+    recommendations.push("Moon observation", "Bright planets only");
+  }
+
+  return recommendations.length > 0 ? recommendations : ["Limited observation opportunities"];
+};

@@ -54,20 +54,23 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
         <div className="legend">
           <div className="legend-item">
             <div className="legend-dot excellent"></div>
-            <span>Clear</span>
+            <span>Excellent</span>
           </div>
           <div className="legend-item">
             <div className="legend-dot good"></div>
-            <span>Partly Cloudy</span>
+            <span>Good</span>
           </div>
           <div className="legend-item">
             <div className="legend-dot fair"></div>
-            <span>Cloudy</span>
+            <span>Fair</span>
           </div>
           <div className="legend-item">
             <div className="legend-dot poor"></div>
-            <span>Overcast</span>
+            <span>Poor</span>
           </div>
+        </div>
+        <div className="legend-note">
+          <small>🌙 Moonlight: Lower is better for deep sky observations</small>
         </div>
       </div>
 
@@ -188,6 +191,47 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                     })}
                   </div>
                 </div>
+
+                {/* Moonlight row */}
+                <div className="hourly-row moonlight-row">
+                  <div className="row-label">🌙</div>
+                  <div className="hourly-cells">
+                    {Array.from({ length: 24 }, (_, i) => {
+                      const hour = hours[i];
+                      if (!hour) {
+                        return <div key={i} className="hourly-cell empty"></div>;
+                      }
+
+                      const moonlight = hour.moonlight?.moonlightActual;
+                      const hasMoonlight = moonlight !== null && moonlight !== undefined;
+
+                      // Moonlight intensity: 0% = new moon (best for deep sky), 100% = full moon (worst for deep sky)
+                      // For astronomical observation, lower moonlight is better
+                      const moonlightQuality = hasMoonlight
+                        ? moonlight < 10 ? 'excellent'  // Dark skies, ideal for deep sky
+                          : moonlight < 25 ? 'good'     // Some moonlight, still good
+                          : moonlight < 50 ? 'fair'     // Moderate moonlight
+                          : 'poor'                      // Bright moonlight, poor for deep sky
+                        : 'poor';
+
+                      const moonlightColor = getObservingQualityColor(moonlightQuality);
+                      // Higher moonlight = higher opacity (more interference)
+                      const opacity = hasMoonlight ? Math.min(1, Math.max(0.2, moonlight / 100)) : 0.2;
+
+                      return (
+                        <div
+                          key={i}
+                          className="hourly-cell moonlight-cell"
+                          style={{
+                            backgroundColor: moonlightColor,
+                            opacity
+                          }}
+                          title={`${formatTime(hour.time)}: ${hasMoonlight ? `${moonlight.toFixed(1)}%` : 'N/A'} moonlight`}
+                        ></div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
           );
@@ -224,6 +268,21 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           <span className="summary-value">
             {hourlyData.filter(h => h.visibility !== null).length > 0
               ? `${(hourlyData.filter(h => h.visibility !== null).reduce((sum, hour) => sum + (hour.visibility || 0), 0) / hourlyData.filter(h => h.visibility !== null).length).toFixed(1)}km`
+              : 'N/A'
+            }
+          </span>
+        </div>
+        <div className="summary-item">
+          <span className="summary-label">Dark Hours:</span>
+          <span className="summary-value">
+            {hourlyData.filter(hour => hour.moonlight?.moonlightActual !== null && hour.moonlight.moonlightActual < 25).length}h moonlight &lt;25%
+          </span>
+        </div>
+        <div className="summary-item">
+          <span className="summary-label">Avg Moonlight:</span>
+          <span className="summary-value">
+            {hourlyData.filter(h => h.moonlight?.moonlightActual !== null).length > 0
+              ? `${Math.round(hourlyData.filter(h => h.moonlight?.moonlightActual !== null).reduce((sum, hour) => sum + (hour.moonlight?.moonlightActual || 0), 0) / hourlyData.filter(h => h.moonlight?.moonlightActual !== null).length)}%`
               : 'N/A'
             }
           </span>

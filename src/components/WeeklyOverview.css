@@ -47,6 +47,17 @@
 .legend-dot.fair { background-color: #eab308; }
 .legend-dot.poor { background-color: #64748b; }
 
+.legend-note {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.legend-note small {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
 /* No data state */
 .no-data-compact {
   display: flex;
@@ -166,6 +177,14 @@
 
 .precip-cell.has-rain {
   border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.moonlight-cell {
+  border-radius: 3px;
+}
+
+.moonlight-cell:hover {
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Summary Row */

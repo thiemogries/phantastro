@@ -112,6 +112,7 @@ class WeatherService {
         sampleVisibility: cloudData.data_1h?.visibility?.slice(0, 3)
       });
 
+
       const location: Location = {
         lat,
         lon,
@@ -384,6 +385,59 @@ class WeatherService {
   }
 
   /**
+   * Fetch moonlight data from Meteoblue moonlight API
+   *
+   * This method uses the moonlight-1h API endpoint to get detailed
+   * moonlight and night sky brightness data for astronomical observations.
+   *
+   * API endpoint: https://my.meteoblue.com/packages/moonlight-1h
+   *
+   * Returns:
+   * - moonlight_actual: Percentage of light w.r.t. luminance of full moon considering actual conditions
+   * - moonlight_clearsky: Percentage of light w.r.t. luminance of full moon not considering cloud-cover
+   * - nightskybrightness_actual: Illuminance of the nightsky in lux considering actual conditions
+   * - nightskybrightness_clearsky: Illuminance of the nightsky in lux not considering cloud-cover
+   * - zenithangle: Solar zenith angle for twilight estimates
+   */
+  async fetchMoonlightData(lat: number, lon: number): Promise<any> {
+    if (!this.apiKey || this.apiKey === "your_meteoblue_api_key_here") {
+      throw new Error("No API key configured");
+    }
+
+    const params = {
+      apikey: this.apiKey,
+      lat,
+      lon,
+      format: "json",
+      timeformat: "iso8601",
+      tz: "utc"
+    };
+
+    this.requestCounter++;
+    console.log(`🌙 Making Meteoblue moonlight API request #${this.requestCounter} with params:`, params);
+    try {
+      const response = await axios.get(`${this.baseUrl}/moonlight-1h`, {
+        params,
+      });
+      console.log(`✅ Meteoblue moonlight API response #${this.requestCounter} received successfully`);
+      return response.data;
+    } catch (error) {
+      console.warn(`⚠️ Failed to fetch moonlight data, continuing without moonlight information:`, error instanceof Error ? error.message : 'Unknown error');
+      // Return empty moonlight data structure if moonlight API fails
+      return {
+        data_1h: {
+          time: [],
+          moonlight_actual: [],
+          moonlight_clearsky: [],
+          nightskybrightness_actual: [],
+          nightskybrightness_clearsky: [],
+          zenithangle: []
+        }
+      };
+    }
+  }
+
+  /**
    * Get API request statistics
    */
   getRequestStats(): { totalRequests: number } {
@@ -401,6 +455,7 @@ class WeatherService {
     data: any,
     location: Location,
     cloudData?: any,
+    moonlightData?: any,
   ): WeatherForecast {
     // Transform hourly data
     const hourlyForecast: HourlyForecast[] = [];
@@ -460,6 +515,23 @@ class WeatherService {
       }
     }
 
+    // Validate moonlight data arrays if available
+    if (moonlightData?.data_1h) {
+      const moonlightArrays = {
+        moonlight_actual: moonlightData.data_1h.moonlight_actual,
+        moonlight_clearsky: moonlightData.data_1h.moonlight_clearsky,
+        nightskybrightness_actual: moonlightData.data_1h.nightskybrightness_actual,
+        nightskybrightness_clearsky: moonlightData.data_1h.nightskybrightness_clearsky,
+        zenithangle: moonlightData.data_1h.zenithangle
+      };
+
+      for (const [fieldName, array] of Object.entries(moonlightArrays)) {
+        if (array && array.length !== timeLength) {
+          console.warn(`⚠️ Moonlight data length mismatch for ${fieldName}: expected ${timeLength}, got ${array.length}`);
+        }
+      }
+    }
+
     for (const [fieldName, array] of Object.entries(dataArrays)) {
       if (array && array.length !== timeLength) {
         console.warn(`⚠️ Length mismatch for ${fieldName}: expected ${timeLength}, got ${array.length}`);
@@ -487,6 +559,14 @@ class WeatherService {
           precipitationProbability: data.data_1h.precipitation_probability?.[i] ?? null,
         };
 
+        const moonlightDataPoint = {
+          moonlightActual: moonlightData?.data_1h?.moonlight_actual?.[i] ?? null,
+          moonlightClearSky: moonlightData?.data_1h?.moonlight_clearsky?.[i] ?? null,
+          nightSkyBrightnessActual: moonlightData?.data_1h?.nightskybrightness_actual?.[i] ?? null,
+          nightSkyBrightnessClearSky: moonlightData?.data_1h?.nightskybrightness_clearsky?.[i] ?? null,
+          zenithAngle: moonlightData?.data_1h?.zenithangle?.[i] ?? null,
+        };
+
         // Validate precipitation data
         if (precipitationData.precipitation !== null && precipitationData.precipitation < 0) {
           console.warn(`⚠️ Invalid precipitation value at hour ${i}: ${precipitationData.precipitation}`);
@@ -498,6 +578,15 @@ class WeatherService {
           precipitationData.precipitationProbability = Math.max(0, Math.min(100, precipitationData.precipitationProbability));
         }
 
+        // Add default moonlight data if none provided
+        const defaultMoonlightData = {
+          moonlightActual: null,
+          moonlightClearSky: null,
+          nightSkyBrightnessActual: null,
+          nightSkyBrightnessClearSky: null,
+          zenithAngle: null,
+        };
+
         const hourData = {
           time: data.data_1h.time[i],
           temperature: data.data_1h.temperature?.[i] ?? null,
@@ -506,6 +595,7 @@ class WeatherService {
           windDirection: null, // Not available in this API response
           cloudCover: cloudCoverData,
           precipitation: precipitationData,
+          moonlight: moonlightData ? moonlightDataPoint : defaultMoonlightData,
           visibility: cloudData?.data_1h?.visibility?.[i] ? cloudData.data_1h.visibility[i] / 1000 : null, // Convert from meters to kilometers
         };
 
@@ -581,6 +671,23 @@ class WeatherService {
             precipitation: {
               precipitation: Math.random() < 0.1 ? Math.random() * 2 : 0, // 10% chance of light rain
               precipitationProbability: Math.random() < 0.1 ? Math.random() * 50 + 50 : Math.random() * 30,
+            },
+            moonlight: {
+              moonlightActual: lastRealHour.moonlight?.moonlightActual !== null && lastRealHour.moonlight?.moonlightActual !== undefined
+                ? Math.max(0, Math.min(100, lastRealHour.moonlight.moonlightActual + (Math.random() - 0.5) * 5))
+                : null,
+              moonlightClearSky: lastRealHour.moonlight?.moonlightClearSky !== null && lastRealHour.moonlight?.moonlightClearSky !== undefined
+                ? Math.max(0, Math.min(100, lastRealHour.moonlight.moonlightClearSky + (Math.random() - 0.5) * 5))
+                : null,
+              nightSkyBrightnessActual: lastRealHour.moonlight?.nightSkyBrightnessActual !== null && lastRealHour.moonlight?.nightSkyBrightnessActual !== undefined
+                ? Math.max(0, lastRealHour.moonlight.nightSkyBrightnessActual + (Math.random() - 0.5) * 100)
+                : null,
+              nightSkyBrightnessClearSky: lastRealHour.moonlight?.nightSkyBrightnessClearSky !== null && lastRealHour.moonlight?.nightSkyBrightnessClearSky !== undefined
+                ? Math.max(0, lastRealHour.moonlight.nightSkyBrightnessClearSky + (Math.random() - 0.5) * 100)
+                : null,
+              zenithAngle: lastRealHour.moonlight?.zenithAngle !== null && lastRealHour.moonlight?.zenithAngle !== undefined
+                ? (lastRealHour.moonlight.zenithAngle + (Math.random() - 0.5) * 5) % 360
+                : null,
             },
             visibility: lastRealHour.visibility !== null && lastRealHour.visibility !== undefined ? Math.max(5, lastRealHour.visibility + (Math.random() - 0.5) * 5) : null,
           });
@@ -679,6 +786,14 @@ class WeatherService {
           precipitation: null,
           precipitationProbability: null,
         },
+        moonlight: {
+          moonlightActual: null,
+          moonlightClearSky: null,
+          nightSkyBrightnessActual: null,
+          nightSkyBrightnessClearSky: null,
+          zenithAngle: null,
+        },
+        visibility: null,
       },
       hourlyForecast: [],
       dailyForecast: [],
@@ -721,7 +836,11 @@ class WeatherService {
       lowCloudCover: hourlyForecast.filter(h => h.cloudCover.lowCloudCover !== null).length / hourlyForecast.length * 100,
       midCloudCover: hourlyForecast.filter(h => h.cloudCover.midCloudCover !== null).length / hourlyForecast.length * 100,
       highCloudCover: hourlyForecast.filter(h => h.cloudCover.highCloudCover !== null).length / hourlyForecast.length * 100,
-      visibility: hourlyForecast.filter(h => h.visibility !== null).length / hourlyForecast.length * 100
+      visibility: hourlyForecast.filter(h => h.visibility !== null).length / hourlyForecast.length * 100,
+      moonlightActual: hourlyForecast.filter(h => h.moonlight.moonlightActual !== null).length / hourlyForecast.length * 100,
+      moonlightClearSky: hourlyForecast.filter(h => h.moonlight.moonlightClearSky !== null).length / hourlyForecast.length * 100,
+      nightSkyBrightnessActual: hourlyForecast.filter(h => h.moonlight.nightSkyBrightnessActual !== null).length / hourlyForecast.length * 100,
+      zenithAngle: hourlyForecast.filter(h => h.moonlight.zenithAngle !== null).length / hourlyForecast.length * 100
     };
     console.log('📊 Data completeness percentages:', dataCompleteness);
 
@@ -734,6 +853,10 @@ class WeatherService {
     const midCloudCover = hourlyForecast.map(h => h.cloudCover.midCloudCover).filter(c => c !== null) as number[];
     const highCloudCover = hourlyForecast.map(h => h.cloudCover.highCloudCover).filter(c => c !== null) as number[];
     const visibilities = hourlyForecast.map(h => h.visibility).filter(v => v !== null) as number[];
+    const moonlightActual = hourlyForecast.map(h => h.moonlight.moonlightActual).filter(m => m !== null) as number[];
+    const moonlightClearSky = hourlyForecast.map(h => h.moonlight.moonlightClearSky).filter(m => m !== null) as number[];
+    const nightSkyBrightnessActual = hourlyForecast.map(h => h.moonlight.nightSkyBrightnessActual).filter(n => n !== null) as number[];
+    const zenithAngles = hourlyForecast.map(h => h.moonlight.zenithAngle).filter(z => z !== null) as number[];
 
     if (temperatures.length > 0) {
       const tempStats = {
@@ -800,6 +923,42 @@ class WeatherService {
       });
     }
 
+    if (moonlightActual.length > 0) {
+      const moonlightStats = {
+        min: Math.min(...moonlightActual),
+        max: Math.max(...moonlightActual),
+        avg: moonlightActual.reduce((sum, m) => sum + m, 0) / moonlightActual.length
+      };
+      console.log('🌙 Moonlight actual stats:', moonlightStats);
+    }
+
+    if (moonlightClearSky.length > 0) {
+      const moonlightClearStats = {
+        min: Math.min(...moonlightClearSky),
+        max: Math.max(...moonlightClearSky),
+        avg: moonlightClearSky.reduce((sum, m) => sum + m, 0) / moonlightClearSky.length
+      };
+      console.log('🌝 Moonlight clear sky stats:', moonlightClearStats);
+    }
+
+    if (nightSkyBrightnessActual.length > 0) {
+      const nightSkyStats = {
+        min: Math.min(...nightSkyBrightnessActual),
+        max: Math.max(...nightSkyBrightnessActual),
+        avg: nightSkyBrightnessActual.reduce((sum, n) => sum + n, 0) / nightSkyBrightnessActual.length
+      };
+      console.log('✨ Night sky brightness stats (lux):', nightSkyStats);
+    }
+
+    if (zenithAngles.length > 0) {
+      const zenithStats = {
+        min: Math.min(...zenithAngles),
+        max: Math.max(...zenithAngles),
+        avg: zenithAngles.reduce((sum, z) => sum + z, 0) / zenithAngles.length
+      };
+      console.log('☀️ Zenith angle stats (degrees):', zenithStats);
+    }
+
     // Check time sequence continuity
     const timeGaps: string[] = [];
     for (let i = 1; i < hourlyForecast.length; i++) {
@@ -842,6 +1001,14 @@ class WeatherService {
         precipitation: 0,
         precipitationProbability: 10,
       },
+      moonlight: {
+        moonlightActual: 25,
+        moonlightClearSky: 30,
+        nightSkyBrightnessActual: 0.1,
+        nightSkyBrightnessClearSky: 0.05,
+        zenithAngle: 90,
+      },
+      visibility: 15,
     };
   }
 

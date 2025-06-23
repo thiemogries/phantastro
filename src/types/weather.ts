@@ -34,10 +34,20 @@ export interface PrecipitationData {
   precipitationType?: 'rain' | 'snow' | 'sleet' | 'none';
 }
 
+// Moonlight data
+export interface MoonlightData {
+  moonlightActual: number | null;        // 0-100% light w.r.t. full moon (actual conditions)
+  moonlightClearSky: number | null;      // 0-100% light w.r.t. full moon (clear sky)
+  nightSkyBrightnessActual: number | null; // lux (actual conditions)
+  nightSkyBrightnessClearSky: number | null; // lux (clear sky)
+  zenithAngle: number | null;            // degrees (solar zenith angle)
+}
+
 // Combined hourly forecast data
 export interface HourlyForecast extends WeatherDataPoint {
   cloudCover: CloudData;
   precipitation: PrecipitationData;
+  moonlight: MoonlightData;
   uvIndex?: number;
   visibility?: number | null; // km
 }
@@ -106,6 +116,12 @@ export interface MeteoblueResponse {
     visibility?: number[];
     fog_probability?: number[];
     sunshinetime?: number[];
+    // Moonlight data from moonlight-1h API
+    moonlight_actual?: number[];
+    moonlight_clearsky?: number[];
+    nightskybrightness_actual?: number[];
+    nightskybrightness_clearsky?: number[];
+    zenithangle?: number[];
   };
   data_day?: {
     time: string[];
