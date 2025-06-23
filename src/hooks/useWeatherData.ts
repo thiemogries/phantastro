@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { WeatherForecast, LocationSearchResult, ObservingConditions } from '../types/weather';
+import { WeatherForecast, LocationSearchResult } from '../types/weather';
 import weatherService from '../services/weatherService';
 
 export interface WeatherQueryParams {
@@ -14,7 +14,6 @@ export const WEATHER_QUERY_KEYS = {
   cloudData: (lat: number, lon: number) => ['cloudData', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
   moonlightData: (lat: number, lon: number) => ['moonlightData', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
   locations: (query: string) => ['locations', query] as const,
-  observingConditions: (forecast: WeatherForecast) => ['observingConditions', forecast.lastUpdated] as const,
 } as const;
 
 /**
@@ -159,31 +158,7 @@ export const useLocationSearch = () => {
   });
 };
 
-/**
- * Custom hook for calculating observing conditions
- */
-export const useObservingConditions = (forecast: WeatherForecast | undefined | null) => {
-  return useQuery<ObservingConditions | null>({
-    queryKey: forecast ? WEATHER_QUERY_KEYS.observingConditions(forecast) : ['observingConditions', 'disabled'],
-    queryFn: (): ObservingConditions | null => {
-      if (!forecast?.currentWeather) return null;
 
-      console.log('🔭 Calculating observing conditions for current weather:', {
-        temperature: forecast.currentWeather.temperature,
-        windSpeed: forecast.currentWeather.windSpeed,
-        cloudCover: forecast.currentWeather.cloudCover.totalCloudCover,
-        precipitationProbability: forecast.currentWeather.precipitation.precipitationProbability
-      });
-
-      const conditions = weatherService.calculateObservingConditions(forecast.currentWeather);
-      console.log('✨ Observing conditions calculated:', conditions);
-      return conditions;
-    },
-    enabled: !!forecast?.currentWeather,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
-  });
-};
 
 /**
  * Custom hook for API key validation

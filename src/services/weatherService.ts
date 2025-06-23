@@ -5,7 +5,6 @@ import {
   DailyForecast,
   Location,
   LocationSearchResult,
-  ObservingConditions,
   CloudData,
   PrecipitationData,
   WeatherApiError,
@@ -237,71 +236,7 @@ class WeatherService {
     }
   }
 
-  /**
-   * Calculate observing conditions based on weather data
-   */
-  calculateObservingConditions(forecast: HourlyForecast): ObservingConditions {
-    // Handle null values by returning poor conditions
-    if (forecast.cloudCover.totalCloudCover === null ||
-        forecast.windSpeed === null ||
-        forecast.humidity === null) {
-      return {
-        overall: 'poor',
-        cloudScore: 0,
-        transparencyScore: 0,
-        windScore: 0,
-        moonInterference: 'minimal',
-        recommendations: ['Weather data not available - cannot assess observing conditions']
-      };
-    }
 
-    const cloudScore = Math.max(
-      0,
-      10 - forecast.cloudCover.totalCloudCover / 10,
-    );
-    const windScore = Math.max(0, 10 - Math.min(10, forecast.windSpeed / 3));
-
-    // Transparency affected by humidity and clouds
-    const transparencyScore = Math.max(
-      0,
-      10 - forecast.humidity / 10 - forecast.cloudCover.totalCloudCover / 20,
-    );
-
-    const overallScore =
-      cloudScore * 0.5 +
-      transparencyScore * 0.3 +
-      windScore * 0.2;
-
-    let overall: ObservingConditions["overall"];
-    if (overallScore > 8) overall = "excellent";
-    else if (overallScore > 6) overall = "good";
-    else if (overallScore > 4) overall = "fair";
-    else if (overallScore > 2) overall = "poor";
-    else overall = "impossible";
-
-    const recommendations: string[] = [];
-    if (forecast.cloudCover.totalCloudCover > 70) {
-      recommendations.push("High cloud coverage - consider indoor activities");
-    }
-    if (forecast.windSpeed > 20) {
-      recommendations.push("High winds - challenging for telescopes");
-    }
-    if (forecast.humidity > 85) {
-      recommendations.push("High humidity - dew may form on equipment");
-    }
-    if (forecast.precipitation.precipitationProbability !== null && forecast.precipitation.precipitationProbability > 30) {
-      recommendations.push("Risk of precipitation - cover equipment");
-    }
-
-    return {
-      overall,
-      cloudScore,
-      transparencyScore,
-      windScore,
-      moonInterference: "minimal", // Would need moon phase data
-      recommendations,
-    };
-  }
 
   /**
    * Fetch basic weather data from Meteoblue

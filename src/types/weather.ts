@@ -143,15 +143,7 @@ export interface WeatherApiError {
   details?: string;
 }
 
-// Observing conditions assessment
-export interface ObservingConditions {
-  overall: 'excellent' | 'good' | 'fair' | 'poor' | 'impossible';
-  cloudScore: number;     // 0-10 (10 = clear skies)
-  transparencyScore: number; // 0-10 (10 = excellent transparency)
-  windScore: number;      // 0-10 (10 = calm conditions)
-  moonInterference: 'none' | 'minimal' | 'moderate' | 'significant' | 'extreme';
-  recommendations: string[];
-}
+
 
 // Location search result
 export interface LocationSearchResult {

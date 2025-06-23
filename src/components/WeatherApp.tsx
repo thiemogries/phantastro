@@ -2,15 +2,10 @@ import React, { useState } from 'react';
 import { LocationSearchResult } from '../types/weather';
 import {
   useWeatherData,
-  useObservingConditions,
   useRefreshWeatherData,
   WeatherQueryParams
 } from '../hooks/useWeatherData';
 import LocationSearch from './LocationSearch';
-import CurrentWeather from './CurrentWeather';
-import HourlyForecast from './HourlyForecast';
-import DailyForecast from './DailyForecast';
-import ObservingConditionsPanel from './ObservingConditionsPanel';
 import WeeklyOverview from './WeeklyOverview';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
@@ -21,7 +16,6 @@ interface WeatherAppProps {
 }
 
 const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
-  const [selectedLocation, setSelectedLocation] = useState<LocationSearchResult | null>(null);
   const [weatherParams, setWeatherParams] = useState<WeatherQueryParams | null>(null);
 
   // Initialize with default location
@@ -38,7 +32,6 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
 
   // Use TanStack Query hooks
   const { data: forecast, isLoading: loading, error: queryError } = useWeatherData(weatherParams);
-  const { data: observingConditions } = useObservingConditions(forecast);
   const refreshWeatherData = useRefreshWeatherData();
 
   const error = queryError ? (queryError as Error).message : null;
@@ -48,7 +41,6 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
   const handleLocationSelect = (location: LocationSearchResult) => {
     if (loading) return; // Prevent duplicate requests
     console.log('📍 WeatherApp: Location selected:', location);
-    setSelectedLocation(location);
     setWeatherParams({ lat: location.lat, lon: location.lon, locationName: location.name });
   };
 
@@ -135,93 +127,8 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
             </div>
           )}
 
-          {/* Compact 7-Day Overview */}
+          {/* 7-Day Hourly Overview */}
           <WeeklyOverview hourlyData={forecast.hourlyForecast} />
-
-          {/* Observing Conditions Overview */}
-          {observingConditions && forecast.hourlyForecast.length > 0 && (
-            <ObservingConditionsPanel
-              conditions={observingConditions}
-              currentWeather={forecast.currentWeather}
-            />
-          )}
-
-          {/* Current Weather */}
-          <CurrentWeather
-            weather={forecast.currentWeather}
-            observingConditions={observingConditions || null}
-          />
-
-          {/* Hourly Forecast */}
-          {forecast.hourlyForecast.length > 0 ? (
-            <div className="forecast-section">
-              <h3>🕐 Next 24 Hours</h3>
-              <HourlyForecast
-                hourlyData={forecast.hourlyForecast.slice(0, 24)}
-              />
-            </div>
-          ) : (
-            <div className="forecast-section">
-              <h3>🕐 Next 24 Hours</h3>
-              <div className="no-data-message">
-                <div className="no-data-icon">📊</div>
-                <div className="no-data-text">
-                  <h4>Hourly forecast not available</h4>
-                  <p>Configure your Meteoblue API key to access detailed hourly weather data.</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Daily Forecast */}
-          {forecast.dailyForecast.length > 0 ? (
-            <div className="forecast-section">
-              <h3>📅 7-Day Outlook</h3>
-              <DailyForecast
-                dailyData={forecast.dailyForecast}
-              />
-            </div>
-          ) : (
-            <div className="forecast-section">
-              <h3>📅 7-Day Outlook</h3>
-              <div className="no-data-message">
-                <div className="no-data-icon">📅</div>
-                <div className="no-data-text">
-                  <h4>Daily forecast not available</h4>
-                  <p>Configure your Meteoblue API key to access extended weather forecasts.</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Additional Info */}
-          <div className="weather-app__footer">
-            <div className="info-grid">
-              <div className="info-card">
-                <h4>🌙 Best Observing Tonight</h4>
-                <p>
-                  Check the hourly forecast for periods with low cloud coverage
-                  and minimal wind for optimal viewing conditions.
-                </p>
-              </div>
-              <div className="info-card">
-                <h4>🔭 Equipment Tips</h4>
-                <p>
-                  {observingConditions?.recommendations.length ?
-                    observingConditions.recommendations[0] :
-                    'Conditions look good for astronomical observations!'
-                  }
-                </p>
-              </div>
-              <div className="info-card">
-                <h4>📊 Data Source</h4>
-                <p>
-                  Weather data provided by Meteoblue API.
-                  Specialized for astronomical observation conditions.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       )}
 

@@ -1,5 +1,4 @@
 import { format, parseISO, isToday, isTomorrow } from "date-fns";
-import { HourlyForecast } from "../types/weather";
 
 /**
  * Format temperature with appropriate units or show "Not available"
@@ -268,83 +267,7 @@ export const calculateDewPoint = (
   return (b * alpha) / (a - alpha);
 };
 
-/**
- * Determine if conditions are good for specific types of observation
- */
-export const getObservationRecommendations = (
-  forecast: HourlyForecast,
-): {
-  planetary: boolean | null;
-  deepSky: boolean | null;
-  photography: boolean | null;
-  lunar: boolean | null;
-  solar: boolean | null;
-} => {
-  const cloudCover = forecast.cloudCover.totalCloudCover;
-  const windSpeed = forecast.windSpeed;
 
-  // Return null (not available) if essential data is missing
-  if (cloudCover === null || windSpeed === null) {
-    return {
-      planetary: null,
-      deepSky: null,
-      photography: null,
-      lunar: null,
-      solar: null,
-    };
-  }
-
-  return {
-    planetary: cloudCover < 30 && windSpeed < 10,
-    deepSky: cloudCover < 20,
-    photography: cloudCover < 15 && windSpeed < 8,
-    lunar: cloudCover < 40 && windSpeed < 15,
-    solar: cloudCover < 50, // Solar observation can work with some clouds
-  };
-};
-
-/**
- * Get best observing hours from hourly forecast
- */
-export const getBestObservingHours = (
-  hourlyForecast: HourlyForecast[],
-  count: number = 3,
-): HourlyForecast[] => {
-  return hourlyForecast
-    .map((hour) => ({
-      ...hour,
-      score: calculateObservingScore(hour),
-    }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, count);
-};
-
-/**
- * Calculate a comprehensive observing score
- */
-export const calculateObservingScore = (forecast: HourlyForecast): number => {
-  // Return 0 if essential data is missing
-  if (forecast.cloudCover.totalCloudCover === null ||
-      forecast.windSpeed === null ||
-      forecast.humidity === null ||
-      forecast.precipitation.precipitationProbability === null) {
-    return 0;
-  }
-
-  const cloudScore = Math.max(0, 100 - forecast.cloudCover.totalCloudCover);
-  const windScore = Math.max(0, 100 - forecast.windSpeed * 5);
-  const humidityScore = Math.max(0, 100 - forecast.humidity);
-  const precipScore =
-    forecast.precipitation.precipitationProbability === 0 ? 100 : 0;
-
-  // Weight the factors for astronomical observation
-  return (
-    cloudScore * 0.4 +
-    windScore * 0.25 +
-    humidityScore * 0.2 +
-    precipScore * 0.15
-  );
-};
 
 /**
  * Get trend indicator for a series of values
