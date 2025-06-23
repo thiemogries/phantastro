@@ -311,7 +311,7 @@ class WeatherService {
   /**
    * Fetch basic weather data from Meteoblue
    */
-  private async fetchBasicWeatherData(lat: number, lon: number): Promise<any> {
+  async fetchBasicWeatherData(lat: number, lon: number): Promise<any> {
     if (!this.apiKey || this.apiKey === "your_meteoblue_api_key_here") {
       throw new Error("No API key configured");
     }
@@ -351,7 +351,7 @@ class WeatherService {
    * This data is essential for astronomical observations as different
    * cloud layers affect visibility differently.
    */
-  private async fetchCloudData(lat: number, lon: number): Promise<any> {
+  async fetchCloudData(lat: number, lon: number): Promise<any> {
     if (!this.apiKey || this.apiKey === "your_meteoblue_api_key_here") {
       throw new Error("No API key configured");
     }
@@ -403,7 +403,7 @@ class WeatherService {
   /**
    * Transform Meteoblue API response to our internal format
    */
-  private transformMeteoblueData(
+  transformMeteoblueData(
     data: any,
     location: Location,
     cloudData?: any,

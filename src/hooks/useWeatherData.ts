@@ -10,23 +10,62 @@ export interface WeatherQueryParams {
 
 export const WEATHER_QUERY_KEYS = {
   weather: (lat: number, lon: number) => ['weather', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
+  basicWeather: (lat: number, lon: number) => ['basicWeather', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
+  cloudData: (lat: number, lon: number) => ['cloudData', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
   locations: (query: string) => ['locations', query] as const,
   observingConditions: (forecast: WeatherForecast) => ['observingConditions', forecast.lastUpdated] as const,
 } as const;
 
 /**
- * Custom hook for fetching weather data with TanStack Query
+ * Custom hook for fetching weather data with separate cloud data caching
  */
 export const useWeatherData = (params: WeatherQueryParams | null) => {
+  // Use separate queries for basic weather and cloud data
+  const basicWeatherQuery = useBasicWeatherData(params);
+  const cloudDataQuery = useCloudData(params);
+
   return useQuery<WeatherForecast>({
     queryKey: params ? WEATHER_QUERY_KEYS.weather(params.lat, params.lon) : ['weather', 'disabled'],
     queryFn: async (): Promise<WeatherForecast> => {
       if (!params) throw new Error('No location parameters provided');
-      console.log('🌍 Fetching weather data for:', params);
+
+      const basicData = basicWeatherQuery.data;
+      const cloudData = cloudDataQuery.data;
+
+      if (!basicData) throw new Error('Basic weather data not available');
+
+      console.log('🔄 Combining weather data for:', params);
+
+      const location = {
+        lat: params.lat,
+        lon: params.lon,
+        name: params.locationName || `${params.lat.toFixed(2)}, ${params.lon.toFixed(2)}`,
+        timezone: basicData.metadata?.timezone_abbreviation,
+      };
+
+      const result = weatherService.transformMeteoblueData(basicData, location, cloudData);
+      console.log('✅ Weather data combined successfully');
+      return result;
+    },
+    enabled: !!params && basicWeatherQuery.isSuccess,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
+};
+
+/**
+ * Custom hook for fetching basic weather data independently
+ */
+export const useBasicWeatherData = (params: WeatherQueryParams | null) => {
+  return useQuery<any>({
+    queryKey: params ? WEATHER_QUERY_KEYS.basicWeather(params.lat, params.lon) : ['basicWeather', 'disabled'],
+    queryFn: async (): Promise<any> => {
+      if (!params) throw new Error('No location parameters provided');
+      console.log('🌍 Fetching basic weather data for:', params);
       const startTime = Date.now();
-      const result = await weatherService.getWeatherForecast(params.lat, params.lon, params.locationName);
+      const result = await weatherService.fetchBasicWeatherData(params.lat, params.lon);
       const loadTime = Date.now() - startTime;
-      console.log(`✅ Weather data loaded successfully in ${loadTime}ms`);
+      console.log(`✅ Basic weather data loaded successfully in ${loadTime}ms`);
       return result;
     },
     enabled: !!params,
@@ -38,6 +77,35 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
         return false;
       }
       return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+};
+
+/**
+ * Custom hook for fetching cloud data independently (for advanced use cases)
+ */
+export const useCloudData = (params: WeatherQueryParams | null) => {
+  return useQuery<any>({
+    queryKey: params ? WEATHER_QUERY_KEYS.cloudData(params.lat, params.lon) : ['cloudData', 'disabled'],
+    queryFn: async (): Promise<any> => {
+      if (!params) throw new Error('No location parameters provided');
+      console.log('☁️ Fetching cloud data for:', params);
+      const startTime = Date.now();
+      const result = await weatherService.fetchCloudData(params.lat, params.lon);
+      const loadTime = Date.now() - startTime;
+      console.log(`✅ Cloud data loaded successfully in ${loadTime}ms`);
+      return result;
+    },
+    enabled: !!params,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: (failureCount, error) => {
+      // Be more lenient with cloud data since it's supplementary
+      if (error.message.includes('API key') || error.message.includes('401')) {
+        return false;
+      }
+      return failureCount < 3;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
@@ -109,10 +177,18 @@ export const useRefreshWeatherData = () => {
   return useMutation({
     mutationFn: async (params: WeatherQueryParams) => {
       console.log('🔄 Refreshing weather data for:', params);
-      // Invalidate and refetch the specific weather query
-      await queryClient.invalidateQueries({
-        queryKey: WEATHER_QUERY_KEYS.weather(params.lat, params.lon)
-      });
+      // Invalidate and refetch all related queries
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: WEATHER_QUERY_KEYS.basicWeather(params.lat, params.lon)
+        }),
+        queryClient.invalidateQueries({
+          queryKey: WEATHER_QUERY_KEYS.cloudData(params.lat, params.lon)
+        }),
+        queryClient.invalidateQueries({
+          queryKey: WEATHER_QUERY_KEYS.weather(params.lat, params.lon)
+        })
+      ]);
       return params;
     },
     onSuccess: (params) => {
@@ -143,9 +219,16 @@ export const usePrefetchWeatherData = () => {
   const queryClient = useQueryClient();
 
   return (params: WeatherQueryParams) => {
+    // Prefetch both basic weather and cloud data separately
     queryClient.prefetchQuery({
-      queryKey: WEATHER_QUERY_KEYS.weather(params.lat, params.lon),
-      queryFn: () => weatherService.getWeatherForecast(params.lat, params.lon, params.locationName),
+      queryKey: WEATHER_QUERY_KEYS.basicWeather(params.lat, params.lon),
+      queryFn: () => weatherService.fetchBasicWeatherData(params.lat, params.lon),
+      staleTime: 5 * 60 * 1000,
+    });
+
+    queryClient.prefetchQuery({
+      queryKey: WEATHER_QUERY_KEYS.cloudData(params.lat, params.lon),
+      queryFn: () => weatherService.fetchCloudData(params.lat, params.lon),
       staleTime: 5 * 60 * 1000,
     });
   };
