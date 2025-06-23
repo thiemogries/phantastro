@@ -189,6 +189,45 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                     })}
                   </div>
                 </div>
+
+                {/* Visibility row */}
+                <div className="hourly-row visibility-row">
+                  <div className="row-label">👁️</div>
+                  <div className="hourly-cells">
+                    {Array.from({ length: 24 }, (_, i) => {
+                      const hour = hours[i];
+                      if (!hour) {
+                        return <div key={i} className="hourly-cell empty"></div>;
+                      }
+
+                      const visibility = hour.visibility;
+                      const hasVisibility = visibility !== null && visibility !== undefined;
+
+                      // Good visibility is >20km, poor is <5km
+                      const visibilityQuality = hasVisibility
+                        ? visibility > 20 ? 'excellent'
+                          : visibility > 15 ? 'good'
+                          : visibility > 10 ? 'fair'
+                          : 'poor'
+                        : 'poor';
+
+                      const visibilityColor = getObservingQualityColor(visibilityQuality);
+                      const opacity = hasVisibility ? Math.min(1, Math.max(0.3, visibility / 30)) : 0.2;
+
+                      return (
+                        <div
+                          key={i}
+                          className="hourly-cell visibility-cell"
+                          style={{
+                            backgroundColor: visibilityColor,
+                            opacity
+                          }}
+                          title={`${formatTime(hour.time)}: ${hasVisibility ? `${visibility.toFixed(1)}km` : 'N/A'} visibility`}
+                        ></div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
           );
@@ -218,6 +257,15 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           <span className="summary-label">Clear Periods:</span>
           <span className="summary-value">
             {hourlyData.filter(hour => hour.cloudCover.totalCloudCover !== null && hour.cloudCover.totalCloudCover < 20).length}h total
+          </span>
+        </div>
+        <div className="summary-item">
+          <span className="summary-label">Avg Visibility:</span>
+          <span className="summary-value">
+            {hourlyData.filter(h => h.visibility !== null).length > 0
+              ? `${(hourlyData.filter(h => h.visibility !== null).reduce((sum, hour) => sum + (hour.visibility || 0), 0) / hourlyData.filter(h => h.visibility !== null).length).toFixed(1)}km`
+              : 'N/A'
+            }
           </span>
         </div>
       </div>

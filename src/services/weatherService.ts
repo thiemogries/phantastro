@@ -112,15 +112,32 @@ class WeatherService {
     try {
       console.log(`🌍 Making new API request for ${lat}, ${lon} (${locationName || 'Unknown location'})`);
       const startTime = Date.now();
-      // Use only basic weather data from meteoblue
-      const basicData = await this.fetchBasicWeatherData(lat, lon);
-      console.log(`✅ API request completed in ${Date.now() - startTime}ms`);
-      console.log('📊 API Response data structure:', {
+
+      // Fetch both basic weather data and cloud data in parallel
+      const [basicData, cloudData] = await Promise.all([
+        this.fetchBasicWeatherData(lat, lon),
+        this.fetchCloudData(lat, lon)
+      ]);
+
+      console.log(`✅ API requests completed in ${Date.now() - startTime}ms`);
+      console.log('📊 Basic API Response data structure:', {
         hasData1h: !!basicData.data_1h,
         hourCount: basicData.data_1h?.time?.length || 0,
         hasMetadata: !!basicData.metadata,
         firstFewTimes: basicData.data_1h?.time?.slice(0, 3),
-        sampleTemps: basicData.data_1h?.temperature_2m?.slice(0, 3)
+        sampleTemps: basicData.data_1h?.temperature?.slice(0, 3)
+      });
+      console.log('☁️ Cloud API Response data structure:', {
+        hasData1h: !!cloudData.data_1h,
+        hourCount: cloudData.data_1h?.time?.length || 0,
+        hasTotalCloudCover: !!cloudData.data_1h?.totalcloudcover,
+        hasLowClouds: !!cloudData.data_1h?.lowclouds,
+        hasMidClouds: !!cloudData.data_1h?.midclouds,
+        hasHighClouds: !!cloudData.data_1h?.highclouds,
+        hasVisibility: !!cloudData.data_1h?.visibility,
+        sampleTotalCloudCover: cloudData.data_1h?.totalcloudcover?.slice(0, 3),
+        sampleLowClouds: cloudData.data_1h?.lowclouds?.slice(0, 3),
+        sampleVisibility: cloudData.data_1h?.visibility?.slice(0, 3)
       });
 
       const location: Location = {
@@ -130,9 +147,10 @@ class WeatherService {
         timezone: basicData.metadata?.timezone_abbreviation,
       };
 
-      const forecast = this.transformMeteoblueData(basicData, location);
+      const forecast = this.transformMeteoblueData(basicData, location, cloudData);
       console.log('🔄 Transformed forecast:', {
         currentTemp: forecast.currentWeather.temperature,
+        currentCloudCover: forecast.currentWeather.cloudCover.totalCloudCover,
         hourlyCount: forecast.hourlyForecast.length,
         dailyCount: forecast.dailyForecast.length,
         firstHour: forecast.hourlyForecast[0]?.time,
@@ -363,23 +381,72 @@ class WeatherService {
       lat,
       lon,
       format: "json",
+      timeformat: "iso8601",
+      tz: "utc"
     };
 
     this.requestCounter++;
-    console.log(`📡 Making Meteoblue API request #${this.requestCounter} with params:`, params);
-    // Use basic-1h package for hourly data - extend time range in params
-    const extendedParams = {
-      ...params,
-      // Request multiple days of hourly data
+    console.log(`📡 Making Meteoblue basic API request #${this.requestCounter} with params:`, params);
+    const response = await axios.get(`${this.baseUrl}/basic-1h`, {
+      params,
+    });
+    console.log(`✅ Meteoblue basic API response #${this.requestCounter} received successfully`);
+    return response.data;
+  }
+
+  /**
+   * Fetch cloud coverage data from Meteoblue clouds API
+   *
+   * This method uses the clouds-1h_clouds-day API endpoint to get detailed
+   * cloud coverage data including low, mid, and high altitude clouds.
+   *
+   * API endpoint: https://my.meteoblue.com/packages/clouds-1h_clouds-day
+   *
+   * Returns:
+   * - cloudcover: Total cloud coverage (0-100%)
+   * - cloudcover_low: Low altitude clouds (0-100%)
+   * - cloudcover_mid: Mid altitude clouds (0-100%)
+   * - cloudcover_high: High altitude clouds (0-100%)
+   *
+   * This data is essential for astronomical observations as different
+   * cloud layers affect visibility differently.
+   */
+  private async fetchCloudData(lat: number, lon: number): Promise<any> {
+    if (!this.apiKey || this.apiKey === "your_meteoblue_api_key_here") {
+      throw new Error("No API key configured");
+    }
+
+    const params = {
+      apikey: this.apiKey,
+      lat,
+      lon,
       format: "json",
       timeformat: "iso8601",
       tz: "utc"
     };
-    const response = await axios.get(`${this.baseUrl}/basic-1h`, {
-      params: extendedParams,
-    });
-    console.log(`✅ Meteoblue API response #${this.requestCounter} received successfully`);
-    return response.data;
+
+    this.requestCounter++;
+    console.log(`☁️ Making Meteoblue clouds API request #${this.requestCounter} with params:`, params);
+    try {
+      const response = await axios.get(`${this.baseUrl}/clouds-1h_clouds-day`, {
+        params,
+      });
+      console.log(`✅ Meteoblue clouds API response #${this.requestCounter} received successfully`);
+      return response.data;
+    } catch (error) {
+      console.warn(`⚠️ Failed to fetch cloud data, continuing without detailed cloud coverage:`, error instanceof Error ? error.message : 'Unknown error');
+      // Return empty cloud data structure if cloud API fails
+      return {
+        data_1h: {
+          time: [],
+          totalcloudcover: [],
+          lowclouds: [],
+          midclouds: [],
+          highclouds: [],
+          visibility: []
+        }
+      };
+    }
   }
 
   /**
@@ -400,6 +467,7 @@ class WeatherService {
   private transformMeteoblueData(
     data: any,
     location: Location,
+    cloudData?: any,
   ): WeatherForecast {
     // Transform hourly data
     const hourlyForecast: HourlyForecast[] = [];
@@ -442,6 +510,23 @@ class WeatherService {
       precipitation_probability: data.data_1h.precipitation_probability
     };
 
+    // Validate cloud data arrays if available
+    if (cloudData?.data_1h) {
+      const cloudArrays = {
+        totalcloudcover: cloudData.data_1h.totalcloudcover,
+        lowclouds: cloudData.data_1h.lowclouds,
+        midclouds: cloudData.data_1h.midclouds,
+        highclouds: cloudData.data_1h.highclouds,
+        visibility: cloudData.data_1h.visibility
+      };
+
+      for (const [fieldName, array] of Object.entries(cloudArrays)) {
+        if (array && array.length !== timeLength) {
+          console.warn(`⚠️ Cloud data length mismatch for ${fieldName}: expected ${timeLength}, got ${array.length}`);
+        }
+      }
+    }
+
     for (const [fieldName, array] of Object.entries(dataArrays)) {
       if (array && array.length !== timeLength) {
         console.warn(`⚠️ Length mismatch for ${fieldName}: expected ${timeLength}, got ${array.length}`);
@@ -457,11 +542,11 @@ class WeatherService {
       // First, process all available real data
       for (let i = 0; i < availableHours; i++) {
         // 24 hours of hourly data
-        const cloudData: CloudData = {
-          totalCloudCover: null, // Not available in this API response
-          lowCloudCover: null,
-          midCloudCover: null,
-          highCloudCover: null,
+        const cloudCoverData: CloudData = {
+          totalCloudCover: cloudData?.data_1h?.totalcloudcover?.[i] ?? null,
+          lowCloudCover: cloudData?.data_1h?.lowclouds?.[i] ?? null,
+          midCloudCover: cloudData?.data_1h?.midclouds?.[i] ?? null,
+          highCloudCover: cloudData?.data_1h?.highclouds?.[i] ?? null,
         };
 
         const precipitationData: PrecipitationData = {
@@ -486,9 +571,9 @@ class WeatherService {
           humidity: null, // Not available in this API response
           windSpeed: data.data_1h.windspeed?.[i] ?? null,
           windDirection: null, // Not available in this API response
-          cloudCover: cloudData,
+          cloudCover: cloudCoverData,
           precipitation: precipitationData,
-          visibility: null, // Not available in this API response
+          visibility: cloudData?.data_1h?.visibility?.[i] ? cloudData.data_1h.visibility[i] / 1000 : null, // Convert from meters to kilometers
         };
 
         // Validate temperature and wind speed
@@ -511,7 +596,13 @@ class WeatherService {
             rawPrecipitation: data.data_1h.precipitation?.[i],
             mappedPrecipitation: hourData.precipitation.precipitation,
             rawPrecipProb: data.data_1h.precipitation_probability?.[i],
-            mappedPrecipProb: hourData.precipitation.precipitationProbability
+            mappedPrecipProb: hourData.precipitation.precipitationProbability,
+            rawCloudCover: cloudData?.data_1h?.totalcloudcover?.[i],
+            mappedCloudCover: hourData.cloudCover.totalCloudCover,
+            rawLowClouds: cloudData?.data_1h?.lowclouds?.[i],
+            mappedLowClouds: hourData.cloudCover.lowCloudCover,
+            rawVisibility: cloudData?.data_1h?.visibility?.[i],
+            mappedVisibility: hourData.visibility
           });
         }
 
@@ -594,21 +685,30 @@ class WeatherService {
           const clouds = dayHours.map(h => h.cloudCover.totalCloudCover).filter(c => c !== null) as number[];
           const windSpeeds = dayHours.map(h => h.windSpeed).filter(w => w !== null) as number[];
 
-          // Since cloud data is not available in current API, use precipitation as a proxy for observing conditions
           const precips = dayHours.map(h => h.precipitation.precipitation).filter(p => p !== null) as number[];
           const precipProbs = dayHours.map(h => h.precipitation.precipitationProbability).filter(p => p !== null) as number[];
 
-          const cloudAvg = clouds.length > 0 ? clouds.reduce((sum, c) => sum + c, 0) / clouds.length : 50; // Default to 50% when no cloud data
+          const cloudAvg = clouds.length > 0 ? clouds.reduce((sum, c) => sum + c, 0) / clouds.length : 50;
           const maxPrecipProb = precipProbs.length > 0 ? Math.max(...precipProbs) : 0;
           const totalPrecip = precips.length > 0 ? precips.reduce((sum, p) => sum + p, 0) : 0;
 
-          // Determine observing quality based on available data (precipitation probability and amount)
+          // Determine observing quality based on cloud coverage if available, otherwise use precipitation
           let observingQuality: DailyForecast["observingQuality"] = "fair";
-          if (maxPrecipProb < 10 && totalPrecip < 0.1) observingQuality = "excellent";
-          else if (maxPrecipProb < 30 && totalPrecip < 1) observingQuality = "good";
-          else if (maxPrecipProb < 60 && totalPrecip < 5) observingQuality = "fair";
-          else if (maxPrecipProb < 80 && totalPrecip < 10) observingQuality = "poor";
-          else observingQuality = "impossible";
+          if (clouds.length > 0) {
+            // Use cloud coverage for quality assessment
+            if (cloudAvg < 20) observingQuality = "excellent";
+            else if (cloudAvg < 40) observingQuality = "good";
+            else if (cloudAvg < 70) observingQuality = "fair";
+            else if (cloudAvg < 90) observingQuality = "poor";
+            else observingQuality = "impossible";
+          } else {
+            // Fallback to precipitation-based assessment
+            if (maxPrecipProb < 10 && totalPrecip < 0.1) observingQuality = "excellent";
+            else if (maxPrecipProb < 30 && totalPrecip < 1) observingQuality = "good";
+            else if (maxPrecipProb < 60 && totalPrecip < 5) observingQuality = "fair";
+            else if (maxPrecipProb < 80 && totalPrecip < 10) observingQuality = "poor";
+            else observingQuality = "impossible";
+          }
 
           dailyForecast.push({
             date: dayHours[0].time.split('T')[0],
@@ -700,7 +800,12 @@ class WeatherService {
       temperature: hourlyForecast.filter(h => h.temperature !== null).length / hourlyForecast.length * 100,
       windSpeed: hourlyForecast.filter(h => h.windSpeed !== null).length / hourlyForecast.length * 100,
       precipitation: hourlyForecast.filter(h => h.precipitation.precipitation !== null).length / hourlyForecast.length * 100,
-      precipitationProbability: hourlyForecast.filter(h => h.precipitation.precipitationProbability !== null).length / hourlyForecast.length * 100
+      precipitationProbability: hourlyForecast.filter(h => h.precipitation.precipitationProbability !== null).length / hourlyForecast.length * 100,
+      totalCloudCover: hourlyForecast.filter(h => h.cloudCover.totalCloudCover !== null).length / hourlyForecast.length * 100,
+      lowCloudCover: hourlyForecast.filter(h => h.cloudCover.lowCloudCover !== null).length / hourlyForecast.length * 100,
+      midCloudCover: hourlyForecast.filter(h => h.cloudCover.midCloudCover !== null).length / hourlyForecast.length * 100,
+      highCloudCover: hourlyForecast.filter(h => h.cloudCover.highCloudCover !== null).length / hourlyForecast.length * 100,
+      visibility: hourlyForecast.filter(h => h.visibility !== null).length / hourlyForecast.length * 100
     };
     console.log('📊 Data completeness percentages:', dataCompleteness);
 
@@ -708,6 +813,11 @@ class WeatherService {
     const temperatures = hourlyForecast.map(h => h.temperature).filter(t => t !== null) as number[];
     const windSpeeds = hourlyForecast.map(h => h.windSpeed).filter(w => w !== null) as number[];
     const precipitations = hourlyForecast.map(h => h.precipitation.precipitation).filter(p => p !== null) as number[];
+    const totalCloudCover = hourlyForecast.map(h => h.cloudCover.totalCloudCover).filter(c => c !== null) as number[];
+    const lowCloudCover = hourlyForecast.map(h => h.cloudCover.lowCloudCover).filter(c => c !== null) as number[];
+    const midCloudCover = hourlyForecast.map(h => h.cloudCover.midCloudCover).filter(c => c !== null) as number[];
+    const highCloudCover = hourlyForecast.map(h => h.cloudCover.highCloudCover).filter(c => c !== null) as number[];
+    const visibilities = hourlyForecast.map(h => h.visibility).filter(v => v !== null) as number[];
 
     if (temperatures.length > 0) {
       const tempStats = {
@@ -734,6 +844,44 @@ class WeatherService {
         total: precipitations.reduce((sum, p) => sum + p, 0)
       };
       console.log('🌧️ Precipitation stats:', precipStats);
+    }
+
+    if (visibilities.length > 0) {
+      const visibilityStats = {
+        min: Math.min(...visibilities),
+        max: Math.max(...visibilities),
+        avg: visibilities.reduce((sum, v) => sum + v, 0) / visibilities.length
+      };
+      console.log('👁️ Visibility stats (km):', visibilityStats);
+    }
+
+    if (totalCloudCover.length > 0) {
+      const cloudStats = {
+        min: Math.min(...totalCloudCover),
+        max: Math.max(...totalCloudCover),
+        avg: totalCloudCover.reduce((sum, c) => sum + c, 0) / totalCloudCover.length
+      };
+      console.log('☁️ Total cloud cover stats:', cloudStats);
+    }
+
+    if (lowCloudCover.length > 0 || midCloudCover.length > 0 || highCloudCover.length > 0) {
+      console.log('🌤️ Cloud layer stats:', {
+        low: lowCloudCover.length > 0 ? {
+          min: Math.min(...lowCloudCover),
+          max: Math.max(...lowCloudCover),
+          avg: lowCloudCover.reduce((sum, c) => sum + c, 0) / lowCloudCover.length
+        } : 'No data',
+        mid: midCloudCover.length > 0 ? {
+          min: Math.min(...midCloudCover),
+          max: Math.max(...midCloudCover),
+          avg: midCloudCover.reduce((sum, c) => sum + c, 0) / midCloudCover.length
+        } : 'No data',
+        high: highCloudCover.length > 0 ? {
+          min: Math.min(...highCloudCover),
+          max: Math.max(...highCloudCover),
+          avg: highCloudCover.reduce((sum, c) => sum + c, 0) / highCloudCover.length
+        } : 'No data'
+      });
     }
 
     // Check time sequence continuity

@@ -108,6 +108,14 @@ export interface MeteoblueResponse {
     rainspot: string[];
     precipitation: number[];
     isdaylight: number[];
+    // Cloud data from clouds-1h_clouds-day API
+    totalcloudcover?: number[];
+    lowclouds?: number[];
+    midclouds?: number[];
+    highclouds?: number[];
+    visibility?: number[];
+    fog_probability?: number[];
+    sunshinetime?: number[];
   };
   data_day?: {
     time: string[];

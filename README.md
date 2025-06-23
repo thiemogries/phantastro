@@ -150,18 +150,24 @@ Phantastro includes quick access to world-renowned astronomical sites:
 
 ### Meteoblue Integration
 - **Free Tier**: 500 API calls per day
-- **Package Used**: Basic hourly weather data (`basic-1h`)
-- **Data Coverage**: Global weather data
+- **Packages Used**: 
+  - Basic hourly weather data (`basic-1h`)
+  - Cloud coverage data (`clouds-1h_clouds-day`)
+- **Data Coverage**: Global weather data with detailed cloud analysis
 - **Update Frequency**: Hourly forecasts
 - **Forecast Range**: 24-hour detailed + 7-day outlook
+- **Cloud Data**: Real-time cloud coverage by altitude (low, mid, high)
 - **Astronomy Features**: Enhanced with calculated data
 - **Optimization**: Smart caching (5min) and request deduplication prevent API waste
+- **Fallback System**: Graceful degradation when cloud API is unavailable
 
 ### Custom Calculations
 - **Seeing Estimation**: Based on wind speed and atmospheric pressure
 - **Transparency Index**: Calculated from humidity and cloud coverage
 - **Equipment Stability**: Wind speed analysis for telescope mounts
 - **Observation Scoring**: Multi-factor algorithm for optimal viewing times
+- **Cloud Analysis**: Real-time processing of low, mid, and high-altitude clouds
+- **Observing Quality**: Enhanced algorithm using actual cloud data when available
 
 ## 🔧 Development
 
@@ -268,8 +274,10 @@ Having issues or questions?
 ### API Issues
 
 **Problem**: Getting "Data corrupted" or "invalid package" errors from Meteoblue API
-- **Solution**: App uses only basic weather packages available in free tier
+- **Solution**: App uses basic weather and cloud packages available in free tier
 - **Auto-fallback**: Automatically switches to mock data if API calls fail
+- **Cloud API**: Uses `clouds-1h_clouds-day` endpoint for detailed cloud coverage
+- **Graceful Degradation**: Cloud API failures don't break basic weather functionality
 - **Check**: Ensure your API key is correctly set in `.env`
 - **Verify**: API key should not be `your_meteoblue_api_key_here`
 ### Troubleshooting
