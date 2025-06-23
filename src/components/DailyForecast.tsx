@@ -3,8 +3,6 @@ import { DailyForecast as DailyData } from '../types/weather';
 import {
   formatDateRelative,
   formatTemperature,
-  getObservingQualityColor,
-  getObservingQualityEmoji,
   getCloudCoverageInfo
 } from '../utils/weatherUtils';
 import './DailyForecast.css';
@@ -71,22 +69,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({
                 </div>
               </div>
 
-              <div className="daily-observing">
-                <div
-                  className="observing-quality-badge"
-                  style={{
-                    backgroundColor: getObservingQualityColor(day.observingQuality),
-                    color: 'white'
-                  }}
-                >
-                  <span className="quality-emoji">
-                    {getObservingQualityEmoji(day.observingQuality)}
-                  </span>
-                  <span className="quality-text">
-                    {day.observingQuality.charAt(0).toUpperCase() + day.observingQuality.slice(1)}
-                  </span>
-                </div>
-              </div>
+
 
               <div className="daily-details">
                 <div className="detail-item">

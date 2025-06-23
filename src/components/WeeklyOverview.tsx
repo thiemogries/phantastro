@@ -3,8 +3,7 @@ import { HourlyForecast } from '../types/weather';
 import {
   formatTime,
   getCloudCoverageInfo,
-  getObservingQualityColor,
-  getObservingQualityEmoji
+  getObservingQualityColor
 } from '../utils/weatherUtils';
 import './WeeklyOverview.css';
 
@@ -17,20 +16,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   hourlyData,
   className
 }) => {
-  const getSeeingQuality = (cloudCover: number | null, windSpeed: number | null): string => {
-    if (cloudCover === null || windSpeed === null) return 'poor';
-    if (cloudCover > 80 || windSpeed > 20) return 'poor';
-    if (cloudCover > 60 || windSpeed > 15) return 'fair';
-    if (cloudCover > 40 || windSpeed > 10) return 'good';
-    return 'excellent';
-  };
 
-  const getSeeingScore = (cloudCover: number | null, windSpeed: number | null): number => {
-    if (cloudCover === null || windSpeed === null) return 0;
-    const cloudScore = Math.max(0, 10 - (cloudCover / 10));
-    const windScore = Math.max(0, 10 - (windSpeed / 2));
-    return (cloudScore + windScore) / 2;
-  };
 
   // Group hourly data by day
   const groupedByDay = React.useMemo(() => {
@@ -134,33 +120,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                   </div>
                 </div>
 
-                {/* Seeing quality row */}
-                <div className="hourly-row seeing-row">
-                  <div className="row-label">👁️</div>
-                  <div className="hourly-cells">
-                    {Array.from({ length: 24 }, (_, i) => {
-                      const hour = hours[i];
-                      if (!hour) {
-                        return <div key={i} className="hourly-cell empty"></div>;
-                      }
 
-                      const seeingQuality = getSeeingQuality(hour.cloudCover.totalCloudCover, hour.windSpeed);
-                      const qualityColor = getObservingQualityColor(seeingQuality);
-
-                      return (
-                        <div
-                          key={i}
-                          className="hourly-cell seeing-cell"
-                          style={{
-                            backgroundColor: qualityColor,
-                            opacity: hour.windSpeed !== null && hour.windSpeed < 5 ? 1 : Math.max(0.3, 1 - ((hour.windSpeed || 0) / 20))
-                          }}
-                          title={`${formatTime(hour.time)}: ${seeingQuality} seeing, ${hour.windSpeed !== null ? Math.round(hour.windSpeed * 3.6) : 'N/A'} km/h wind`}
-                        ></div>
-                      );
-                    })}
-                  </div>
-                </div>
 
                 {/* Precipitation row */}
                 <div className="hourly-row precip-row">

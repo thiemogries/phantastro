@@ -2,21 +2,21 @@
 
 **A stellar weather app for astronomical observations**
 
-Phantastro is a specialized React-based weather application designed specifically for astronomy enthusiasts. It provides detailed weather forecasts with a focus on observing conditions, cloud coverage, atmospheric seeing, and other factors crucial for stargazing and astrophotography.
+Phantastro is a specialized React-based weather application designed specifically for astronomy enthusiasts. It provides detailed weather forecasts with a focus on observing conditions, cloud coverage, atmospheric transparency, and other factors crucial for stargazing and astrophotography.
 
 ![Phantastro Screenshot](public/logo192.png)
 
 ## 🌟 Features
 
 ### 🔭 Astronomical Focus
-- **Seeing Conditions**: Atmospheric turbulence forecasts for telescope observations
+- **Wind Conditions**: Wind speed and stability forecasts for telescope observations
 - **Cloud Layer Analysis**: Detailed breakdown of low, mid, and high-altitude clouds
 - **Transparency Forecasts**: Atmospheric clarity predictions for deep-sky observations
 - **Equipment Stability**: Wind speed analysis for telescope stability
 
 ### 🌤️ Comprehensive Weather Data
 - **7-Day Forecast**: Extended outlook for planning observing sessions
-- **Hourly 7-Day Overview**: Interactive hourly grid showing cloud coverage, seeing conditions, and precipitation for 168 hours
+- **Hourly 7-Day Overview**: Interactive hourly grid showing cloud coverage, wind conditions, and precipitation for 168 hours
 - **24-Hour Updates**: Detailed hourly forecasts with observing quality indicators
 - **Real-time Conditions**: Current weather with astronomical observation recommendations
 - **Location Search**: Find weather data for observatories and dark-sky sites worldwide
@@ -92,7 +92,7 @@ Phantastro features a **cosmic dark theme** inspired by the night sky:
 
 ### Hourly 7-Day Grid
 - **Cloud Coverage Row**: Color intensity shows cloud percentage (darker = more clouds)
-- **Seeing Quality Row**: Green = excellent, yellow = fair, red = poor atmospheric stability  
+- **Wind Quality Row**: Green = excellent, yellow = fair, red = poor wind conditions for stability  
 - **Precipitation Row**: Blue cells indicate rain/snow with intensity showing amount
 - **Interactive Tooltips**: Hover over any hour cell for detailed conditions
 
@@ -162,7 +162,7 @@ Phantastro includes quick access to world-renowned astronomical sites:
 - **Fallback System**: Graceful degradation when cloud API is unavailable
 
 ### Custom Calculations
-- **Seeing Estimation**: Based on wind speed and atmospheric pressure
+- **Wind Assessment**: Based on wind speed for equipment stability
 - **Transparency Index**: Calculated from humidity and cloud coverage
 - **Equipment Stability**: Wind speed analysis for telescope mounts
 - **Observation Scoring**: Multi-factor algorithm for optimal viewing times
@@ -222,7 +222,7 @@ Remember to set your environment variables in your deployment platform:
 
 ### Best Practices
 - **Check hourly forecasts** for short observation windows
-- **Monitor seeing conditions** for planetary observations
+- **Monitor wind conditions** for planetary observations
 - **Watch cloud trends** throughout the day
 - **Plan around moon phases** for deep-sky photography
 

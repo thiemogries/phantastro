@@ -232,8 +232,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
             <h2>🌟 Welcome to Phantastro</h2>
             <p>
               Your specialized weather companion for astronomical observations.
-              Get detailed forecasts for seeing conditions, cloud coverage,
-              and atmospheric transparency.
+              Get detailed forecasts for cloud coverage and atmospheric transparency.
             </p>
             <div className="feature-list">
               <div className="feature">
@@ -244,10 +243,10 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
                 </div>
               </div>
               <div className="feature">
-                <div className="feature-icon">🌊</div>
+                <div className="feature-icon">💨</div>
                 <div>
-                  <h4>Seeing Conditions</h4>
-                  <p>Atmospheric turbulence forecast</p>
+                  <h4>Wind Conditions</h4>
+                  <p>Wind speed and stability forecast</p>
                 </div>
               </div>
               <div className="feature">

@@ -25,12 +25,7 @@ export interface CloudData {
   highCloudCover: number | null;  // 0-100%
 }
 
-// Astronomical seeing conditions
-export interface SeeingConditions {
-  seeing: number;           // arcseconds (1-5, lower is better)
-  transparency: number;     // 0-100% (higher is better)
-  scintillation: number;   // 0-100% (lower is better for photography)
-}
+
 
 // Precipitation data
 export interface PrecipitationData {
@@ -42,7 +37,6 @@ export interface PrecipitationData {
 // Combined hourly forecast data
 export interface HourlyForecast extends WeatherDataPoint {
   cloudCover: CloudData;
-  seeing?: SeeingConditions;
   precipitation: PrecipitationData;
   uvIndex?: number;
   visibility?: number | null; // km
@@ -54,16 +48,12 @@ export interface DailyForecast {
   temperatureMin: number;
   temperatureMax: number;
   cloudCoverAvg: number;
-  seeingAvg?: number;
   precipitationTotal: number;
   precipitationProbability: number;
   windSpeedMax: number;
   moonPhase?: number; // 0-1 (0 = new moon, 0.5 = full moon)
   sunrise?: string;
   sunset?: string;
-  moonrise?: string;
-  moonset?: string;
-  observingQuality: 'excellent' | 'good' | 'fair' | 'poor' | 'impossible';
 }
 
 // Complete weather forecast response
@@ -141,7 +131,6 @@ export interface WeatherApiError {
 export interface ObservingConditions {
   overall: 'excellent' | 'good' | 'fair' | 'poor' | 'impossible';
   cloudScore: number;     // 0-10 (10 = clear skies)
-  seeingScore: number;    // 0-10 (10 = excellent seeing)
   transparencyScore: number; // 0-10 (10 = excellent transparency)
   windScore: number;      // 0-10 (10 = calm conditions)
   moonInterference: 'none' | 'minimal' | 'moderate' | 'significant' | 'extreme';

@@ -4,8 +4,7 @@ import {
   formatTime,
   formatTemperature,
   getCloudCoverageInfo,
-  getObservingQualityColor,
-  formatWind
+  getObservingQualityColor
 } from '../utils/weatherUtils';
 import './HourlyForecast.css';
 

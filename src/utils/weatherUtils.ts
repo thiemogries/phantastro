@@ -105,16 +105,7 @@ export const getCloudCoverageInfo = (
   return { description: "Heavy overcast", color: "#475569", emoji: "☁️" };
 };
 
-/**
- * Format seeing conditions (in arcseconds)
- */
-export const formatSeeing = (seeing: number): string => {
-  if (seeing < 1) return 'Excellent (<1")';
-  if (seeing < 1.5) return 'Good (1-1.5")';
-  if (seeing < 2.5) return 'Average (1.5-2.5")';
-  if (seeing < 4) return 'Poor (2.5-4")';
-  return 'Very poor (>4")';
-};
+
 
 /**
  * Get observing quality color
@@ -268,7 +259,6 @@ export const getObservationRecommendations = (
 } => {
   const cloudCover = forecast.cloudCover.totalCloudCover;
   const windSpeed = forecast.windSpeed;
-  const seeing = forecast.seeing?.seeing || 2.5;
 
   // Return null (not available) if essential data is missing
   if (cloudCover === null || windSpeed === null) {
@@ -282,9 +272,9 @@ export const getObservationRecommendations = (
   }
 
   return {
-    planetary: cloudCover < 30 && seeing < 2.0 && windSpeed < 10,
-    deepSky: cloudCover < 20 && (forecast.seeing?.transparency || 0) > 70,
-    photography: cloudCover < 15 && windSpeed < 8 && seeing < 2.5,
+    planetary: cloudCover < 30 && windSpeed < 10,
+    deepSky: cloudCover < 20,
+    photography: cloudCover < 15 && windSpeed < 8,
     lunar: cloudCover < 40 && windSpeed < 15,
     solar: cloudCover < 50, // Solar observation can work with some clouds
   };

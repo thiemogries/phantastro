@@ -247,7 +247,6 @@ class WeatherService {
       return {
         overall: 'poor',
         cloudScore: 0,
-        seeingScore: 0,
         transparencyScore: 0,
         windScore: 0,
         moonInterference: 'minimal',
@@ -261,9 +260,6 @@ class WeatherService {
     );
     const windScore = Math.max(0, 10 - Math.min(10, forecast.windSpeed / 3));
 
-    // Estimate seeing based on wind and temperature (simplified)
-    const seeingScore = Math.max(0, 10 - Math.min(10, forecast.windSpeed / 2));
-
     // Transparency affected by humidity and clouds
     const transparencyScore = Math.max(
       0,
@@ -271,10 +267,9 @@ class WeatherService {
     );
 
     const overallScore =
-      cloudScore * 0.4 +
-      seeingScore * 0.3 +
-      transparencyScore * 0.2 +
-      windScore * 0.1;
+      cloudScore * 0.5 +
+      transparencyScore * 0.3 +
+      windScore * 0.2;
 
     let overall: ObservingConditions["overall"];
     if (overallScore > 8) overall = "excellent";
@@ -300,7 +295,6 @@ class WeatherService {
     return {
       overall,
       cloudScore,
-      seeingScore,
       transparencyScore,
       windScore,
       moonInterference: "minimal", // Would need moon phase data
@@ -631,23 +625,7 @@ class WeatherService {
           const maxPrecipProb = precipProbs.length > 0 ? Math.max(...precipProbs) : 0;
           const totalPrecip = precips.length > 0 ? precips.reduce((sum, p) => sum + p, 0) : 0;
 
-          // Determine observing quality based on cloud coverage if available, otherwise use precipitation
-          let observingQuality: DailyForecast["observingQuality"] = "fair";
-          if (clouds.length > 0) {
-            // Use cloud coverage for quality assessment
-            if (cloudAvg < 20) observingQuality = "excellent";
-            else if (cloudAvg < 40) observingQuality = "good";
-            else if (cloudAvg < 70) observingQuality = "fair";
-            else if (cloudAvg < 90) observingQuality = "poor";
-            else observingQuality = "impossible";
-          } else {
-            // Fallback to precipitation-based assessment
-            if (maxPrecipProb < 10 && totalPrecip < 0.1) observingQuality = "excellent";
-            else if (maxPrecipProb < 30 && totalPrecip < 1) observingQuality = "good";
-            else if (maxPrecipProb < 60 && totalPrecip < 5) observingQuality = "fair";
-            else if (maxPrecipProb < 80 && totalPrecip < 10) observingQuality = "poor";
-            else observingQuality = "impossible";
-          }
+
 
           dailyForecast.push({
             date: dayHours[0].time.split('T')[0],
@@ -657,7 +635,6 @@ class WeatherService {
             precipitationTotal: totalPrecip,
             precipitationProbability: maxPrecipProb,
             windSpeedMax: windSpeeds.length > 0 ? Math.max(...windSpeeds) : 0,
-            observingQuality,
           });
         }
       }

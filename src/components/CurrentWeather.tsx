@@ -3,7 +3,6 @@ import { HourlyForecast, ObservingConditions } from '../types/weather';
 import {
   formatTemperature,
   formatWind,
-  formatCloudCover,
   getCloudCoverageInfo,
   getObservingQualityColor,
   getObservingQualityEmoji,

@@ -107,51 +107,7 @@ const ObservingConditionsPanel: React.FC<ObservingConditionsPanelProps> = ({
           </div>
         </div>
 
-        {/* Seeing Conditions */}
-        <div className="condition-card">
-          <div className="condition-header">
-            <div className="condition-icon">🌊</div>
-            <div className="condition-title">Atmospheric Stability</div>
-          </div>
-          <div className="condition-score">
-            <div className="score-circle">
-              <svg width="80" height="80" className="progress-ring">
-                <circle
-                  cx="40"
-                  cy="40"
-                  r="35"
-                  fill="none"
-                  stroke="rgba(255, 255, 255, 0.1)"
-                  strokeWidth="6"
-                />
-                <circle
-                  cx="40"
-                  cy="40"
-                  r="35"
-                  fill="none"
-                  stroke={getScoreColor(conditions.seeingScore)}
-                  strokeWidth="6"
-                  strokeDasharray={`${Math.max(0, (conditions.seeingScore / 10) * 220)} 220`}
-                  strokeDashoffset="0"
-                  transform="rotate(-90 40 40)"
-                  className="progress-circle"
-                />
-              </svg>
-              <div className="score-inner">
-                {currentWeather.windSpeed === null ? 'N/A' : conditions.seeingScore.toFixed(1)}
-              </div>
-            </div>
-            <div className="score-description">
-              {getScoreDescription(conditions.seeingScore)}
-            </div>
-          </div>
-          <div className="condition-details">
-            <div className="detail-row">
-              <span>Wind Speed:</span>
-              <span>{currentWeather.windSpeed === null ? 'Not available' : `${Math.round(currentWeather.windSpeed * 3.6)} km/h`}</span>
-            </div>
-          </div>
-        </div>
+
 
         {/* Transparency */}
         <div className="condition-card">
