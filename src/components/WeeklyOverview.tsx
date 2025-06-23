@@ -50,27 +50,6 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
     <div className={`weekly-overview ${className || ''}`}>
       <div className="overview-header">
         <h3>📅 7-Day Hourly Observing Outlook</h3>
-        <div className="legend">
-          <div className="legend-item">
-            <div className="legend-dot excellent"></div>
-            <span>Excellent</span>
-          </div>
-          <div className="legend-item">
-            <div className="legend-dot good"></div>
-            <span>Good</span>
-          </div>
-          <div className="legend-item">
-            <div className="legend-dot fair"></div>
-            <span>Fair</span>
-          </div>
-          <div className="legend-item">
-            <div className="legend-dot poor"></div>
-            <span>Poor</span>
-          </div>
-        </div>
-        <div className="legend-note">
-          <small>🌙 Moonlight: Transparent = no moon (best), Dark blue = full moon (worst for deep sky)</small>
-        </div>
       </div>
 
       <div className="hourly-overview-container">
