@@ -7,7 +7,6 @@ import {
 } from '../hooks/useWeatherData';
 import LocationSearch from './LocationSearch';
 import WeeklyOverview from './WeeklyOverview';
-import DailyCards from './DailyCards';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
 import './WeatherApp.css';
@@ -133,11 +132,6 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
             hourlyData={forecast.hourlyForecast}
             dailyData={forecast.dailyForecast}
           />
-
-          {/* Daily Sun & Moon Times */}
-          {forecast.dailyForecast.length > 0 && (
-            <DailyCards dailyData={forecast.dailyForecast} />
-          )}
         </div>
       )}
 
