@@ -2,8 +2,8 @@
 
 .weekly-overview {
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 20px;
-  padding: 25px;
+  border-radius: 16px;
+  padding: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   overflow-x: auto;
@@ -13,12 +13,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 25px;
+  margin-bottom: 16px;
 }
 
 .overview-header h3 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   color: white;
 }
 
@@ -44,19 +44,19 @@
 .hourly-overview-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .day-section {
   background: rgba(255, 255, 255, 0.02);
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   overflow: hidden;
 }
 
 .day-header-hourly {
-  padding: 12px 15px;
+  padding: 8px 12px;
   background: rgba(255, 255, 255, 0.03);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
@@ -76,14 +76,14 @@
 }
 
 .hourly-strip {
-  padding: 10px 15px;
+  padding: 6px 12px;
 }
 
 .time-labels {
   display: grid;
   grid-template-columns: 50px repeat(24, 1fr);
   gap: 2px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .time-label {
@@ -97,15 +97,16 @@
   display: grid;
   grid-template-columns: 50px repeat(24, 1fr);
   gap: 2px;
-  margin-bottom: 6px;
+  margin-bottom: 3px;
   align-items: center;
 }
 
 .row-label {
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   text-align: center;
   color: rgba(255, 255, 255, 0.7);
-  padding: 4px 0;
+  padding: 2px 0;
+  font-weight: 500;
 }
 
 .hourly-cells {
@@ -113,8 +114,8 @@
 }
 
 .hourly-cell {
-  height: 20px;
-  border-radius: 3px;
+  height: 16px;
+  border-radius: 2px;
   transition: all 0.2s ease;
   cursor: pointer;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -162,13 +163,13 @@
   display: grid;
   grid-template-columns: 50px 1fr;
   gap: 2px;
-  margin-bottom: 6px;
+  margin-bottom: 3px;
   align-items: center;
 }
 
 .line-track {
   position: relative;
-  height: 8px;
+  height: 6px;
 }
 
 .sun-line {
@@ -209,10 +210,10 @@
 .overview-summary {
   display: flex;
   justify-content: space-around;
-  gap: 20px;
-  padding: 15px 0;
+  gap: 16px;
+  padding: 12px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  margin-top: 15px;
+  margin-top: 12px;
 }
 
 .summary-item {
@@ -237,38 +238,100 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
+  .weekly-overview {
+    padding: 12px;
+  }
+
+  .overview-header {
+    margin-bottom: 12px;
+  }
+
+  .overview-header h3 {
+    font-size: 1.2rem;
+  }
+
+  .hourly-overview-container {
+    gap: 8px;
+  }
+
+  .day-header-hourly {
+    padding: 6px 10px;
+  }
+
+  .hourly-strip {
+    padding: 4px 10px;
+  }
+
   .time-labels,
   .hourly-row {
     grid-template-columns: 40px repeat(24, 1fr);
+    margin-bottom: 2px;
   }
 
   .sun-line-row,
   .moon-line-row {
     grid-template-columns: 40px 1fr;
+    margin-bottom: 2px;
   }
 
   .time-label {
     font-size: 0.65rem;
+    padding: 1px 0;
+  }
+
+  .row-label {
+    font-size: 0.7rem;
+    padding: 1px 0;
+  }
+
+  .hourly-cell {
+    height: 14px;
+  }
+
+  .line-track {
+    height: 5px;
   }
 }
 
 @media (max-width: 768px) {
   .weekly-overview {
-    padding: 20px;
+    padding: 10px;
+  }
+
+  .overview-header {
+    margin-bottom: 10px;
+  }
+
+  .overview-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .hourly-overview-container {
+    gap: 6px;
+  }
+
+  .day-header-hourly {
+    padding: 4px 8px;
+  }
+
+  .hourly-strip {
+    padding: 3px 8px;
   }
 
   .time-labels,
   .hourly-row {
     grid-template-columns: 35px repeat(12, 1fr);
+    margin-bottom: 2px;
   }
 
   .sun-line-row,
   .moon-line-row {
     grid-template-columns: 35px 1fr;
+    margin-bottom: 2px;
   }
 
   .line-track {
-    height: 6px;
+    height: 4px;
   }
 
   .time-label:nth-child(n+14) {
@@ -281,7 +344,9 @@
 
   .overview-summary {
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+    padding: 8px 0;
+    margin-top: 8px;
   }
 
   .summary-item {
@@ -290,23 +355,57 @@
   }
 
   .hourly-cell {
-    height: 16px;
+    height: 12px;
+  }
+
+  .row-label {
+    font-size: 0.65rem;
   }
 }
 
 @media (max-width: 480px) {
+  .weekly-overview {
+    padding: 8px;
+  }
+
+  .overview-header h3 {
+    font-size: 1rem;
+  }
+
+  .hourly-overview-container {
+    gap: 4px;
+  }
+
+  .day-header-hourly {
+    padding: 3px 6px;
+  }
+
+  .day-name {
+    font-size: 0.9rem;
+  }
+
+  .day-date {
+    font-size: 0.75rem;
+  }
+
+  .hourly-strip {
+    padding: 2px 6px;
+  }
+
   .time-labels,
   .hourly-row {
     grid-template-columns: 30px repeat(8, 1fr);
+    margin-bottom: 1px;
   }
 
   .sun-line-row,
   .moon-line-row {
     grid-template-columns: 30px 1fr;
+    margin-bottom: 1px;
   }
 
   .line-track {
-    height: 4px;
+    height: 3px;
   }
 
   .time-label:nth-child(n+10) {
@@ -318,10 +417,24 @@
   }
 
   .hourly-cell {
-    height: 14px;
+    height: 10px;
   }
 
   .row-label {
+    font-size: 0.6rem;
+  }
+
+  .overview-summary {
+    gap: 6px;
+    padding: 6px 0;
+    margin-top: 6px;
+  }
+
+  .summary-label {
+    font-size: 0.7rem;
+  }
+
+  .summary-value {
     font-size: 0.8rem;
   }
 }

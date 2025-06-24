@@ -52,7 +52,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   return (
     <div className={`weekly-overview ${className || ''}`}>
       <div className="overview-header">
-        <h3>📅 7-Day Hourly Observing Outlook</h3>
+        <h3>7-Day Hourly Outlook</h3>
       </div>
 
       <div className="hourly-overview-container">
@@ -91,7 +91,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
                 {/* Sun line */}
                 <div className="sun-line-row">
-                  <div className="row-label">☀️</div>
+                  <div className="row-label">Sun</div>
                   <div className="line-track">
                     {/* Handle special all-day sun case */}
                     {sunMoon?.sunrise === '00:00' && sunMoon?.sunset === '24:00' ? (
@@ -145,7 +145,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
                 {/* Moon line */}
                 <div className="moon-line-row">
-                  <div className="row-label">🌙</div>
+                  <div className="row-label">Moon</div>
                   <div className="line-track">
                     {/* Handle special all-day moon case */}
                     {sunMoon?.moonrise === '00:00' && sunMoon?.moonset === '24:00' ? (
@@ -199,7 +199,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
                 {/* Cloud coverage row */}
                 <div className="hourly-row cloud-row">
-                  <div className="row-label">☁️</div>
+                  <div className="row-label">Cloud</div>
                   <div className="hourly-cells">
                     {Array.from({ length: 24 }, (_, i) => {
                       const hour = hours[i];
@@ -229,7 +229,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
                 {/* Precipitation row */}
                 <div className="hourly-row precip-row">
-                  <div className="row-label">🌧️</div>
+                  <div className="row-label">Rain</div>
                   <div className="hourly-cells">
                     {Array.from({ length: 24 }, (_, i) => {
                       const hour = hours[i];
@@ -256,7 +256,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
                 {/* Visibility row */}
                 <div className="hourly-row visibility-row">
-                  <div className="row-label">👁️</div>
+                  <div className="row-label">Vis</div>
                   <div className="hourly-cells">
                     {Array.from({ length: 24 }, (_, i) => {
                       const hour = hours[i];
@@ -303,7 +303,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
                 {/* Moonlight row */}
                 <div className="hourly-row moonlight-row">
-                  <div className="row-label">🌙</div>
+                  <div className="row-label">Light</div>
                   <div className="hourly-cells">
                     {Array.from({ length: 24 }, (_, i) => {
                       const hour = hours[i];
