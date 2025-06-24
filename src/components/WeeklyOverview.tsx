@@ -1,5 +1,5 @@
 import React from 'react';
-import { HourlyForecast } from '../types/weather';
+import { HourlyForecast, DailyForecast } from '../types/weather';
 import {
   formatTime,
   getCloudCoverageInfo,
@@ -9,11 +9,13 @@ import './WeeklyOverview.css';
 
 interface WeeklyOverviewProps {
   hourlyData: HourlyForecast[];
+  dailyData?: DailyForecast[]; // Daily forecast data with sun/moon times
   className?: string;
 }
 
 const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   hourlyData,
+  dailyData,
   className
 }) => {
 
@@ -31,9 +33,10 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
     return Object.entries(days).slice(0, 7).map(([date, hours]) => ({
       date,
-      hours: hours.slice(0, 24) // Ensure max 24 hours per day
+      hours: hours.slice(0, 24), // Ensure max 24 hours per day
+      sunMoon: dailyData?.find(day => day.date === date)?.sunMoon
     }));
-  }, [hourlyData]);
+  }, [hourlyData, dailyData]);
 
   if (groupedByDay.length === 0) {
     return (
@@ -53,9 +56,21 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
       </div>
 
       <div className="hourly-overview-container">
-        {groupedByDay.map(({ date, hours }, dayIndex) => {
+        {groupedByDay.map(({ date, hours, sunMoon }, dayIndex) => {
           const dayName = new Date(date).toLocaleDateString([], { weekday: 'short' });
           const dayDate = new Date(date).toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+          // Parse sun/moon times to hours
+          const parseTimeToHour = (timeStr: string | null | undefined): number => {
+            if (!timeStr || timeStr === '---' || timeStr === '00:00' || timeStr === '24:00') return -1;
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return hours + (minutes >= 30 ? 1 : 0); // Round to nearest hour
+          };
+
+          const sunriseHour = parseTimeToHour(sunMoon?.sunrise);
+          const sunsetHour = parseTimeToHour(sunMoon?.sunset);
+          const moonriseHour = parseTimeToHour(sunMoon?.moonrise);
+          const moonsetHour = parseTimeToHour(sunMoon?.moonset);
 
           return (
             <div key={date} className="day-section">
@@ -72,6 +87,114 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                       {i.toString().padStart(2, '0')}
                     </div>
                   ))}
+                </div>
+
+                {/* Sun line */}
+                <div className="sun-line-row">
+                  <div className="row-label">☀️</div>
+                  <div className="line-track">
+                    {/* Handle special all-day sun case */}
+                    {sunMoon?.sunrise === '00:00' && sunMoon?.sunset === '24:00' ? (
+                      <div
+                        className="sun-line"
+                        style={{
+                          left: '0%',
+                          width: '100%',
+                          display: 'block'
+                        }}
+                        title={`Sun: All day (${sunMoon.sunrise} - ${sunMoon.sunset})`}
+                      />
+                    ) : sunriseHour > sunsetHour && sunriseHour !== -1 && sunsetHour !== -1 ? (
+                      // Sun crosses midnight - show two segments
+                      <>
+                        <div
+                          className="sun-line"
+                          style={{
+                            left: '0%',
+                            width: `${(sunsetHour / 24) * 100}%`,
+                            display: 'block'
+                          }}
+                          title={`Sun: ${sunMoon?.sunrise || 'N/A'} - ${sunMoon?.sunset || 'N/A'} (continues from previous day)`}
+                        />
+                        <div
+                          className="sun-line"
+                          style={{
+                            left: `${(sunriseHour / 24) * 100}%`,
+                            width: `${((24 - sunriseHour) / 24) * 100}%`,
+                            display: 'block'
+                          }}
+                          title={`Sun: ${sunMoon?.sunrise || 'N/A'} - ${sunMoon?.sunset || 'N/A'} (continues to next day)`}
+                        />
+                      </>
+                    ) : (
+                      // Normal sun period
+                      <div
+                        className="sun-line"
+                        style={{
+                          left: sunriseHour !== -1 ? `${(sunriseHour / 24) * 100}%` : '0%',
+                          width: sunriseHour !== -1 && sunsetHour !== -1
+                            ? `${((sunsetHour - sunriseHour) / 24) * 100}%`
+                            : '0%',
+                          display: sunriseHour !== -1 && sunsetHour !== -1 ? 'block' : 'none'
+                        }}
+                        title={`Sun: ${sunMoon?.sunrise || 'N/A'} - ${sunMoon?.sunset || 'N/A'}`}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Moon line */}
+                <div className="moon-line-row">
+                  <div className="row-label">🌙</div>
+                  <div className="line-track">
+                    {/* Handle special all-day moon case */}
+                    {sunMoon?.moonrise === '00:00' && sunMoon?.moonset === '24:00' ? (
+                      <div
+                        className="moon-line"
+                        style={{
+                          left: '0%',
+                          width: '100%',
+                          display: 'block'
+                        }}
+                        title={`Moon: All day (${sunMoon.moonrise} - ${sunMoon.moonset})`}
+                      />
+                    ) : moonriseHour > moonsetHour && moonriseHour !== -1 && moonsetHour !== -1 ? (
+                      // Moon crosses midnight - show two segments
+                      <>
+                        <div
+                          className="moon-line"
+                          style={{
+                            left: '0%',
+                            width: `${(moonsetHour / 24) * 100}%`,
+                            display: 'block'
+                          }}
+                          title={`Moon: ${sunMoon?.moonrise || 'N/A'} - ${sunMoon?.moonset || 'N/A'} (continues from previous day)`}
+                        />
+                        <div
+                          className="moon-line"
+                          style={{
+                            left: `${(moonriseHour / 24) * 100}%`,
+                            width: `${((24 - moonriseHour) / 24) * 100}%`,
+                            display: 'block'
+                          }}
+                          title={`Moon: ${sunMoon?.moonrise || 'N/A'} - ${sunMoon?.moonset || 'N/A'} (continues to next day)`}
+                        />
+                      </>
+                    ) : (
+                      // Normal moon period
+                      <div
+                        className="moon-line"
+                        style={{
+                          left: moonriseHour !== -1 ? `${(moonriseHour / 24) * 100}%` : '0%',
+                          width: moonriseHour !== -1 && moonsetHour !== -1
+                            ? `${((moonsetHour - moonriseHour) / 24) * 100}%`
+                            : '0%',
+                          display: moonriseHour !== -1 && moonsetHour !== -1 && sunMoon?.moonrise !== '---' && sunMoon?.moonset !== '---' ? 'block' : 'none'
+                        }}
+                        title={`Moon: ${sunMoon?.moonrise || 'N/A'} - ${sunMoon?.moonset || 'N/A'}`}
+                      />
+                    )}
+                  </div>
                 </div>
 
                 {/* Cloud coverage row */}

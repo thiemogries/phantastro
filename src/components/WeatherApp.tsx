@@ -129,7 +129,10 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
           )}
 
           {/* 7-Day Hourly Overview */}
-          <WeeklyOverview hourlyData={forecast.hourlyForecast} />
+          <WeeklyOverview
+            hourlyData={forecast.hourlyForecast}
+            dailyData={forecast.dailyForecast}
+          />
 
           {/* Daily Sun & Moon Times */}
           {forecast.dailyForecast.length > 0 && (
