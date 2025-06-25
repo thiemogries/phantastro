@@ -81,7 +81,7 @@
 
 .time-labels {
   display: grid;
-  grid-template-columns: 50px repeat(24, 1fr);
+  grid-template-columns: repeat(24, 1fr);
   gap: 2px;
   margin-bottom: 4px;
 }
@@ -95,19 +95,13 @@
 
 .hourly-row {
   display: grid;
-  grid-template-columns: 50px repeat(24, 1fr);
+  grid-template-columns: repeat(24, 1fr);
   gap: 2px;
   margin-bottom: 3px;
   align-items: center;
 }
 
-.row-label {
-  font-size: 0.75rem;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.7);
-  padding: 2px 0;
-  font-weight: 500;
-}
+
 
 .hourly-cells {
   display: contents;
@@ -160,11 +154,12 @@
 /* Sun/Moon continuous lines */
 .sun-line-row,
 .moon-line-row {
-  display: grid;
-  grid-template-columns: 50px 1fr;
-  gap: 2px;
-  margin-bottom: 3px;
+  margin-bottom: 0px;
   align-items: center;
+}
+
+.sun-line-row {
+  margin-bottom: 2px;
 }
 
 .line-track {
@@ -264,13 +259,7 @@
 
   .time-labels,
   .hourly-row {
-    grid-template-columns: 40px repeat(24, 1fr);
-    margin-bottom: 2px;
-  }
-
-  .sun-line-row,
-  .moon-line-row {
-    grid-template-columns: 40px 1fr;
+    grid-template-columns: repeat(24, 1fr);
     margin-bottom: 2px;
   }
 
@@ -279,10 +268,7 @@
     padding: 1px 0;
   }
 
-  .row-label {
-    font-size: 0.7rem;
-    padding: 1px 0;
-  }
+
 
   .hourly-cell {
     height: 14px;
@@ -320,13 +306,11 @@
 
   .time-labels,
   .hourly-row {
-    grid-template-columns: 35px repeat(12, 1fr);
+    grid-template-columns: repeat(12, 1fr);
     margin-bottom: 2px;
   }
 
-  .sun-line-row,
-  .moon-line-row {
-    grid-template-columns: 35px 1fr;
+  .sun-line-row {
     margin-bottom: 2px;
   }
 
@@ -358,9 +342,7 @@
     height: 12px;
   }
 
-  .row-label {
-    font-size: 0.65rem;
-  }
+
 }
 
 @media (max-width: 480px) {
@@ -394,13 +376,7 @@
 
   .time-labels,
   .hourly-row {
-    grid-template-columns: 30px repeat(8, 1fr);
-    margin-bottom: 1px;
-  }
-
-  .sun-line-row,
-  .moon-line-row {
-    grid-template-columns: 30px 1fr;
+    grid-template-columns: repeat(8, 1fr);
     margin-bottom: 1px;
   }
 
@@ -420,9 +396,7 @@
     height: 10px;
   }
 
-  .row-label {
-    font-size: 0.6rem;
-  }
+
 
   .overview-summary {
     gap: 6px;
