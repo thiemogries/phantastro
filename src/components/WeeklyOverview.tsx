@@ -106,7 +106,6 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
       <div className="weekly-grid">
         {/* Header row with day names */}
         <div className="grid-header">
-          <div className="row-label"></div>
           {groupedByDay.map(({ date }) => {
             const dayName = new Date(date).toLocaleDateString([], { weekday: 'short' });
             const dayDate = new Date(date).toLocaleDateString([], { month: 'short', day: 'numeric' });
@@ -121,14 +120,6 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
         {/* Column-based grid structure for CSS-only hover effects */}
         <div className="grid-columns">
-          <div className="row-labels-column">
-            <div className="row-label">Hour</div>
-            <div className="row-label">☁️ Clouds</div>
-            <div className="row-label">🌧️ Rain</div>
-            <div className="row-label">👁️ Visibility</div>
-            <div className="row-label">🌙 Moonlight</div>
-          </div>
-
           {Array.from({ length: 7 }, (_, dayIndex) => (
             <div key={dayIndex} className="day-column">
               {Array.from({ length: 24 }, (_, hourIndex) => {
@@ -215,7 +206,6 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
         {/* Sun rise/set row */}
         <div className="grid-row sun-row">
-          <div className="row-label">☀️ Sun</div>
           {groupedByDay.map(({ date, sunMoon }, dayIndex) => {
             // Parse sun/moon times to hours (with precision for better positioning)
             const parseTimeToHour = (timeStr: string | null | undefined): number => {
@@ -306,7 +296,6 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
         {/* Moon rise/set row */}
         <div className="grid-row moon-row">
-          <div className="row-label">🌙 Moon</div>
           {groupedByDay.map(({ date, sunMoon }, dayIndex) => {
             // Parse sun/moon times to hours (with precision for better positioning)
             const parseTimeToHour = (timeStr: string | null | undefined): number => {

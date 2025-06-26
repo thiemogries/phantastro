@@ -52,7 +52,7 @@
 /* Header row with day names */
 .grid-header {
   display: grid;
-  grid-template-columns: 120px repeat(7, 168px);
+  grid-template-columns: repeat(7, 200px);
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -77,33 +77,16 @@
 /* Column-based grid structure */
 .grid-columns {
   display: grid;
-  grid-template-columns: 120px repeat(7, 168px);
+  grid-template-columns: repeat(7, 200px);
   gap: 1px;
 }
 
-/* Row labels column */
-.row-labels-column {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.row-label {
-  height: 50px;
-  padding: 8px 12px;
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.03);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-}
+/* Row labels column - removed */
 
 /* Day column container */
 .day-column {
   display: grid;
-  grid-template-columns: repeat(24, 6px);
+  grid-template-columns: repeat(24, 7px);
   gap: 1px;
 }
 
@@ -222,6 +205,14 @@
   margin-bottom: 0;
 }
 
+/* Grid rows for sun/moon timelines */
+.grid-row {
+  display: grid;
+  grid-template-columns: repeat(7, 200px);
+  gap: 1px;
+  margin-top: 8px;
+}
+
 /* Timeline tracks for sun/moon lines */
 .day-timeline {
   padding: 4px 2px;
@@ -338,17 +329,15 @@
   }
 
   .grid-header {
-    grid-template-columns: 100px repeat(7, 120px);
+    grid-template-columns: repeat(7, 140px);
   }
 
   .grid-columns {
-    grid-template-columns: 100px repeat(7, 120px);
+    grid-template-columns: repeat(7, 140px);
   }
 
-  .row-label {
-    padding: 4px 8px;
-    font-size: 0.7rem;
-    height: 36px;
+  .grid-row {
+    grid-template-columns: repeat(7, 140px);
   }
 
   .day-name {
@@ -403,18 +392,18 @@
   }
 
   .grid-header {
-    grid-template-columns: 80px repeat(7, 88px);
+    grid-template-columns: repeat(7, 100px);
   }
 
   .grid-columns {
-    grid-template-columns: 80px repeat(7, 88px);
+    grid-template-columns: repeat(7, 100px);
   }
 
-  .row-label {
-    padding: 3px 6px;
-    font-size: 0.65rem;
-    height: 30px;
+  .grid-row {
+    grid-template-columns: repeat(7, 100px);
   }
+
+
 
   .day-name {
     font-size: 0.75rem;
