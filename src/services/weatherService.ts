@@ -34,7 +34,6 @@ class WeatherService {
    */
   async validateApiKey(): Promise<boolean> {
     if (!this.apiKey || this.apiKey === "your_meteoblue_api_key_here") {
-      console.log("API key not configured");
       return false;
     }
 
@@ -47,16 +46,14 @@ class WeatherService {
         format: "json",
       };
 
-      const response = await axios.get(`${this.baseUrl}/basic-1h`, {
+      await axios.get(`${this.baseUrl}/basic-1h`, {
         params,
         timeout: 10000, // 10 second timeout for API validation
       });
 
-      console.log("API key validation successful - basic hourly package available");
       return true;
     } catch (error: any) {
       console.error("API key validation failed:", error.response?.data || error.message);
-      console.log("Weather data will show as 'Not available' - configure API key for real data");
       return false;
     }
   }
@@ -81,36 +78,11 @@ class WeatherService {
     locationName?: string,
   ): Promise<WeatherForecast> {
     try {
-      console.log(`🌍 Making new API request for ${lat}, ${lon} (${locationName || 'Unknown location'})`);
-      const startTime = Date.now();
-
       // Fetch both basic weather data and cloud data in parallel
       const [basicData, cloudData] = await Promise.all([
         this.fetchBasicWeatherData(lat, lon),
         this.fetchCloudData(lat, lon)
       ]);
-
-      console.log(`✅ API requests completed in ${Date.now() - startTime}ms`);
-      console.log('📊 Basic API Response data structure:', {
-        hasData1h: !!basicData.data_1h,
-        hourCount: basicData.data_1h?.time?.length || 0,
-        hasMetadata: !!basicData.metadata,
-        firstFewTimes: basicData.data_1h?.time?.slice(0, 3),
-        sampleTemps: basicData.data_1h?.temperature?.slice(0, 3)
-      });
-      console.log('☁️ Cloud API Response data structure:', {
-        hasData1h: !!cloudData.data_1h,
-        hourCount: cloudData.data_1h?.time?.length || 0,
-        hasTotalCloudCover: !!cloudData.data_1h?.totalcloudcover,
-        hasLowClouds: !!cloudData.data_1h?.lowclouds,
-        hasMidClouds: !!cloudData.data_1h?.midclouds,
-        hasHighClouds: !!cloudData.data_1h?.highclouds,
-        hasVisibility: !!cloudData.data_1h?.visibility,
-        sampleTotalCloudCover: cloudData.data_1h?.totalcloudcover?.slice(0, 3),
-        sampleLowClouds: cloudData.data_1h?.lowclouds?.slice(0, 3),
-        sampleVisibility: cloudData.data_1h?.visibility?.slice(0, 3)
-      });
-
 
       const location: Location = {
         lat,
@@ -120,14 +92,6 @@ class WeatherService {
       };
 
       const forecast = this.transformMeteoblueData(basicData, location, cloudData);
-      console.log('🔄 Transformed forecast:', {
-        currentTemp: forecast.currentWeather.temperature,
-        currentCloudCover: forecast.currentWeather.cloudCover.totalCloudCover,
-        hourlyCount: forecast.hourlyForecast.length,
-        dailyCount: forecast.dailyForecast.length,
-        firstHour: forecast.hourlyForecast[0]?.time,
-        lastHour: forecast.hourlyForecast[forecast.hourlyForecast.length - 1]?.time
-      });
 
       return forecast;
     } catch (error) {
@@ -256,11 +220,9 @@ class WeatherService {
     };
 
     this.requestCounter++;
-    console.log(`📡 Making Meteoblue basic API request #${this.requestCounter} with params:`, params);
     const response = await axios.get(`${this.baseUrl}/basic-1h`, {
       params,
     });
-    console.log(`✅ Meteoblue basic API response #${this.requestCounter} received successfully`);
     return response.data;
   }
 
@@ -296,12 +258,10 @@ class WeatherService {
     };
 
     this.requestCounter++;
-    console.log(`☁️ Making Meteoblue clouds API request #${this.requestCounter} with params:`, params);
     try {
       const response = await axios.get(`${this.baseUrl}/clouds-1h_clouds-day`, {
         params,
       });
-      console.log(`✅ Meteoblue clouds API response #${this.requestCounter} received successfully`);
       return response.data;
     } catch (error) {
       console.warn(`⚠️ Failed to fetch cloud data, continuing without detailed cloud coverage:`, error instanceof Error ? error.message : 'Unknown error');
@@ -349,12 +309,10 @@ class WeatherService {
     };
 
     this.requestCounter++;
-    console.log(`🌙 Making Meteoblue moonlight API request #${this.requestCounter} with params:`, params);
     try {
       const response = await axios.get(`${this.baseUrl}/moonlight-1h`, {
         params,
       });
-      console.log(`✅ Meteoblue moonlight API response #${this.requestCounter} received successfully`);
       return response.data;
     } catch (error) {
       console.warn(`⚠️ Failed to fetch moonlight data, continuing without moonlight information:`, error instanceof Error ? error.message : 'Unknown error');
@@ -401,12 +359,10 @@ class WeatherService {
     };
 
     this.requestCounter++;
-    console.log(`☀️🌙 Making Meteoblue sunmoon API request #${this.requestCounter} with params:`, params);
     try {
       const response = await axios.get(`${this.baseUrl}/sunmoon`, {
         params,
       });
-      console.log(`✅ Meteoblue sunmoon API response #${this.requestCounter} received successfully`);
       return response.data;
     } catch (error) {
       console.warn(`⚠️ Failed to fetch sun/moon data, continuing without sun/moon information:`, error instanceof Error ? error.message : 'Unknown error');
@@ -450,13 +406,6 @@ class WeatherService {
   ): WeatherForecast {
     // Transform hourly data
     const hourlyForecast: HourlyForecast[] = [];
-    console.log('🔍 Transforming hourly data:', {
-      hasData1h: !!data.data_1h,
-      timeArrayLength: data.data_1h?.time?.length,
-      availableFields: Object.keys(data.data_1h || {}),
-      firstTime: data.data_1h?.time?.[0],
-      lastTime: data.data_1h?.time?.[data.data_1h?.time?.length - 1]
-    });
 
     // Validate and debug API response structure
     if (!data.data_1h) {
@@ -468,17 +417,6 @@ class WeatherService {
       console.error('❌ Missing or invalid time array in API response');
       throw new Error('Invalid API response: missing time data');
     }
-
-    // Debug: Log sample data from the first few entries to understand the structure
-    console.log('📊 Sample API data for first 3 hours:', {
-      times: data.data_1h.time?.slice(0, 3),
-      temperatures: data.data_1h.temperature?.slice(0, 3),
-      windSpeeds: data.data_1h.windspeed?.slice(0, 3),
-      precipitation: data.data_1h.precipitation?.slice(0, 3),
-      precipitationProbability: data.data_1h.precipitation_probability?.slice(0, 3),
-      snowFraction: data.data_1h.snowfraction?.slice(0, 3),
-      isDaylight: data.data_1h.isdaylight?.slice(0, 3)
-    });
 
     // Validate data arrays have consistent lengths
     const timeLength = data.data_1h.time.length;
@@ -533,7 +471,6 @@ class WeatherService {
       // Process all available hours, but generate additional hours if needed
       const availableHours = data.data_1h.time.length;
       const targetHours = 168; // 7 days
-      console.log(`📅 Processing ${availableHours} available hours, targeting ${targetHours} total`);
 
       // First, process all available real data
       for (let i = 0; i < availableHours; i++) {
@@ -599,43 +536,11 @@ class WeatherService {
           hourData.windSpeed = Math.max(0, Math.min(200, hourData.windSpeed));
         }
 
-        // Debug: Log detailed data for first few hours to verify correct mapping
-        if (i < 2) {
-          console.log(`🕐 Hour ${i} detailed mapping:`, {
-            time: hourData.time,
-            rawTemperature: data.data_1h.temperature?.[i],
-            mappedTemperature: hourData.temperature,
-            rawWindSpeed: data.data_1h.windspeed?.[i],
-            mappedWindSpeed: hourData.windSpeed,
-            rawPrecipitation: data.data_1h.precipitation?.[i],
-            mappedPrecipitation: hourData.precipitation.precipitation,
-            rawPrecipProb: data.data_1h.precipitation_probability?.[i],
-            mappedPrecipProb: hourData.precipitation.precipitationProbability,
-            rawCloudCover: cloudData?.data_1h?.totalcloudcover?.[i],
-            mappedCloudCover: hourData.cloudCover.totalCloudCover,
-            rawLowClouds: cloudData?.data_1h?.lowclouds?.[i],
-            mappedLowClouds: hourData.cloudCover.lowCloudCover,
-            rawVisibility: cloudData?.data_1h?.visibility?.[i],
-            mappedVisibility: hourData.visibility
-          });
-        }
-
         hourlyForecast.push(hourData);
-
-        // Debug first few entries
-        if (i < 3) {
-          console.log(`⏰ Hour ${i}:`, {
-            time: hourData.time,
-            temp: hourData.temperature,
-            clouds: hourData.cloudCover.totalCloudCover,
-            wind: hourData.windSpeed
-          });
-        }
       }
 
       // If we have less than 168 hours, generate additional forecasted hours
       if (availableHours < targetHours && availableHours > 0) {
-        console.log(`🔮 Generating ${targetHours - availableHours} additional forecast hours`);
         const lastRealHour = hourlyForecast[availableHours - 1];
         const baseTime = new Date(lastRealHour.time);
 
@@ -684,18 +589,6 @@ class WeatherService {
           });
         }
       }
-
-      console.log(`✅ Processed ${hourlyForecast.length} hours total (${availableHours} real + ${hourlyForecast.length - availableHours} forecast)`);
-
-      // Final validation of processed data
-      const validDataSample = hourlyForecast.slice(0, 3).map(hour => ({
-        time: hour.time,
-        hasTemperature: hour.temperature !== null,
-        hasWindSpeed: hour.windSpeed !== null,
-        hasPrecipitation: hour.precipitation.precipitation !== null,
-        hasPrecipitationProb: hour.precipitation.precipitationProbability !== null
-      }));
-      console.log('✅ Final data validation sample:', validDataSample);
 
       // Run comprehensive data integrity check
       this.checkDataIntegrity(hourlyForecast);
@@ -834,129 +727,6 @@ class WeatherService {
    * Check data integrity and log potential issues
    */
   private checkDataIntegrity(hourlyForecast: HourlyForecast[]): void {
-    console.log('🔍 Running data integrity check...');
-
-    // Check data completeness
-    const dataCompleteness = {
-      temperature: hourlyForecast.filter(h => h.temperature !== null).length / hourlyForecast.length * 100,
-      windSpeed: hourlyForecast.filter(h => h.windSpeed !== null).length / hourlyForecast.length * 100,
-      precipitation: hourlyForecast.filter(h => h.precipitation.precipitation !== null).length / hourlyForecast.length * 100,
-      precipitationProbability: hourlyForecast.filter(h => h.precipitation.precipitationProbability !== null).length / hourlyForecast.length * 100,
-      totalCloudCover: hourlyForecast.filter(h => h.cloudCover.totalCloudCover !== null).length / hourlyForecast.length * 100,
-      lowCloudCover: hourlyForecast.filter(h => h.cloudCover.lowCloudCover !== null).length / hourlyForecast.length * 100,
-      midCloudCover: hourlyForecast.filter(h => h.cloudCover.midCloudCover !== null).length / hourlyForecast.length * 100,
-      highCloudCover: hourlyForecast.filter(h => h.cloudCover.highCloudCover !== null).length / hourlyForecast.length * 100,
-      visibility: hourlyForecast.filter(h => h.visibility !== null).length / hourlyForecast.length * 100,
-      moonlightClearSky: hourlyForecast.filter(h => h.moonlight.moonlightClearSky !== null).length / hourlyForecast.length * 100,
-      nightSkyBrightnessClearSky: hourlyForecast.filter(h => h.moonlight.nightSkyBrightnessClearSky !== null).length / hourlyForecast.length * 100,
-      zenithAngle: hourlyForecast.filter(h => h.moonlight.zenithAngle !== null).length / hourlyForecast.length * 100
-    };
-    console.log('📊 Data completeness percentages:', dataCompleteness);
-
-    // Check for data anomalies
-    const temperatures = hourlyForecast.map(h => h.temperature).filter(t => t !== null) as number[];
-    const windSpeeds = hourlyForecast.map(h => h.windSpeed).filter(w => w !== null) as number[];
-    const precipitations = hourlyForecast.map(h => h.precipitation.precipitation).filter(p => p !== null) as number[];
-    const totalCloudCover = hourlyForecast.map(h => h.cloudCover.totalCloudCover).filter(c => c !== null) as number[];
-    const lowCloudCover = hourlyForecast.map(h => h.cloudCover.lowCloudCover).filter(c => c !== null) as number[];
-    const midCloudCover = hourlyForecast.map(h => h.cloudCover.midCloudCover).filter(c => c !== null) as number[];
-    const highCloudCover = hourlyForecast.map(h => h.cloudCover.highCloudCover).filter(c => c !== null) as number[];
-    const visibilities = hourlyForecast.map(h => h.visibility).filter(v => v !== null) as number[];
-    const moonlightClearSky = hourlyForecast.map(h => h.moonlight.moonlightClearSky).filter(m => m !== null) as number[];
-    const nightSkyBrightnessClearSky = hourlyForecast.map(h => h.moonlight.nightSkyBrightnessClearSky).filter(n => n !== null) as number[];
-    const zenithAngles = hourlyForecast.map(h => h.moonlight.zenithAngle).filter(z => z !== null) as number[];
-
-    if (temperatures.length > 0) {
-      const tempStats = {
-        min: Math.min(...temperatures),
-        max: Math.max(...temperatures),
-        avg: temperatures.reduce((sum, t) => sum + t, 0) / temperatures.length
-      };
-      console.log('🌡️ Temperature stats:', tempStats);
-    }
-
-    if (windSpeeds.length > 0) {
-      const windStats = {
-        min: Math.min(...windSpeeds),
-        max: Math.max(...windSpeeds),
-        avg: windSpeeds.reduce((sum, w) => sum + w, 0) / windSpeeds.length
-      };
-      console.log('💨 Wind speed stats:', windStats);
-    }
-
-    if (precipitations.length > 0) {
-      const precipStats = {
-        min: Math.min(...precipitations),
-        max: Math.max(...precipitations),
-        total: precipitations.reduce((sum, p) => sum + p, 0)
-      };
-      console.log('🌧️ Precipitation stats:', precipStats);
-    }
-
-    if (visibilities.length > 0) {
-      const visibilityStats = {
-        min: Math.min(...visibilities),
-        max: Math.max(...visibilities),
-        avg: visibilities.reduce((sum, v) => sum + v, 0) / visibilities.length
-      };
-      console.log('👁️ Visibility stats (km):', visibilityStats);
-    }
-
-    if (totalCloudCover.length > 0) {
-      const cloudStats = {
-        min: Math.min(...totalCloudCover),
-        max: Math.max(...totalCloudCover),
-        avg: totalCloudCover.reduce((sum, c) => sum + c, 0) / totalCloudCover.length
-      };
-      console.log('☁️ Total cloud cover stats:', cloudStats);
-    }
-
-    if (lowCloudCover.length > 0 || midCloudCover.length > 0 || highCloudCover.length > 0) {
-      console.log('🌤️ Cloud layer stats:', {
-        low: lowCloudCover.length > 0 ? {
-          min: Math.min(...lowCloudCover),
-          max: Math.max(...lowCloudCover),
-          avg: lowCloudCover.reduce((sum, c) => sum + c, 0) / lowCloudCover.length
-        } : 'No data',
-        mid: midCloudCover.length > 0 ? {
-          min: Math.min(...midCloudCover),
-          max: Math.max(...midCloudCover),
-          avg: midCloudCover.reduce((sum, c) => sum + c, 0) / midCloudCover.length
-        } : 'No data',
-        high: highCloudCover.length > 0 ? {
-          min: Math.min(...highCloudCover),
-          max: Math.max(...highCloudCover),
-          avg: highCloudCover.reduce((sum, c) => sum + c, 0) / highCloudCover.length
-        } : 'No data'
-      });
-    }
-
-    if (moonlightClearSky.length > 0) {
-      const moonlightStats = {
-        min: Math.min(...moonlightClearSky),
-        max: Math.max(...moonlightClearSky),
-        avg: moonlightClearSky.reduce((sum, m) => sum + m, 0) / moonlightClearSky.length
-      };
-      console.log('🌙 Moonlight clear sky stats:', moonlightStats);
-    }
-
-    if (nightSkyBrightnessClearSky.length > 0) {
-      const nightSkyStats = {
-        min: Math.min(...nightSkyBrightnessClearSky),
-        max: Math.max(...nightSkyBrightnessClearSky),
-        avg: nightSkyBrightnessClearSky.reduce((sum, n) => sum + n, 0) / nightSkyBrightnessClearSky.length
-      };
-      console.log('✨ Night sky brightness clear sky stats (lux):', nightSkyStats);
-    }
-
-    if (zenithAngles.length > 0) {
-      const zenithStats = {
-        min: Math.min(...zenithAngles),
-        max: Math.max(...zenithAngles),
-        avg: zenithAngles.reduce((sum, z) => sum + z, 0) / zenithAngles.length
-      };
-      console.log('☀️ Zenith angle stats (degrees):', zenithStats);
-    }
 
     // Check time sequence continuity
     const timeGaps: string[] = [];
@@ -973,11 +743,7 @@ class WeatherService {
 
     if (timeGaps.length > 0) {
       console.warn('⚠️ Time sequence issues found:', timeGaps);
-    } else {
-      console.log('✅ Time sequence is continuous');
     }
-
-    console.log('✅ Data integrity check completed');
   }
 
   /**
