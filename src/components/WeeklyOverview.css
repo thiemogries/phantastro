@@ -8,7 +8,7 @@
   backdrop-filter: blur(10px);
   overflow-y: visible;
   position: relative;
-  min-width: 600px;
+  width: 100%;
 }
 
 .overview-header {
@@ -49,6 +49,7 @@
   border-radius: 8px;
   overflow-y: visible;
   background: rgba(255, 255, 255, 0.02);
+  width: 100%;
 }
 
 /* Header row with day names */
@@ -62,7 +63,6 @@
   padding: 8px 4px;
   text-align: center;
   border-right: 1px solid rgba(255, 255, 255, 0.05);
-  min-width: 60px;
 }
 
 .day-name {
@@ -89,9 +89,8 @@
 /* Day column container */
 .day-column {
   display: grid;
-  grid-template-columns: repeat(24, minmax(3px, 1fr));
+  grid-template-columns: repeat(24, minmax(1px, 8px));
   gap: 1px;
-  min-width: 80px;
 }
 
 /* Hour column - contains all cells for one hour vertically */
@@ -130,7 +129,6 @@
   transition: all 0.2s ease;
   border: 1px solid rgba(255, 255, 255, 0.05);
   position: relative;
-  min-width: 3px;
 }
 
 /* Hour labels */
@@ -279,168 +277,9 @@ body > .react-tooltip[id*="hour-"] {
   font-weight: 600;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .weekly-overview {
-    padding: 12px;
-  }
-
-  .overview-header h3 {
-    font-size: 1.2rem;
-  }
-
-  .row-label {
-    padding: 6px 10px;
-    font-size: 0.75rem;
-    height: 42px;
-  }
-
-  .hour-cell, .hour-label {
-    height: 8px;
-  }
-
-  .hour-label {
-    font-size: 0.55rem;
-    height: 12px;
-  }
-}
-
-@media (max-width: 768px) {
-  .weekly-overview {
-    padding: 10px;
-  }
-
-  .overview-header h3 {
-    font-size: 1.1rem;
-  }
-
-  .grid-header {
-    grid-template-columns: repeat(7, 1fr);
-  }
-
-  .grid-columns {
-    grid-template-columns: repeat(7, 1fr);
-  }
-
-  .grid-row {
-    grid-template-columns: repeat(7, 1fr);
-  }
-
-  .day-name {
-    font-size: 0.8rem;
-  }
-
-  .day-date {
-    font-size: 0.65rem;
-  }
-
-  .day-column {
-    grid-template-columns: repeat(12, 1fr);
-  }
-
-  .hour-column:nth-child(n+13) {
-    display: none;
-  }
-
-  .hour-cell, .hour-label {
-    height: 6px;
-  }
-
-  .hour-label {
-    height: 10px;
-    font-size: 0.5rem;
-  }
-
-  .timeline-track {
-    height: 2px;
-  }
-
-  .overview-summary {
-    flex-direction: column;
-    gap: 8px;
-    padding: 8px 0;
-    margin-top: 8px;
-  }
-
-  .summary-item {
-    flex-direction: row;
-    justify-content: space-between;
-  }
-}
-
-@media (max-width: 480px) {
-  .weekly-overview {
-    padding: 8px;
-    min-width: 450px;
-    overflow-x: auto;
-  }
-
-  .overview-header h3 {
-    font-size: 1rem;
-  }
-
-  .grid-header {
-    grid-template-columns: repeat(7, 1fr);
-  }
-
-  .grid-columns {
-    grid-template-columns: repeat(7, 1fr);
-  }
-
-  .grid-row {
-    grid-template-columns: repeat(7, 1fr);
-  }
+/* Responsive Design removed - using percentage-based grid */
 
 
-
-  .day-name {
-    font-size: 0.75rem;
-  }
-
-  .day-date {
-    font-size: 0.6rem;
-  }
-
-  .day-column {
-    grid-template-columns: repeat(8, 1fr);
-    min-width: 60px;
-  }
-
-  .hour-column:nth-child(n+9) {
-    display: none;
-  }
-
-  .hour-cell, .hour-label {
-    height: 4px;
-  }
-
-  .hour-label {
-    height: 8px;
-    font-size: 0.45rem;
-  }
-
-  .timeline-track {
-    height: 2px;
-  }
-
-  .day-timeline {
-    padding: 2px 1px;
-  }
-
-  .overview-summary {
-    gap: 6px;
-    padding: 6px 0;
-    margin-top: 6px;
-  }
-
-  .summary-label {
-    font-size: 0.7rem;
-  }
-
-  .summary-value {
-    font-size: 0.8rem;
-  }
-}
 
 /* Animation */
 @keyframes slideInUp {
