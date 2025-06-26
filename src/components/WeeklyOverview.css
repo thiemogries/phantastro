@@ -159,7 +159,7 @@
 }
 
 .sun-line-row {
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .line-track {
@@ -260,7 +260,7 @@
   .time-labels,
   .hourly-row {
     grid-template-columns: repeat(24, 1fr);
-    margin-bottom: 2px;
+    margin-bottom: 4px;
   }
 
   .time-label {
@@ -307,11 +307,11 @@
   .time-labels,
   .hourly-row {
     grid-template-columns: repeat(12, 1fr);
-    margin-bottom: 2px;
+    margin-bottom: 4px;
   }
 
   .sun-line-row {
-    margin-bottom: 2px;
+    margin-bottom: 4px;
   }
 
   .line-track {
