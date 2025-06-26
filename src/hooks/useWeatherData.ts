@@ -27,6 +27,14 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
   const moonlightDataQuery = useMoonlightData(params);
   const sunMoonDataQuery = useSunMoonData(params);
 
+  // Calculate combined loading state - only show loading if basic weather is loading
+  // This prevents flickering from supplementary data queries
+  const isLoading = basicWeatherQuery.isLoading;
+
+  // Calculate if we have sufficient data to proceed (basic weather is essential)
+  const hasBasicData = Boolean(basicWeatherQuery.isSuccess && basicWeatherQuery.data);
+  const supplementaryDataReady = Boolean(!cloudDataQuery.isLoading && !moonlightDataQuery.isLoading && !sunMoonDataQuery.isLoading);
+
   return useQuery<WeatherForecast>({
     queryKey: params ? WEATHER_QUERY_KEYS.weather(params.lat, params.lon) : ['weather', 'disabled'],
     queryFn: async (): Promise<WeatherForecast> => {
@@ -41,8 +49,6 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
         throw new Error('Basic weather data not available');
       }
 
-
-
       const location: Location = {
         lat: params.lat,
         lon: params.lon,
@@ -51,16 +57,25 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
 
       const result = weatherService.transformMeteoblueData(basicData, location, cloudData, moonlightData, sunMoonData);
 
-
-
       return result;
     },
-    enabled: !!params && basicWeatherQuery.isSuccess &&
-             (!cloudDataQuery.isLoading && !moonlightDataQuery.isLoading && !sunMoonDataQuery.isLoading),
+    enabled: Boolean(params && hasBasicData),
     staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    refetchOnMount: true, // Ensure fresh data on component mount
+    gcTime: 15 * 60 * 1000, // 15 minutes (longer cache)
+    refetchOnMount: false, // Prevent unnecessary refetch on mount
     refetchOnReconnect: true, // Refetch when connection is restored
+    refetchOnWindowFocus: false, // Prevent flicker on focus
+    // Use placeholder data to prevent loading states
+    placeholderData: (previousData: any) => previousData,
+    // Reduce retry attempts to prevent delays
+    retry: 1,
+    retryDelay: 1000,
+    // Add meta to track loading states
+    meta: {
+      isLoading,
+      hasBasicData,
+      supplementaryDataReady,
+    },
   });
 };
 
@@ -74,7 +89,7 @@ export const useBasicWeatherData = (params: WeatherQueryParams | null) => {
       if (!params) throw new Error('No location parameters provided');
       return await weatherService.fetchBasicWeatherData(params.lat, params.lon);
     },
-    enabled: !!params,
+    enabled: Boolean(params),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: (failureCount, error) => {
@@ -85,6 +100,11 @@ export const useBasicWeatherData = (params: WeatherQueryParams | null) => {
       return failureCount < 2;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    // Network mode to handle offline scenarios
+    networkMode: 'offlineFirst',
+    // Prevent background refetching that can cause flicker
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 };
 
@@ -98,17 +118,22 @@ export const useCloudData = (params: WeatherQueryParams | null) => {
       if (!params) throw new Error('No location parameters provided');
       return await weatherService.fetchCloudData(params.lat, params.lon);
     },
-    enabled: !!params,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    enabled: Boolean(params),
+    staleTime: 10 * 60 * 1000, // 10 minutes (longer for supplementary data)
+    gcTime: 20 * 60 * 1000, // 20 minutes
     retry: (failureCount, error) => {
       // Be more lenient with cloud data since it's supplementary
       if (error.message.includes('API key') || error.message.includes('401')) {
         return false;
       }
-      return failureCount < 3;
+      return failureCount < 2; // Reduced retries to prevent delay
     },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retryDelay: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 15000), // Faster retries
+    // Allow stale data to prevent loading delays
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    // Use stale data while revalidating
+    placeholderData: (previousData: any) => previousData,
   });
 };
 
@@ -122,17 +147,20 @@ export const useMoonlightData = (params: WeatherQueryParams | null) => {
       if (!params) throw new Error('No location parameters provided');
       return await weatherService.fetchMoonlightData(params.lat, params.lon);
     },
-    enabled: !!params,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    enabled: Boolean(params),
+    staleTime: 30 * 60 * 1000, // 30 minutes (moonlight changes slowly)
+    gcTime: 60 * 60 * 1000, // 1 hour
     retry: (failureCount, error) => {
       // Be lenient with moonlight data since it's supplementary
       if (error.message.includes('API key') || error.message.includes('401')) {
         return false;
       }
-      return failureCount < 3;
+      return failureCount < 2;
     },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retryDelay: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 15000),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    placeholderData: (previousData: any) => previousData,
   });
 };
 
@@ -146,17 +174,20 @@ export const useSunMoonData = (params: WeatherQueryParams | null) => {
       if (!params) throw new Error('No location parameters provided');
       return await weatherService.fetchSunMoonData(params.lat, params.lon);
     },
-    enabled: !!params,
-    staleTime: 60 * 60 * 1000, // 1 hour (sun/moon times don't change frequently)
-    gcTime: 2 * 60 * 60 * 1000, // 2 hours
+    enabled: Boolean(params),
+    staleTime: 2 * 60 * 60 * 1000, // 2 hours (sun/moon times change slowly)
+    gcTime: 6 * 60 * 60 * 1000, // 6 hours
     retry: (failureCount, error) => {
       // Be lenient with sun/moon data since it's supplementary
       if (error.message.includes('API key') || error.message.includes('401')) {
         return false;
       }
-      return failureCount < 3;
+      return failureCount < 2;
     },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retryDelay: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 15000),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    placeholderData: (previousData: any) => previousData,
   });
 };
 

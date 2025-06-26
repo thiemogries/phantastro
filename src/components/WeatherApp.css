@@ -438,11 +438,63 @@
   }
 }
 
-/* Animations */
-@keyframes fadeIn {
+/* Subtle updating indicator */
+.weather-app__updating {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: rgba(124, 58, 237, 0.9);
+  border-radius: 25px;
+  padding: 8px 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.2);
+}
+
+.update-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.update-dot {
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}
+
+/* Stable content transitions - prevent flicker */
+.weather-app__content {
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.weather-app__content.loading {
+  opacity: 0.7;
+}
+
+/* Smooth fade-in only on initial load */
+@keyframes stableFadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -450,11 +502,45 @@
   }
 }
 
-.weather-app__content > * {
-  animation: fadeIn 0.6s ease-out;
+.weather-app__content[data-initial-load="true"] > * {
+  animation: stableFadeIn 0.4s ease-out backwards;
 }
 
-.weather-app__content > *:nth-child(1) { animation-delay: 0.1s; }
-.weather-app__content > *:nth-child(2) { animation-delay: 0.2s; }
-.weather-app__content > *:nth-child(3) { animation-delay: 0.3s; }
-.weather-app__content > *:nth-child(4) { animation-delay: 0.4s; }
+.weather-app__content[data-initial-load="true"] > *:nth-child(1) { animation-delay: 0.05s; }
+.weather-app__content[data-initial-load="true"] > *:nth-child(2) { animation-delay: 0.1s; }
+.weather-app__content[data-initial-load="true"] > *:nth-child(3) { animation-delay: 0.15s; }
+.weather-app__content[data-initial-load="true"] > *:nth-child(4) { animation-delay: 0.2s; }
+
+/* Prevent layout shift during loading */
+.weather-app__loading {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Smoother transitions for all content sections */
+.weather-app__location,
+.forecast-section,
+.data-notice {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Reduced motion support - disable animations */
+@media (prefers-reduced-motion: reduce) {
+  .weather-app__content > * {
+    animation: none !important;
+  }
+
+  .update-dot {
+    animation: none;
+  }
+
+  .weather-app__content,
+  .weather-app__location,
+  .forecast-section,
+  .data-notice {
+    transition: none;
+  }
+}

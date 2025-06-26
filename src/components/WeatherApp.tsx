@@ -17,6 +17,8 @@ interface WeatherAppProps {
 
 const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
   const [weatherParams, setWeatherParams] = useState<WeatherQueryParams | null>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [lastError, setLastError] = useState<string | null>(null);
 
   // Initialize with default location
   React.useEffect(() => {
@@ -31,20 +33,45 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
   }, [weatherParams]);
 
   // Use TanStack Query hooks
-  const { data: forecast, isLoading: loading, error: queryError } = useWeatherData(weatherParams);
+  const { data: forecast, isLoading, error: queryError, isFetching } = useWeatherData(weatherParams);
   const refreshWeatherData = useRefreshWeatherData();
 
-  const error = queryError ? (queryError as Error).message : null;
+  // Stable loading state - only show loading on initial load or when no data exists
+  const loading = (isLoading && !forecast) || (isInitialLoad && isLoading);
+
+  // Mark initial load as complete when we get data or error
+  React.useEffect(() => {
+    if ((forecast || queryError) && isInitialLoad) {
+      setIsInitialLoad(false);
+    }
+  }, [forecast, queryError, isInitialLoad]);
+
+  // Stable error handling - prevent error flickering
+  const currentError = queryError ? (queryError as Error).message : null;
+  React.useEffect(() => {
+    if (currentError) {
+      setLastError(currentError);
+    } else if (forecast) {
+      // Clear error only when we have successful data
+      setLastError(null);
+    }
+  }, [currentError, forecast]);
+
+  const error = lastError;
 
   const handleLocationSelect = (location: LocationSearchResult) => {
     if (loading) return; // Prevent duplicate requests
     console.log('📍 WeatherApp: Location selected:', location);
+    // Clear previous error when selecting new location
+    setLastError(null);
     setWeatherParams({ lat: location.lat, lon: location.lon, locationName: location.name });
   };
 
   const handleRefresh = () => {
     if (loading || !weatherParams) return; // Prevent duplicate requests
     console.log('🔄 WeatherApp: Refresh requested for:', weatherParams);
+    // Clear previous error when refreshing
+    setLastError(null);
     refreshWeatherData.mutate(weatherParams);
   };
 
@@ -77,6 +104,16 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
         </div>
       )}
 
+      {/* Subtle loading indicator for background updates */}
+      {isFetching && forecast && !loading && (
+        <div className="weather-app__updating">
+          <div className="update-indicator">
+            <span className="update-dot"></span>
+            <span>Updating...</span>
+          </div>
+        </div>
+      )}
+
       {/* Error State */}
       {error && !loading && (
         <ErrorMessage
@@ -87,7 +124,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
 
       {/* Weather Content */}
       {forecast && !loading && (
-        <div className="weather-app__content">
+        <div className="weather-app__content" data-initial-load={isInitialLoad ? "true" : "false"}>
           {/* Location Info */}
           <div className="weather-app__location">
             <h2>📍 {forecast.location.name}</h2>
@@ -136,7 +173,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
       )}
 
       {/* App Info */}
-      {!forecast && !loading && !error && (
+      {!forecast && !loading && !error && !isInitialLoad && (
         <div className="weather-app__welcome">
           <div className="welcome-content">
             <h2>🌟 Welcome to Phantastro</h2>

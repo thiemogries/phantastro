@@ -9,14 +9,27 @@ if (process.env.NODE_ENV === 'development') {
   import('./test-api-response');
 }
 
-// Create a client instance
+// Create a client instance with optimized settings to prevent flickering
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
-      retry: 2,
+      gcTime: 15 * 60 * 1000, // 15 minutes (longer cache to reduce refetching)
+      retry: 1, // Reduced retries to prevent delays
+      retryDelay: 1000, // Faster retry delay
       refetchOnWindowFocus: false,
+      refetchOnReconnect: false, // Prevent flickering on reconnect
+      refetchOnMount: false, // Prevent unnecessary refetch on mount
+      // Use network-first approach but allow stale data
+      networkMode: 'offlineFirst',
+      // Keep previous data while fetching new data
+      placeholderData: (previousData: any) => previousData,
+    },
+    mutations: {
+      retry: 1,
+      retryDelay: 1000,
+      // Optimistic updates where possible
+      networkMode: 'offlineFirst',
     },
   },
 });
