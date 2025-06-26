@@ -60,17 +60,88 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           const dayName = new Date(date).toLocaleDateString([], { weekday: 'short' });
           const dayDate = new Date(date).toLocaleDateString([], { month: 'short', day: 'numeric' });
 
-          // Parse sun/moon times to hours
+          // Parse sun/moon times to hours (with precision for better positioning)
           const parseTimeToHour = (timeStr: string | null | undefined): number => {
-            if (!timeStr || timeStr === '---' || timeStr === '00:00' || timeStr === '24:00') return -1;
+            if (!timeStr || timeStr === '---' || timeStr === '----') return -1;
+            if (timeStr === '24:00') return 24; // End of day
             const [hours, minutes] = timeStr.split(':').map(Number);
-            return hours + (minutes >= 30 ? 1 : 0); // Round to nearest hour
+            return hours + (minutes / 60); // Precise decimal hours for better positioning
           };
 
           const sunriseHour = parseTimeToHour(sunMoon?.sunrise);
           const sunsetHour = parseTimeToHour(sunMoon?.sunset);
           const moonriseHour = parseTimeToHour(sunMoon?.moonrise);
           const moonsetHour = parseTimeToHour(sunMoon?.moonset);
+
+          // Determine sun visibility for days with no rise/set events
+          const getSunVisibility = () => {
+            // If we have both sunrise and sunset, use normal logic
+            if (sunriseHour !== -1 && sunsetHour !== -1) {
+              return { hasRise: true, hasSet: true };
+            }
+
+            // If we have only sunrise, sun is visible from rise to end of day
+            if (sunriseHour !== -1 && sunsetHour === -1) {
+              return { hasRise: true, hasSet: false };
+            }
+
+            // If we have only sunset, sun is visible from start of day to set
+            if (sunriseHour === -1 && sunsetHour !== -1) {
+              return { hasRise: false, hasSet: true };
+            }
+
+            // If we have neither rise nor set, assume sun is visible all day (polar day)
+            return { hasRise: false, hasSet: false, allDay: true };
+          };
+
+          // Determine moon visibility for days with no rise/set events
+          const getMoonVisibility = () => {
+            // Safety checks for NaN values
+            const hasValidRise = moonriseHour !== -1 && !isNaN(moonriseHour);
+            const hasValidSet = moonsetHour !== -1 && !isNaN(moonsetHour);
+
+            // If we have both moonrise and moonset, use normal logic
+            if (hasValidRise && hasValidSet) {
+              return { hasRise: true, hasSet: true };
+            }
+
+            // If we have only moonrise, moon is visible from rise to end of day
+            if (hasValidRise && !hasValidSet) {
+              return { hasRise: true, hasSet: false };
+            }
+
+            // If we have only moonset, moon is visible from start of day to set
+            if (!hasValidRise && hasValidSet) {
+              return { hasRise: false, hasSet: true };
+            }
+
+            // If we have neither rise nor set, check surrounding days for moon activity
+            // If there's moon activity on adjacent days, assume this day has all-day visibility
+            const prevDay = dayIndex > 0 ? groupedByDay[dayIndex - 1] : null;
+            const nextDay = dayIndex < groupedByDay.length - 1 ? groupedByDay[dayIndex + 1] : null;
+
+            // Check if previous day has moon events
+            const prevHasMoonEvents = prevDay?.sunMoon &&
+              ((prevDay.sunMoon.moonrise !== null && prevDay.sunMoon.moonrise !== '---') ||
+               (prevDay.sunMoon.moonset !== null && prevDay.sunMoon.moonset !== '---'));
+
+            // Check if next day has moon events
+            const nextHasMoonEvents = nextDay?.sunMoon &&
+              ((nextDay.sunMoon.moonrise !== null && nextDay.sunMoon.moonrise !== '---') ||
+               (nextDay.sunMoon.moonset !== null && nextDay.sunMoon.moonset !== '---'));
+
+            // If either adjacent day has moon events, assume all-day visibility
+            if (prevHasMoonEvents || nextHasMoonEvents) {
+              return { hasRise: false, hasSet: false, allDay: true };
+            }
+
+            return { hasRise: false, hasSet: false, allDay: false };
+          };
+
+          const sunVisibility = getSunVisibility();
+          const moonVisibility = getMoonVisibility();
+
+
 
           return (
             <div key={date} className="day-section">
@@ -229,8 +300,8 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                 {/* Sun line */}
                 <div className="sun-line-row">
                   <div className="line-track">
-                    {/* Handle special all-day sun case */}
-                    {sunMoon?.sunrise === '00:00' && sunMoon?.sunset === '24:00' ? (
+                    {/* Handle all-day sun case (either explicit 00:00-24:00 or inferred) */}
+                    {(sunriseHour === 0 && sunsetHour === 24) || sunVisibility.allDay ? (
                       <div
                         className="sun-line"
                         style={{
@@ -238,9 +309,11 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                           width: '100%',
                           display: 'block'
                         }}
-                        title={`Sun: All day (${sunMoon.sunrise} - ${sunMoon.sunset})`}
+                        title={sunVisibility.allDay
+                          ? `Sun: Visible all day (polar day)`
+                          : `Sun: All day (${sunMoon?.sunrise} - ${sunMoon?.sunset})`}
                       />
-                    ) : sunriseHour > sunsetHour && sunriseHour !== -1 && sunsetHour !== -1 ? (
+                    ) : sunriseHour > sunsetHour && sunriseHour !== -1 && sunsetHour !== -1 && sunsetHour !== 24 ? (
                       // Sun crosses midnight - show two segments
                       <>
                         <div
@@ -262,19 +335,42 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                           title={`Sun: ${sunMoon?.sunrise || 'N/A'} - ${sunMoon?.sunset || 'N/A'} (continues to next day)`}
                         />
                       </>
-                    ) : (
-                      // Normal sun period
+                    ) : sunVisibility.hasRise && !sunVisibility.hasSet ? (
+                      // Sun rises but doesn't set - visible from rise to end of day
                       <div
                         className="sun-line"
                         style={{
-                          left: sunriseHour !== -1 ? `${(sunriseHour / 24) * 100}%` : '0%',
-                          width: sunriseHour !== -1 && sunsetHour !== -1
-                            ? `${((sunsetHour - sunriseHour) / 24) * 100}%`
-                            : '0%',
-                          display: sunriseHour !== -1 && sunsetHour !== -1 ? 'block' : 'none'
+                          left: `${(sunriseHour / 24) * 100}%`,
+                          width: `${((24 - sunriseHour) / 24) * 100}%`,
+                          display: 'block'
                         }}
-                        title={`Sun: ${sunMoon?.sunrise || 'N/A'} - ${sunMoon?.sunset || 'N/A'}`}
+                        title={`Sun: ${sunMoon?.sunrise} - end of day (polar day)`}
                       />
+                    ) : !sunVisibility.hasRise && sunVisibility.hasSet ? (
+                      // Sun sets but doesn't rise - visible from start of day to set
+                      <div
+                        className="sun-line"
+                        style={{
+                          left: '0%',
+                          width: `${(sunsetHour / 24) * 100}%`,
+                          display: 'block'
+                        }}
+                        title={`Sun: start of day - ${sunMoon?.sunset} (polar day)`}
+                      />
+                    ) : sunVisibility.hasRise && sunVisibility.hasSet ? (
+                      // Normal sun period with both rise and set
+                      <div
+                        className="sun-line"
+                        style={{
+                          left: `${(sunriseHour / 24) * 100}%`,
+                          width: `${((sunsetHour === 24 ? 24 : sunsetHour) - sunriseHour) / 24 * 100}%`,
+                          display: 'block'
+                        }}
+                        title={`Sun: ${sunMoon?.sunrise} - ${sunMoon?.sunset}`}
+                      />
+                    ) : (
+                      // No sun visibility - polar night
+                      <div style={{ display: 'none' }} />
                     )}
                   </div>
                 </div>
@@ -282,8 +378,8 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                 {/* Moon line */}
                 <div className="moon-line-row">
                   <div className="line-track">
-                    {/* Handle special all-day moon case */}
-                    {sunMoon?.moonrise === '00:00' && sunMoon?.moonset === '24:00' ? (
+                    {/* Handle all-day moon case (either explicit 00:00-24:00 or inferred from neighboring days) */}
+                    {(moonriseHour === 0 && moonsetHour === 24) || moonVisibility.allDay ? (
                       <div
                         className="moon-line"
                         style={{
@@ -291,9 +387,12 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                           width: '100%',
                           display: 'block'
                         }}
-                        title={`Moon: All day (${sunMoon.moonrise} - ${sunMoon.moonset})`}
+                        title={moonVisibility.allDay
+                          ? `Moon: Visible all day (no rise/set events)`
+                          : `Moon: All day (${sunMoon?.moonrise} - ${sunMoon?.moonset})`}
+
                       />
-                    ) : moonriseHour > moonsetHour && moonriseHour !== -1 && moonsetHour !== -1 ? (
+                    ) : moonriseHour > moonsetHour && moonriseHour !== -1 && moonsetHour !== -1 && moonsetHour !== 24 ? (
                       // Moon crosses midnight - show two segments
                       <>
                         <div
@@ -315,19 +414,45 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                           title={`Moon: ${sunMoon?.moonrise || 'N/A'} - ${sunMoon?.moonset || 'N/A'} (continues to next day)`}
                         />
                       </>
-                    ) : (
-                      // Normal moon period
+                    ) : moonVisibility.hasRise && !moonVisibility.hasSet ? (
+                      // Moon rises but doesn't set - visible from rise to end of day
                       <div
                         className="moon-line"
                         style={{
-                          left: moonriseHour !== -1 ? `${(moonriseHour / 24) * 100}%` : '0%',
-                          width: moonriseHour !== -1 && moonsetHour !== -1
-                            ? `${((moonsetHour - moonriseHour) / 24) * 100}%`
-                            : '0%',
-                          display: moonriseHour !== -1 && moonsetHour !== -1 && sunMoon?.moonrise !== '---' && sunMoon?.moonset !== '---' ? 'block' : 'none'
+                          left: `${(moonriseHour / 24) * 100}%`,
+                          width: `${((24 - moonriseHour) / 24) * 100}%`,
+                          display: 'block'
                         }}
-                        title={`Moon: ${sunMoon?.moonrise || 'N/A'} - ${sunMoon?.moonset || 'N/A'}`}
+                        title={`Moon: ${sunMoon?.moonrise} - end of day (sets later)`}
+
                       />
+                    ) : !moonVisibility.hasRise && moonVisibility.hasSet ? (
+                      // Moon sets but doesn't rise - visible from start of day to set
+                      <div
+                        className="moon-line"
+                        style={{
+                          left: '0%',
+                          width: `${Math.max(5, (moonsetHour / 24) * 100)}%`, // Ensure minimum 5% width for visibility
+                          display: 'block'
+                        }}
+                        title={`Moon: start of day - ${sunMoon?.moonset} (rose earlier)`}
+
+                      />
+                    ) : moonVisibility.hasRise && moonVisibility.hasSet ? (
+                      // Normal moon period with both rise and set
+                      <div
+                        className="moon-line"
+                        style={{
+                          left: `${(moonriseHour / 24) * 100}%`,
+                          width: `${((moonsetHour === 24 ? 24 : moonsetHour) - moonriseHour) / 24 * 100}%`,
+                          display: 'block'
+                        }}
+                        title={`Moon: ${sunMoon?.moonrise} - ${sunMoon?.moonset}`}
+
+                      />
+                    ) : (
+                      // No moon visibility - truly no moon this day
+                      <div style={{ display: 'none' }} />
                     )}
                   </div>
                 </div>
