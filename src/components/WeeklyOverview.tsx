@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Tooltip } from 'react-tooltip';
 import { HourlyForecast, DailyForecast } from '../types/weather';
 import {
@@ -181,50 +182,52 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           ))}
         </div>
 
-        {/* Tooltips for all hour columns */}
-        {groupedByDay.flatMap((day, dayIndex) =>
-          day.hours
-            .map((hour, hourIndex) => {
-              if (!hour) return null;
-              const tooltipId = `hour-${dayIndex}-${hourIndex}`;
-              return (
-                <Tooltip
-                  key={tooltipId}
-                  id={tooltipId}
-                  place="bottom"
-                  offset={50}
-                  delayShow={100}
-                  delayHide={100}
-                  style={{
-                    backgroundColor: 'rgba(0, 0, 0, 0.95)',
-                    color: 'white',
-                    fontSize: '0.75rem',
-                    maxWidth: '220px',
-                    zIndex: 1000,
-                    borderRadius: '8px',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
-                  }}
-                  // variant="dark"
-                  // float
-                >
-                  <div style={{ marginBottom: '8px', fontSize: '0.8rem', borderBottom: '1px solid rgba(255, 255, 255, 0.2)', paddingBottom: '4px' }}>
-                    <strong>{formatTime(hour.time)}</strong>
-                  </div>
-                  <div style={{ lineHeight: '1.4' }}>
-                    <div style={{ marginBottom: '2px' }}>☁️ Clouds: {hour.cloudCover.totalCloudCover?.toFixed(0) ?? 'N/A'}% ({getCloudDescription(hour.cloudCover.totalCloudCover)})</div>
-                    <div style={{ marginBottom: '2px' }}>🌧️ Rain: {hour.precipitation.precipitationProbability?.toFixed(0) ?? 'N/A'}% ({getRainDescription(hour.precipitation.precipitation, hour.precipitation.precipitationProbability)})</div>
-                    <div style={{ marginBottom: '2px' }}>👁️ Visibility: {hour.visibility?.toFixed(1) ?? 'N/A'}km ({getVisibilityQuality(hour.visibility)})</div>
-                    <div style={{ marginBottom: '2px' }}>🌙 Moonlight: {hour.moonlight?.moonlightClearSky?.toFixed(1) ?? 'N/A'}%</div>
-                    <div style={{ marginBottom: '2px' }}>💨 Wind: {hour.windSpeed?.toFixed(1) ?? 'N/A'} m/s</div>
-                    {hour.temperature !== null && (
-                      <div>🌡️ Temp: {hour.temperature.toFixed(1)}°C</div>
-                    )}
-                  </div>
-                </Tooltip>
-              );
-            })
-            .filter(Boolean)
+        {/* Tooltips for all hour columns - rendered in portal to break out of container */}
+        {typeof document !== 'undefined' && createPortal(
+          groupedByDay.flatMap((day, dayIndex) =>
+            day.hours
+              .map((hour, hourIndex) => {
+                if (!hour) return null;
+                const tooltipId = `hour-${dayIndex}-${hourIndex}`;
+                return (
+                  <Tooltip
+                    key={tooltipId}
+                    id={tooltipId}
+                    place="bottom"
+                    offset={10}
+                    delayShow={50}
+                    delayHide={50}
+                    noArrow
+                    style={{
+                      backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                      color: 'white',
+                      fontSize: '0.75rem',
+                      maxWidth: '180px',
+                      zIndex: 1000,
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
+                    }}
+                  >
+                    <div style={{ marginBottom: '8px', fontSize: '0.8rem', borderBottom: '1px solid rgba(255, 255, 255, 0.2)', paddingBottom: '4px' }}>
+                      <strong>{formatTime(hour.time)}</strong>
+                    </div>
+                    <div style={{ lineHeight: '1.4' }}>
+                      <div style={{ marginBottom: '2px' }}>☁️ Clouds: {hour.cloudCover.totalCloudCover?.toFixed(0) ?? 'N/A'}% ({getCloudDescription(hour.cloudCover.totalCloudCover)})</div>
+                      <div style={{ marginBottom: '2px' }}>🌧️ Rain: {hour.precipitation.precipitationProbability?.toFixed(0) ?? 'N/A'}% ({getRainDescription(hour.precipitation.precipitation, hour.precipitation.precipitationProbability)})</div>
+                      <div style={{ marginBottom: '2px' }}>👁️ Visibility: {hour.visibility?.toFixed(1) ?? 'N/A'}km ({getVisibilityQuality(hour.visibility)})</div>
+                      <div style={{ marginBottom: '2px' }}>🌙 Moonlight: {hour.moonlight?.moonlightClearSky?.toFixed(1) ?? 'N/A'}%</div>
+                      <div style={{ marginBottom: '2px' }}>💨 Wind: {hour.windSpeed?.toFixed(1) ?? 'N/A'} m/s</div>
+                      {hour.temperature !== null && (
+                        <div>🌡️ Temp: {hour.temperature.toFixed(1)}°C</div>
+                      )}
+                    </div>
+                  </Tooltip>
+                );
+              })
+              .filter(Boolean)
+          ),
+          document.body
         )}
 
         {/* Sun rise/set row */}

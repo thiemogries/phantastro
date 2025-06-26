@@ -7,6 +7,8 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   overflow-x: auto;
+  overflow-y: visible;
+  position: relative;
 }
 
 .overview-header {
@@ -45,7 +47,8 @@
   gap: 1px;
   margin-bottom: 16px;
   border-radius: 8px;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
   background: rgba(255, 255, 255, 0.02);
 }
 
@@ -168,6 +171,23 @@
 }
 
 /* Manual tooltip styles removed - using react-tooltip library */
+
+/* Tooltip positioning assistance */
+.hour-column {
+  position: relative;
+}
+
+/* Style tooltips for better appearance */
+.react-tooltip[id*="hour-"] {
+  max-width: 180px;
+  z-index: 10000 !important;
+  position: fixed !important;
+}
+
+/* Ensure portal tooltips are above everything */
+body > .react-tooltip[id*="hour-"] {
+  z-index: 10000 !important;
+}
 
 /* Grid rows for sun/moon timelines */
 .grid-row {
