@@ -18,34 +18,29 @@ export const WEATHER_QUERY_KEYS = {
 } as const;
 
 /**
- * Custom hook for fetching weather data with separate cloud data caching
+ * Custom hook for fetching weather data - simplified to avoid race conditions
  */
 export const useWeatherData = (params: WeatherQueryParams | null) => {
-  // Use separate queries for basic weather, cloud data, moonlight data, and sun/moon data
-  const basicWeatherQuery = useBasicWeatherData(params);
-  const cloudDataQuery = useCloudData(params);
-  const moonlightDataQuery = useMoonlightData(params);
-  const sunMoonDataQuery = useSunMoonData(params);
-
-  // Calculate combined loading state - only show loading if basic weather is loading
-  // This prevents flickering from supplementary data queries
-  const isLoading = basicWeatherQuery.isLoading;
-
-  // Calculate if we have sufficient data to proceed (basic weather is essential)
-  const hasBasicData = Boolean(basicWeatherQuery.isSuccess && basicWeatherQuery.data);
-  const supplementaryDataReady = Boolean(!cloudDataQuery.isLoading && !moonlightDataQuery.isLoading && !sunMoonDataQuery.isLoading);
-
   return useQuery<WeatherForecast>({
     queryKey: params ? WEATHER_QUERY_KEYS.weather(params.lat, params.lon) : ['weather', 'disabled'],
     queryFn: async (): Promise<WeatherForecast> => {
       if (!params) throw new Error('No location parameters provided');
 
-      const basicData = basicWeatherQuery.data;
-      const cloudData = cloudDataQuery.data;
-      const moonlightData = moonlightDataQuery.data;
-      const sunMoonData = sunMoonDataQuery.data;
+      // Fetch all data in parallel to avoid race conditions
+      const [basicData, cloudData, moonlightData, sunMoonData] = await Promise.allSettled([
+        weatherService.fetchBasicWeatherData(params.lat, params.lon),
+        weatherService.fetchCloudData(params.lat, params.lon),
+        weatherService.fetchMoonlightData(params.lat, params.lon),
+        weatherService.fetchSunMoonData(params.lat, params.lon)
+      ]);
 
-      if (!basicData) {
+      // Extract successful results or null for failed ones
+      const basicWeatherData = basicData.status === 'fulfilled' ? basicData.value : null;
+      const cloudWeatherData = cloudData.status === 'fulfilled' ? cloudData.value : null;
+      const moonlightWeatherData = moonlightData.status === 'fulfilled' ? moonlightData.value : null;
+      const sunMoonWeatherData = sunMoonData.status === 'fulfilled' ? sunMoonData.value : null;
+
+      if (!basicWeatherData) {
         throw new Error('Basic weather data not available');
       }
 
@@ -55,11 +50,17 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
         name: params.locationName || `${params.lat.toFixed(2)}, ${params.lon.toFixed(2)}`
       };
 
-      const result = weatherService.transformMeteoblueData(basicData, location, cloudData, moonlightData, sunMoonData);
+      const result = weatherService.transformMeteoblueData(
+        basicWeatherData,
+        location,
+        cloudWeatherData,
+        moonlightWeatherData,
+        sunMoonWeatherData
+      );
 
       return result;
     },
-    enabled: Boolean(params && hasBasicData),
+    enabled: Boolean(params),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes (longer cache)
     refetchOnMount: false, // Prevent unnecessary refetch on mount
@@ -70,12 +71,6 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
     // Reduce retry attempts to prevent delays
     retry: 1,
     retryDelay: 1000,
-    // Add meta to track loading states
-    meta: {
-      isLoading,
-      hasBasicData,
-      supplementaryDataReady,
-    },
   });
 };
 

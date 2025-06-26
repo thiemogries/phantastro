@@ -36,8 +36,8 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
   const { data: forecast, isLoading, error: queryError, isFetching } = useWeatherData(weatherParams);
   const refreshWeatherData = useRefreshWeatherData();
 
-  // Stable loading state - show loading on initial load or when fetching without data
-  const loading = (isInitialLoad && !forecast && !queryError) || (isLoading && !forecast);
+  // Stable loading state - only show loading when actually fetching and no data exists
+  const loading = isLoading && !forecast;
 
   // Mark initial load as complete when we get data or error
   React.useEffect(() => {
@@ -123,7 +123,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
       )}
 
       {/* Weather Content */}
-      {forecast && !loading && (
+      {forecast && (
         <div className="weather-app__content" data-initial-load={isInitialLoad ? "true" : "false"}>
           {/* Location Info */}
           <div className="weather-app__location">
