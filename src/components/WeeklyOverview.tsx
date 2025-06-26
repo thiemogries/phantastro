@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { Tooltip } from 'react-tooltip';
-import 'react-tooltip/dist/react-tooltip.css';
 import { HourlyForecast, DailyForecast } from '../types/weather';
 import {
   getCloudCoverageInfo,
@@ -47,34 +45,25 @@ const getRainDescription = (precipitation: number | null | undefined, probabilit
   return 'No Rain';
 };
 
-const getTooltipContent = (hour: HourlyForecast): string => {
-  const time = formatTime(hour.time);
-  const clouds = `${hour.cloudCover.totalCloudCover?.toFixed(0) ?? 'N/A'}% (${getCloudDescription(hour.cloudCover.totalCloudCover)})`;
-  const rain = `${hour.precipitation.precipitationProbability?.toFixed(0) ?? 'N/A'}% (${getRainDescription(hour.precipitation.precipitation, hour.precipitation.precipitationProbability)})`;
-  const visibility = `${hour.visibility?.toFixed(1) ?? 'N/A'}km (${getVisibilityQuality(hour.visibility)})`;
-  const moonlight = `${hour.moonlight?.moonlightClearSky?.toFixed(1) ?? 'N/A'}%`;
-  const wind = `${hour.windSpeed?.toFixed(1) ?? 'N/A'} m/s`;
-  const temperature = hour.temperature !== null ? `<div>🌡️ Temp: ${hour.temperature.toFixed(1)}°C</div>` : '';
 
-  return `
-    <div style="font-size: 0.75rem; line-height: 1.4;">
-      <div style="font-weight: bold; margin-bottom: 4px;">${time}</div>
-      <div>☁️ Clouds: ${clouds}</div>
-      <div>🌧️ Rain: ${rain}</div>
-      <div>👁️ Visibility: ${visibility}</div>
-      <div>🌙 Moonlight: ${moonlight}</div>
-      <div>💨 Wind: ${wind}</div>
-      ${temperature}
-    </div>
-  `;
-};
 
 const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   hourlyData,
   dailyData,
   className
 }) => {
-  const [hoveredHour, setHoveredHour] = useState<number | null>(null);
+  const [hoveredCell, setHoveredCell] = useState<{dayIndex: number, hourIndex: number} | null>(null);
+  const [tooltipData, setTooltipData] = useState<HourlyForecast | null>(null);
+
+  const handleHourHover = (dayIndex: number, hourIndex: number, hour: HourlyForecast | null) => {
+    setHoveredCell({dayIndex, hourIndex});
+    setTooltipData(hour);
+  };
+
+  const handleHourLeave = () => {
+    setHoveredCell(null);
+    setTooltipData(null);
+  };
 
 
   // Group hourly data by day
@@ -136,9 +125,9 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
               {Array.from({ length: 24 }, (_, hourIndex) => (
                 <div
                   key={hourIndex}
-                  className={`hour-label ${hoveredHour === hourIndex ? 'highlighted' : ''}`}
-                  onMouseEnter={() => setHoveredHour(hourIndex)}
-                  onMouseLeave={() => setHoveredHour(null)}
+                  className={`hour-label ${hoveredCell?.dayIndex === dayIndex && hoveredCell?.hourIndex === hourIndex ? 'highlighted' : ''}`}
+                  onMouseEnter={() => handleHourHover(dayIndex, hourIndex, groupedByDay[dayIndex]?.hours[hourIndex] || null)}
+                  onMouseLeave={handleHourLeave}
                 >
                   {hourIndex.toString().padStart(2, '0')}
                 </div>
@@ -150,7 +139,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
         {/* Cloud coverage row */}
         <div className="grid-row clouds-row">
           <div className="row-label">☁️ Clouds</div>
-          {groupedByDay.map(({ date, hours }) => (
+          {groupedByDay.map(({ date, hours }, dayIndex) => (
             <div key={`clouds-${date}`} className="day-hours">
               {Array.from({ length: 24 }, (_, hourIndex) => {
                 const hour = hours[hourIndex];
@@ -158,9 +147,9 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                   return (
                     <div
                       key={hourIndex}
-                      className={`hour-cell empty ${hoveredHour === hourIndex ? 'highlighted' : ''}`}
-                      onMouseEnter={() => setHoveredHour(hourIndex)}
-                      onMouseLeave={() => setHoveredHour(null)}
+                      className={`hour-cell empty ${hoveredCell?.dayIndex === dayIndex && hoveredCell?.hourIndex === hourIndex ? 'highlighted' : ''}`}
+                      onMouseEnter={() => handleHourHover(dayIndex, hourIndex, null)}
+                      onMouseLeave={handleHourLeave}
                     ></div>
                   );
                 }
@@ -172,15 +161,13 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                 return (
                   <div
                     key={hourIndex}
-                    className={`hour-cell cloud-cell ${hoveredHour === hourIndex ? 'highlighted' : ''}`}
+                    className={`hour-cell cloud-cell ${hoveredCell?.dayIndex === dayIndex && hoveredCell?.hourIndex === hourIndex ? 'highlighted' : ''}`}
                     style={{
                       backgroundColor: cloudInfo.color,
                       opacity: opacity
                     }}
-                    data-tooltip-id="hour-tooltip"
-                    data-tooltip-html={getTooltipContent(hour)}
-                    onMouseEnter={() => setHoveredHour(hourIndex)}
-                    onMouseLeave={() => setHoveredHour(null)}
+                    onMouseEnter={() => handleHourHover(dayIndex, hourIndex, hour)}
+                    onMouseLeave={handleHourLeave}
                   ></div>
                 );
               })}
@@ -191,7 +178,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
         {/* Precipitation row */}
         <div className="grid-row precipitation-row">
           <div className="row-label">🌧️ Rain</div>
-          {groupedByDay.map(({ date, hours }) => (
+          {groupedByDay.map(({ date, hours }, dayIndex) => (
             <div key={`rain-${date}`} className="day-hours">
               {Array.from({ length: 24 }, (_, hourIndex) => {
                 const hour = hours[hourIndex];
@@ -199,9 +186,9 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                   return (
                     <div
                       key={hourIndex}
-                      className={`hour-cell empty ${hoveredHour === hourIndex ? 'highlighted' : ''}`}
-                      onMouseEnter={() => setHoveredHour(hourIndex)}
-                      onMouseLeave={() => setHoveredHour(null)}
+                      className={`hour-cell empty ${hoveredCell?.dayIndex === dayIndex && hoveredCell?.hourIndex === hourIndex ? 'highlighted' : ''}`}
+                      onMouseEnter={() => handleHourHover(dayIndex, hourIndex, null)}
+                      onMouseLeave={handleHourLeave}
                     ></div>
                   );
                 }
@@ -211,15 +198,13 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                 return (
                   <div
                     key={hourIndex}
-                    className={`hour-cell precip-cell ${rainState.hasRain ? 'has-rain' : ''} ${hoveredHour === hourIndex ? 'highlighted' : ''}`}
+                    className={`hour-cell precip-cell ${rainState.hasRain ? 'has-rain' : ''} ${hoveredCell?.dayIndex === dayIndex && hoveredCell?.hourIndex === hourIndex ? 'highlighted' : ''}`}
                     style={{
                       backgroundColor: rainState.hasRain ? '#3b82f6' : 'transparent',
                       opacity: rainState.hasRain ? Math.max(0.3, rainState.intensity) : 0.1
                     }}
-                    data-tooltip-id="hour-tooltip"
-                    data-tooltip-html={getTooltipContent(hour)}
-                    onMouseEnter={() => setHoveredHour(hourIndex)}
-                    onMouseLeave={() => setHoveredHour(null)}
+                    onMouseEnter={() => handleHourHover(dayIndex, hourIndex, hour)}
+                    onMouseLeave={handleHourLeave}
                   ></div>
                 );
               })}
@@ -230,7 +215,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
         {/* Visibility row */}
         <div className="grid-row visibility-row">
           <div className="row-label">👁️ Visibility</div>
-          {groupedByDay.map(({ date, hours }) => (
+          {groupedByDay.map(({ date, hours }, dayIndex) => (
             <div key={`visibility-${date}`} className="day-hours">
               {Array.from({ length: 24 }, (_, hourIndex) => {
                 const hour = hours[hourIndex];
@@ -238,9 +223,9 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                   return (
                     <div
                       key={hourIndex}
-                      className={`hour-cell empty ${hoveredHour === hourIndex ? 'highlighted' : ''}`}
-                      onMouseEnter={() => setHoveredHour(hourIndex)}
-                      onMouseLeave={() => setHoveredHour(null)}
+                      className={`hour-cell empty ${hoveredCell?.dayIndex === dayIndex && hoveredCell?.hourIndex === hourIndex ? 'highlighted' : ''}`}
+                      onMouseEnter={() => handleHourHover(dayIndex, hourIndex, null)}
+                      onMouseLeave={handleHourLeave}
                     ></div>
                   );
                 }
@@ -264,15 +249,13 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                 return (
                   <div
                     key={hourIndex}
-                    className={`hour-cell visibility-cell ${hoveredHour === hourIndex ? 'highlighted' : ''}`}
+                    className={`hour-cell visibility-cell ${hoveredCell?.dayIndex === dayIndex && hoveredCell?.hourIndex === hourIndex ? 'highlighted' : ''}`}
                     style={{
                       backgroundColor: visibilityColor,
                       opacity
                     }}
-                    data-tooltip-id="hour-tooltip"
-                    data-tooltip-html={getTooltipContent(hour)}
-                    onMouseEnter={() => setHoveredHour(hourIndex)}
-                    onMouseLeave={() => setHoveredHour(null)}
+                    onMouseEnter={() => handleHourHover(dayIndex, hourIndex, hour)}
+                    onMouseLeave={handleHourLeave}
                   ></div>
                 );
               })}
@@ -283,7 +266,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
         {/* Moonlight row */}
         <div className="grid-row moonlight-row">
           <div className="row-label">🌙 Moonlight</div>
-          {groupedByDay.map(({ date, hours }) => (
+          {groupedByDay.map(({ date, hours }, dayIndex) => (
             <div key={`moonlight-${date}`} className="day-hours">
               {Array.from({ length: 24 }, (_, hourIndex) => {
                 const hour = hours[hourIndex];
@@ -291,9 +274,9 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                   return (
                     <div
                       key={hourIndex}
-                      className={`hour-cell empty ${hoveredHour === hourIndex ? 'highlighted' : ''}`}
-                      onMouseEnter={() => setHoveredHour(hourIndex)}
-                      onMouseLeave={() => setHoveredHour(null)}
+                      className={`hour-cell empty ${hoveredCell?.dayIndex === dayIndex && hoveredCell?.hourIndex === hourIndex ? 'highlighted' : ''}`}
+                      onMouseEnter={() => handleHourHover(dayIndex, hourIndex, null)}
+                      onMouseLeave={handleHourLeave}
                     ></div>
                   );
                 }
@@ -308,15 +291,13 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                 return (
                   <div
                     key={hourIndex}
-                    className={`hour-cell moonlight-cell ${hoveredHour === hourIndex ? 'highlighted' : ''}`}
+                    className={`hour-cell moonlight-cell ${hoveredCell?.dayIndex === dayIndex && hoveredCell?.hourIndex === hourIndex ? 'highlighted' : ''}`}
                     style={{
                       backgroundColor: '#4338ca',
                       opacity
                     }}
-                    data-tooltip-id="hour-tooltip"
-                    data-tooltip-html={getTooltipContent(hour)}
-                    onMouseEnter={() => setHoveredHour(hourIndex)}
-                    onMouseLeave={() => setHoveredHour(null)}
+                    onMouseEnter={() => handleHourHover(dayIndex, hourIndex, hour)}
+                    onMouseLeave={handleHourLeave}
                   ></div>
                 );
               })}
@@ -554,6 +535,27 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
         </div>
       </div>
 
+      {/* Fixed position tooltip */}
+      {tooltipData && hoveredCell !== null && (
+        <div className="grid-tooltip">
+          <div className="tooltip-content">
+            <div className="tooltip-header">
+              <strong>{formatTime(tooltipData.time)} - Hour {hoveredCell.hourIndex.toString().padStart(2, '0')}</strong>
+            </div>
+            <div className="tooltip-body">
+              <div>☁️ Clouds: {tooltipData.cloudCover.totalCloudCover?.toFixed(0) ?? 'N/A'}% ({getCloudDescription(tooltipData.cloudCover.totalCloudCover)})</div>
+              <div>🌧️ Rain: {tooltipData.precipitation.precipitationProbability?.toFixed(0) ?? 'N/A'}% ({getRainDescription(tooltipData.precipitation.precipitation, tooltipData.precipitation.precipitationProbability)})</div>
+              <div>👁️ Visibility: {tooltipData.visibility?.toFixed(1) ?? 'N/A'}km ({getVisibilityQuality(tooltipData.visibility)})</div>
+              <div>🌙 Moonlight: {tooltipData.moonlight?.moonlightClearSky?.toFixed(1) ?? 'N/A'}%</div>
+              <div>💨 Wind: {tooltipData.windSpeed?.toFixed(1) ?? 'N/A'} m/s</div>
+              {tooltipData.temperature !== null && (
+                <div>🌡️ Temp: {tooltipData.temperature.toFixed(1)}°C</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Summary Row */}
       <div className="overview-summary">
         <div className="summary-item">
@@ -604,21 +606,6 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           </span>
         </div>
       </div>
-
-      {/* React Tooltip */}
-      <Tooltip
-        id="hour-tooltip"
-        place="top"
-        style={{
-          backgroundColor: 'rgba(0, 0, 0, 0.9)',
-          color: 'white',
-          borderRadius: '6px',
-          fontSize: '0.75rem',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          backdropFilter: 'blur(10px)',
-          maxWidth: '300px'
-        }}
-      />
     </div>
   );
 };

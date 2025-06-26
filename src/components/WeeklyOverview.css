@@ -164,6 +164,47 @@
   border: 1px solid rgba(67, 56, 202, 0.3);
 }
 
+/* Fixed position grid tooltip */
+.grid-tooltip {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.tooltip-content {
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  font-size: 0.75rem;
+  min-width: 200px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.tooltip-header {
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 4px;
+}
+
+.tooltip-body {
+  line-height: 1.4;
+}
+
+.tooltip-body > div {
+  margin-bottom: 2px;
+}
+
+.tooltip-body > div:last-child {
+  margin-bottom: 0;
+}
+
 /* Timeline tracks for sun/moon lines */
 .day-timeline {
   padding: 4px 2px;
