@@ -97,7 +97,7 @@
   display: grid;
   grid-template-columns: repeat(24, 1fr);
   gap: 2px;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
   align-items: center;
 }
 
@@ -108,7 +108,7 @@
 }
 
 .hourly-cell {
-  height: 10px;
+  height: 6px;
   border-radius: 2px;
   transition: all 0.2s ease;
   cursor: pointer;
