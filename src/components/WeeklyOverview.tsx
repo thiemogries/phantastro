@@ -227,19 +227,15 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                       const visibility = hour.visibility;
                       const hasVisibility = visibility !== null && visibility !== undefined;
 
-                      // Create smooth red-to-green gradient based on visibility distance
-                      // Red for poor visibility (<5km), green for excellent visibility (>20km)
+                      // Use three fixed colors based on visibility thresholds
                       const getVisibilityColor = (vis: number): string => {
-                        // Clamp visibility between 0 and 25km for color calculation
-                        const clampedVis = Math.max(0, Math.min(25, vis));
-                        const ratio = clampedVis / 25; // 0 = red, 1 = green
-
-                        // Interpolate from red (255,68,68) to green (34,197,94)
-                        const red = Math.round(255 - (255 - 34) * ratio);
-                        const green = Math.round(68 + (197 - 68) * ratio);
-                        const blue = Math.round(68 + (94 - 68) * ratio);
-
-                        return `rgb(${red}, ${green}, ${blue})`;
+                        if (vis >= 20) {
+                          return '#22c55e'; // Green for good visibility (≥20km)
+                        } else if (vis >= 10) {
+                          return '#f59e0b'; // Orange for moderate visibility (10-19km)
+                        } else {
+                          return '#ef4444'; // Red for poor visibility (<10km)
+                        }
                       };
 
                       const visibilityColor = hasVisibility ? getVisibilityColor(visibility) : '#6b7280';
@@ -254,7 +250,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                             backgroundColor: visibilityColor,
                             opacity
                           }}
-                          title={`${formatTime(hour.time)}: ${hasVisibility ? `${visibility.toFixed(1)}km` : 'N/A'} visibility`}
+                          title={`${formatTime(hour.time)}: ${hasVisibility ? `${visibility.toFixed(1)}km visibility ${visibility >= 20 ? '(Good)' : visibility >= 10 ? '(Moderate)' : '(Poor)'}` : 'N/A visibility'}`}
                         ></div>
                       );
                     })}
