@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HourlyForecast, DailyForecast } from '../types/weather';
 import {
-  formatTime,
   getCloudCoverageInfo,
   getRainState
 } from '../utils/weatherUtils';
@@ -13,11 +12,118 @@ interface WeeklyOverviewProps {
   className?: string;
 }
 
+// Tooltip component for hour segments
+const HourTooltip: React.FC<{
+  hour: HourlyForecast;
+  position: { x: number; y: number };
+  visible: boolean;
+}> = ({ hour, position, visible }) => {
+  if (!visible) return null;
+
+  const formatTime = (timeStr: string) => {
+    return new Date(timeStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const getVisibilityQuality = (vis: number | null | undefined) => {
+    if (vis === null || vis === undefined) return 'N/A';
+    if (vis >= 20) return 'Good';
+    if (vis >= 10) return 'Moderate';
+    return 'Poor';
+  };
+
+  const getCloudDescription = (clouds: number | null | undefined) => {
+    if (clouds === null || clouds === undefined) return 'N/A';
+    if (clouds >= 75) return 'Overcast';
+    if (clouds >= 50) return 'Mostly Cloudy';
+    if (clouds >= 25) return 'Partly Cloudy';
+    return 'Clear';
+  };
+
+  const getRainDescription = (precipitation: number | null | undefined, probability: number | null | undefined) => {
+    if ((precipitation === null || precipitation === undefined) && (probability === null || probability === undefined)) return 'N/A';
+    if (precipitation && precipitation > 0) {
+      if (precipitation >= 2.5) return 'Heavy Rain';
+      if (precipitation >= 0.5) return 'Moderate Rain';
+      return 'Light Rain';
+    }
+    if (probability && probability > 60) return 'High Chance';
+    if (probability && probability > 30) return 'Moderate Chance';
+    if (probability && probability > 0) return 'Low Chance';
+    return 'No Rain';
+  };
+
+  return (
+    <div
+      className="hour-tooltip"
+      style={{
+        position: 'fixed',
+        left: position.x,
+        top: position.y - 10,
+        transform: 'translateX(-50%) translateY(-100%)',
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        color: 'white',
+        padding: '8px 12px',
+        borderRadius: '6px',
+        fontSize: '0.75rem',
+        whiteSpace: 'nowrap',
+        zIndex: 1000,
+        pointerEvents: 'none',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        backdropFilter: 'blur(10px)',
+      }}
+    >
+      <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+        {formatTime(hour.time)}
+      </div>
+      <div>☁️ Clouds: {hour.cloudCover.totalCloudCover?.toFixed(0) ?? 'N/A'}% ({getCloudDescription(hour.cloudCover.totalCloudCover)})</div>
+      <div>🌧️ Rain: {hour.precipitation.precipitationProbability?.toFixed(0) ?? 'N/A'}% ({getRainDescription(hour.precipitation.precipitation, hour.precipitation.precipitationProbability)})</div>
+      <div>👁️ Visibility: {hour.visibility?.toFixed(1) ?? 'N/A'}km ({getVisibilityQuality(hour.visibility)})</div>
+      <div>🌙 Moonlight: {hour.moonlight?.moonlightClearSky?.toFixed(1) ?? 'N/A'}%</div>
+      <div>💨 Wind: {hour.windSpeed?.toFixed(1) ?? 'N/A'} m/s</div>
+      {hour.temperature !== null && (
+        <div>🌡️ Temp: {hour.temperature.toFixed(1)}°C</div>
+      )}
+    </div>
+  );
+};
+
 const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   hourlyData,
   dailyData,
   className
 }) => {
+  const [tooltip, setTooltip] = useState<{
+    hour: HourlyForecast;
+    position: { x: number; y: number };
+    visible: boolean;
+  }>({
+    hour: {} as HourlyForecast,
+    position: { x: 0, y: 0 },
+    visible: false
+  });
+
+  const hideTooltip = () => {
+    setTooltip(prev => ({ ...prev, visible: false }));
+  };
+
+  const getHourFromPosition = (hours: HourlyForecast[], event: React.MouseEvent) => {
+    const element = event.currentTarget as HTMLElement;
+    const rect = element.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const hourIndex = Math.floor((x / rect.width) * 24);
+    return hours[Math.max(0, Math.min(23, hourIndex))] || hours[0];
+  };
+
+  const handleDayMouseMove = (hours: HourlyForecast[], event: React.MouseEvent) => {
+    const hour = getHourFromPosition(hours, event);
+    if (hour) {
+      setTooltip({
+        hour,
+        position: { x: event.clientX, y: event.clientY },
+        visible: true
+      });
+    }
+  };
 
 
   // Group hourly data by day
@@ -161,7 +267,11 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                 </div>
 
                 {/* Cloud coverage row */}
-                <div className="hourly-row cloud-row">
+                <div
+                  className="hourly-row cloud-row"
+                  onMouseMove={(e) => handleDayMouseMove(hours, e)}
+                  onMouseLeave={hideTooltip}
+                >
                   <div className="hourly-cells">
                     {Array.from({ length: 24 }, (_, i) => {
                       const hour = hours[i];
@@ -170,7 +280,8 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                       }
 
                       const cloudInfo = getCloudCoverageInfo(hour.cloudCover.totalCloudCover);
-                      const opacity = hour.cloudCover.totalCloudCover ? hour.cloudCover.totalCloudCover / 100 : 0;
+                      const opacity = hour.cloudCover.totalCloudCover !== null ?
+                        Math.max(0.2, hour.cloudCover.totalCloudCover / 100) : 0.1;
 
                       return (
                         <div
@@ -180,7 +291,6 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                             backgroundColor: cloudInfo.color,
                             opacity: opacity
                           }}
-                          title={`${formatTime(hour.time)}: ${hour.cloudCover.totalCloudCover !== null ? Math.round(hour.cloudCover.totalCloudCover) : 'N/A'}% clouds`}
                         ></div>
                       );
                     })}
@@ -190,7 +300,11 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
 
                 {/* Precipitation row */}
-                <div className="hourly-row precip-row">
+                <div
+                  className="hourly-row precip-row"
+                  onMouseMove={(e) => handleDayMouseMove(hours, e)}
+                  onMouseLeave={hideTooltip}
+                >
                   <div className="hourly-cells">
                     {Array.from({ length: 24 }, (_, i) => {
                       const hour = hours[i];
@@ -208,7 +322,6 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                             backgroundColor: rainState.hasRain ? '#3b82f6' : 'transparent',
                             opacity: rainState.hasRain ? Math.max(0.3, rainState.intensity) : 0.1
                           }}
-                          title={`${formatTime(hour.time)}: ${hour.precipitation.precipitationProbability !== null ? hour.precipitation.precipitationProbability + '% chance' : 'N/A'} of rain`}
                         ></div>
                       );
                     })}
@@ -216,7 +329,11 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                 </div>
 
                 {/* Visibility row */}
-                <div className="hourly-row visibility-row">
+                <div
+                  className="hourly-row visibility-row"
+                  onMouseMove={(e) => handleDayMouseMove(hours, e)}
+                  onMouseLeave={hideTooltip}
+                >
                   <div className="hourly-cells">
                     {Array.from({ length: 24 }, (_, i) => {
                       const hour = hours[i];
@@ -250,7 +367,6 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                             backgroundColor: visibilityColor,
                             opacity
                           }}
-                          title={`${formatTime(hour.time)}: ${hasVisibility ? `${visibility.toFixed(1)}km visibility ${visibility >= 20 ? '(Good)' : visibility >= 10 ? '(Moderate)' : '(Poor)'}` : 'N/A visibility'}`}
                         ></div>
                       );
                     })}
@@ -258,7 +374,11 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                 </div>
 
                 {/* Moonlight row */}
-                <div className="hourly-row moonlight-row">
+                <div
+                  className="hourly-row moonlight-row"
+                  onMouseMove={(e) => handleDayMouseMove(hours, e)}
+                  onMouseLeave={hideTooltip}
+                >
                   <div className="hourly-cells">
                     {Array.from({ length: 24 }, (_, i) => {
                       const hour = hours[i];
@@ -271,7 +391,6 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
                       // Moonlight intensity: 0% = new moon (best for deep sky), 100% = full moon (worst for deep sky)
                       // Use dark blue/purple for moonlight with transparency for no moonlight
-                      const moonlightColor = '#4338ca'; // Dark blue/purple color
                       // Use logarithmic scaling to better show small values while preserving true zero
                       // 0% moonlight = transparent, small values more visible, 100% = fully opaque
                       const opacity = hasMoonlight && moonlight > 0
@@ -283,10 +402,9 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                           key={i}
                           className="hourly-cell moonlight-cell"
                           style={{
-                            backgroundColor: moonlightColor,
+                            backgroundColor: '#4338ca', // Dark blue/purple base color
                             opacity
                           }}
-                          title={`${formatTime(hour.time)}: ${hasMoonlight ? `${moonlight.toFixed(2)}%` : 'N/A'} moonlight`}
                         ></div>
                       );
                     })}
@@ -508,6 +626,13 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           </span>
         </div>
       </div>
+
+      {/* Tooltip */}
+      <HourTooltip
+        hour={tooltip.hour}
+        position={tooltip.position}
+        visible={tooltip.visible}
+      />
     </div>
   );
 };
