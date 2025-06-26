@@ -108,7 +108,7 @@
 }
 
 .hourly-cell {
-  height: 16px;
+  height: 10px;
   border-radius: 2px;
   transition: all 0.2s ease;
   cursor: pointer;
@@ -164,7 +164,7 @@
 
 .line-track {
   position: relative;
-  height: 6px;
+  height: 2px;
 }
 
 .sun-line {
