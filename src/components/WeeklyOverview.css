@@ -6,9 +6,9 @@
   padding: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-  overflow-x: auto;
   overflow-y: visible;
   position: relative;
+  min-width: 600px;
 }
 
 .overview-header {
@@ -47,7 +47,6 @@
   gap: 1px;
   margin-bottom: 16px;
   border-radius: 8px;
-  overflow-x: auto;
   overflow-y: visible;
   background: rgba(255, 255, 255, 0.02);
 }
@@ -55,7 +54,7 @@
 /* Header row with day names */
 .grid-header {
   display: grid;
-  grid-template-columns: repeat(7, 170px);
+  grid-template-columns: repeat(7, 1fr);
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -63,6 +62,7 @@
   padding: 8px 4px;
   text-align: center;
   border-right: 1px solid rgba(255, 255, 255, 0.05);
+  min-width: 60px;
 }
 
 .day-name {
@@ -80,7 +80,7 @@
 /* Column-based grid structure */
 .grid-columns {
   display: grid;
-  grid-template-columns: repeat(7, 170px);
+  grid-template-columns: repeat(7, 1fr);
   gap: 1px;
 }
 
@@ -89,8 +89,9 @@
 /* Day column container */
 .day-column {
   display: grid;
-  grid-template-columns: repeat(24, 6px);
+  grid-template-columns: repeat(24, minmax(3px, 1fr));
   gap: 1px;
+  min-width: 80px;
 }
 
 /* Hour column - contains all cells for one hour vertically */
@@ -129,6 +130,7 @@
   transition: all 0.2s ease;
   border: 1px solid rgba(255, 255, 255, 0.05);
   position: relative;
+  min-width: 3px;
 }
 
 /* Hour labels */
@@ -192,7 +194,7 @@ body > .react-tooltip[id*="hour-"] {
 /* Grid rows for sun/moon timelines */
 .grid-row {
   display: grid;
-  grid-template-columns: repeat(7, 170px);
+  grid-template-columns: repeat(7, 1fr);
   gap: 1px;
   margin-top: 8px;
 }
@@ -313,15 +315,15 @@ body > .react-tooltip[id*="hour-"] {
   }
 
   .grid-header {
-    grid-template-columns: repeat(7, 130px);
+    grid-template-columns: repeat(7, 1fr);
   }
 
   .grid-columns {
-    grid-template-columns: repeat(7, 130px);
+    grid-template-columns: repeat(7, 1fr);
   }
 
   .grid-row {
-    grid-template-columns: repeat(7, 130px);
+    grid-template-columns: repeat(7, 1fr);
   }
 
   .day-name {
@@ -333,7 +335,7 @@ body > .react-tooltip[id*="hour-"] {
   }
 
   .day-column {
-    grid-template-columns: repeat(12, 7px);
+    grid-template-columns: repeat(12, 1fr);
   }
 
   .hour-column:nth-child(n+13) {
@@ -369,6 +371,8 @@ body > .react-tooltip[id*="hour-"] {
 @media (max-width: 480px) {
   .weekly-overview {
     padding: 8px;
+    min-width: 450px;
+    overflow-x: auto;
   }
 
   .overview-header h3 {
@@ -376,15 +380,15 @@ body > .react-tooltip[id*="hour-"] {
   }
 
   .grid-header {
-    grid-template-columns: repeat(7, 90px);
+    grid-template-columns: repeat(7, 1fr);
   }
 
   .grid-columns {
-    grid-template-columns: repeat(7, 90px);
+    grid-template-columns: repeat(7, 1fr);
   }
 
   .grid-row {
-    grid-template-columns: repeat(7, 90px);
+    grid-template-columns: repeat(7, 1fr);
   }
 
 
@@ -398,7 +402,8 @@ body > .react-tooltip[id*="hour-"] {
   }
 
   .day-column {
-    grid-template-columns: repeat(8, 9px);
+    grid-template-columns: repeat(8, 1fr);
+    min-width: 60px;
   }
 
   .hour-column:nth-child(n+9) {
