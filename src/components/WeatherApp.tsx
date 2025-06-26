@@ -36,8 +36,6 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
 
   const error = queryError ? (queryError as Error).message : null;
 
-
-
   const handleLocationSelect = (location: LocationSearchResult) => {
     if (loading) return; // Prevent duplicate requests
     console.log('📍 WeatherApp: Location selected:', location);
@@ -100,6 +98,8 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
               Last updated: {new Date(forecast.lastUpdated).toLocaleTimeString()}
             </p>
           </div>
+
+
 
           {/* Data Availability Notice */}
           {(forecast.hourlyForecast.length === 0 ||

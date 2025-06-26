@@ -4,11 +4,10 @@ import {
   HourlyForecast,
   DailyForecast,
   Location,
-  LocationSearchResult,
-  CloudData,
   PrecipitationData,
-  WeatherApiError,
-} from "../types/weather";
+  LocationSearchResult,
+  WeatherApiError
+} from '../types/weather';
 
 class WeatherService {
   private apiKey: string;
@@ -223,6 +222,9 @@ class WeatherService {
     const response = await axios.get(`${this.baseUrl}/basic-1h`, {
       params,
     });
+
+
+
     return response.data;
   }
 
@@ -262,20 +264,15 @@ class WeatherService {
       const response = await axios.get(`${this.baseUrl}/clouds-1h_clouds-day`, {
         params,
       });
+
+
+
       return response.data;
     } catch (error) {
-      console.warn(`⚠️ Failed to fetch cloud data, continuing without detailed cloud coverage:`, error instanceof Error ? error.message : 'Unknown error');
-      // Return empty cloud data structure if cloud API fails
-      return {
-        data_1h: {
-          time: [],
-          totalcloudcover: [],
-          lowclouds: [],
-          midclouds: [],
-          highclouds: [],
-          visibility: []
-        }
-      };
+
+      console.warn(`⚠️ Failed to fetch cloud data, will use basic weather fallback:`, error instanceof Error ? error.message : 'Unknown error');
+      // Return null to indicate failure - transformation will use basic weather fallback
+      return null;
     }
   }
 
@@ -404,6 +401,8 @@ class WeatherService {
     moonlightData?: any,
     sunMoonData?: any,
   ): WeatherForecast {
+
+
     // Transform hourly data
     const hourlyForecast: HourlyForecast[] = [];
 
@@ -474,26 +473,16 @@ class WeatherService {
 
       // First, process all available real data
       for (let i = 0; i < availableHours; i++) {
-        // 24 hours of hourly data
-        const cloudCoverData: CloudData = {
-          totalCloudCover: cloudData?.data_1h?.totalcloudcover?.[i] ?? null,
-          lowCloudCover: cloudData?.data_1h?.lowclouds?.[i] ?? null,
-          midCloudCover: cloudData?.data_1h?.midclouds?.[i] ?? null,
-          highCloudCover: cloudData?.data_1h?.highclouds?.[i] ?? null,
-        };
+
+
+
 
         const precipitationData: PrecipitationData = {
           precipitation: data.data_1h.precipitation?.[i] ?? null,
           precipitationProbability: data.data_1h.precipitation_probability?.[i] ?? null,
         };
 
-        const moonlightDataPoint = {
-          moonlightActual: moonlightData?.data_1h?.moonlight_actual?.[i] ?? null,
-          moonlightClearSky: moonlightData?.data_1h?.moonlight_clearsky?.[i] ?? null,
-          nightSkyBrightnessActual: moonlightData?.data_1h?.nightskybrightness_actual?.[i] ?? null,
-          nightSkyBrightnessClearSky: moonlightData?.data_1h?.nightskybrightness_clearsky?.[i] ?? null,
-          zenithAngle: moonlightData?.data_1h?.zenithangle?.[i] ?? null,
-        };
+
 
         // Validate precipitation data
         if (precipitationData.precipitation !== null && precipitationData.precipitation < 0) {
@@ -515,16 +504,55 @@ class WeatherService {
           zenithAngle: null,
         };
 
+        // Safe data extraction with fallbacks
+        const safeExtractValue = (dataPath: any, index: number, fieldName: string): number | null => {
+          try {
+            const value = dataPath?.[index];
+
+            if (value === null || value === undefined || isNaN(value)) {
+              return null;
+            }
+            return typeof value === 'number' ? value : parseFloat(value);
+          } catch (error) {
+
+            return null;
+          }
+        };
+
         const hourData = {
           time: data.data_1h.time[i],
-          temperature: data.data_1h.temperature?.[i] ?? null,
+          temperature: safeExtractValue(data.data_1h.temperature, i, 'temperature'),
           humidity: null, // Not available in this API response
-          windSpeed: data.data_1h.windspeed?.[i] ?? null,
+          windSpeed: safeExtractValue(data.data_1h.windspeed, i, 'windspeed'),
           windDirection: null, // Not available in this API response
-          cloudCover: cloudCoverData,
-          precipitation: precipitationData,
-          moonlight: moonlightData ? moonlightDataPoint : defaultMoonlightData,
-          visibility: cloudData?.data_1h?.visibility?.[i] ? cloudData.data_1h.visibility[i] / 1000 : null, // Convert from meters to kilometers
+          cloudCover: {
+            totalCloudCover: (() => {
+              // Try dedicated cloud data first
+              const cloudValue = safeExtractValue(cloudData?.data_1h?.totalcloudcover, i, 'totalcloudcover');
+              if (cloudValue !== null) return cloudValue;
+
+              // Fallback to basic weather data
+              return safeExtractValue(data.data_1h?.cloudcover, i, 'cloudcover_fallback');
+            })(),
+            lowCloudCover: safeExtractValue(cloudData?.data_1h?.lowclouds, i, 'lowclouds'),
+            midCloudCover: safeExtractValue(cloudData?.data_1h?.midclouds, i, 'midclouds'),
+            highCloudCover: safeExtractValue(cloudData?.data_1h?.highclouds, i, 'highclouds'),
+          },
+          precipitation: {
+            precipitation: safeExtractValue(data.data_1h.precipitation, i, 'precipitation'),
+            precipitationProbability: safeExtractValue(data.data_1h.precipitation_probability, i, 'precipitation_probability'),
+          },
+          moonlight: moonlightData ? {
+            moonlightActual: safeExtractValue(moonlightData.data_1h?.moonlight_actual, i, 'moonlight_actual'),
+            moonlightClearSky: safeExtractValue(moonlightData.data_1h?.moonlight_clearsky, i, 'moonlight_clearsky'),
+            nightSkyBrightnessActual: safeExtractValue(moonlightData.data_1h?.nightskybrightness_actual, i, 'nightskybrightness_actual'),
+            nightSkyBrightnessClearSky: safeExtractValue(moonlightData.data_1h?.nightskybrightness_clearsky, i, 'nightskybrightness_clearsky'),
+            zenithAngle: safeExtractValue(moonlightData.data_1h?.zenithangle, i, 'zenithangle'),
+          } : defaultMoonlightData,
+          visibility: (() => {
+            const visibilityValue = safeExtractValue(cloudData?.data_1h?.visibility, i, 'visibility');
+            return visibilityValue !== null ? visibilityValue / 1000 : null;
+          })(), // Convert from meters to kilometers
         };
 
         // Validate temperature and wind speed

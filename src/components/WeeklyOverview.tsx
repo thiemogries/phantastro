@@ -6,6 +6,7 @@ import {
   getCloudCoverageInfo,
   getRainState
 } from '../utils/weatherUtils';
+
 import './WeeklyOverview.css';
 
 interface WeeklyOverviewProps {
@@ -58,10 +59,12 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
   // Group hourly data by day
   const groupedByDay = React.useMemo(() => {
-    if (!hourlyData || hourlyData.length === 0) return [];
+    if (!hourlyData || hourlyData.length === 0) {
+      return [];
+    }
 
     const days: { [key: string]: HourlyForecast[] } = {};
-    hourlyData.slice(0, 168).forEach(hour => { // 7 days * 24 hours = 168
+    hourlyData.slice(0, 168).forEach((hour, index) => { // 7 days * 24 hours = 168
       const date = hour.time.split('T')[0];
       if (!days[date]) days[date] = [];
       days[date].push(hour);
@@ -124,14 +127,20 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
         {/* Column-based grid structure for CSS-only hover effects */}
         <div className="grid-columns">
-          {Array.from({ length: 7 }, (_, dayIndex) => (
-            <div key={groupedByDay[dayIndex]?.date || `empty-${dayIndex}`} className="day-column">
-              {Array.from({ length: 24 }, (_, hourIndex) => {
-                const hour = groupedByDay[dayIndex]?.hours[hourIndex];
-                const tooltipId = `hour-${dayIndex}-${hourIndex}`;
+          {Array.from({ length: 7 }, (_, dayIndex) => {
+            // Create stable key that doesn't change on rerender
+            const dayData = groupedByDay[dayIndex];
+            const stableKey = dayData?.date || `empty-${dayIndex}`;
 
-                return (
-                  <div key={hourIndex} className="hour-column" data-tooltip-id={tooltipId}>
+            return (
+              <div key={stableKey} className="day-column">
+                {Array.from({ length: 24 }, (_, hourIndex) => {
+                  const hour = dayData?.hours[hourIndex];
+                  const tooltipId = `hour-${dayIndex}-${hourIndex}`;
+                  const cellKey = `${stableKey}-${hourIndex}`;
+
+                  return (
+                    <div key={cellKey} className="hour-column" data-tooltip-id={tooltipId}>
                     {/* Cloud cell */}
                     <div
                       className="hour-cell cloud-cell"
@@ -186,11 +195,12 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                       })() : { background: 'rgba(255, 255, 255, 0.05)', opacity: 0.3 }}
                     ></div>
 
-                  </div>
-                );
-              })}
-            </div>
-          ))}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
         </div>
 
         {/* Tooltips for all hour columns - rendered in portal to break out of container */}
@@ -216,9 +226,9 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                       maxWidth: '180px',
                       zIndex: 1000,
                       borderRadius: '8px',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
                     }}
+                    border="1px solid rgba(255, 255, 255, 0.2)"
                   >
                     <div style={{ marginBottom: '8px', fontSize: '0.8rem', borderBottom: '1px solid rgba(255, 255, 255, 0.2)', paddingBottom: '4px' }}>
                       <strong>{formatTime(hour.time)}</strong>

@@ -37,7 +37,11 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
       const moonlightData = moonlightDataQuery.data;
       const sunMoonData = sunMoonDataQuery.data;
 
-      if (!basicData) throw new Error('Basic weather data not available');
+      if (!basicData) {
+        throw new Error('Basic weather data not available');
+      }
+
+
 
       const location: Location = {
         lat: params.lat,
@@ -46,11 +50,17 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
       };
 
       const result = weatherService.transformMeteoblueData(basicData, location, cloudData, moonlightData, sunMoonData);
+
+
+
       return result;
     },
-    enabled: !!params && basicWeatherQuery.isSuccess,
+    enabled: !!params && basicWeatherQuery.isSuccess &&
+             (!cloudDataQuery.isLoading && !moonlightDataQuery.isLoading && !sunMoonDataQuery.isLoading),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnMount: true, // Ensure fresh data on component mount
+    refetchOnReconnect: true, // Refetch when connection is restored
   });
 };
 
