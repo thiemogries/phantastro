@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { WeatherForecast, LocationSearchResult } from '../types/weather';
+import { WeatherForecast, LocationSearchResult, Location } from '../types/weather';
 import weatherService from '../services/weatherService';
 
 export interface WeatherQueryParams {
@@ -39,17 +39,13 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
 
       if (!basicData) throw new Error('Basic weather data not available');
 
-      console.log('🔄 Combining weather data for:', params);
-
-      const location = {
+      const location: Location = {
         lat: params.lat,
         lon: params.lon,
-        name: params.locationName || `${params.lat.toFixed(2)}, ${params.lon.toFixed(2)}`,
-        timezone: basicData.metadata?.timezone_abbreviation,
+        name: params.locationName || `${params.lat.toFixed(2)}, ${params.lon.toFixed(2)}`
       };
 
       const result = weatherService.transformMeteoblueData(basicData, location, cloudData, moonlightData, sunMoonData);
-      console.log('✅ Weather data combined successfully');
       return result;
     },
     enabled: !!params && basicWeatherQuery.isSuccess,
@@ -66,12 +62,7 @@ export const useBasicWeatherData = (params: WeatherQueryParams | null) => {
     queryKey: params ? WEATHER_QUERY_KEYS.basicWeather(params.lat, params.lon) : ['basicWeather', 'disabled'],
     queryFn: async (): Promise<any> => {
       if (!params) throw new Error('No location parameters provided');
-      console.log('🌍 Fetching basic weather data for:', params);
-      const startTime = Date.now();
-      const result = await weatherService.fetchBasicWeatherData(params.lat, params.lon);
-      const loadTime = Date.now() - startTime;
-      console.log(`✅ Basic weather data loaded successfully in ${loadTime}ms`);
-      return result;
+      return await weatherService.fetchBasicWeatherData(params.lat, params.lon);
     },
     enabled: !!params,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -95,12 +86,7 @@ export const useCloudData = (params: WeatherQueryParams | null) => {
     queryKey: params ? WEATHER_QUERY_KEYS.cloudData(params.lat, params.lon) : ['cloudData', 'disabled'],
     queryFn: async (): Promise<any> => {
       if (!params) throw new Error('No location parameters provided');
-      console.log('☁️ Fetching cloud data for:', params);
-      const startTime = Date.now();
-      const result = await weatherService.fetchCloudData(params.lat, params.lon);
-      const loadTime = Date.now() - startTime;
-      console.log(`✅ Cloud data loaded successfully in ${loadTime}ms`);
-      return result;
+      return await weatherService.fetchCloudData(params.lat, params.lon);
     },
     enabled: !!params,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -124,12 +110,7 @@ export const useMoonlightData = (params: WeatherQueryParams | null) => {
     queryKey: params ? WEATHER_QUERY_KEYS.moonlightData(params.lat, params.lon) : ['moonlightData', 'disabled'],
     queryFn: async (): Promise<any> => {
       if (!params) throw new Error('No location parameters provided');
-      console.log('🌙 Fetching moonlight data for:', params);
-      const startTime = Date.now();
-      const result = await weatherService.fetchMoonlightData(params.lat, params.lon);
-      const loadTime = Date.now() - startTime;
-      console.log(`✅ Moonlight data loaded successfully in ${loadTime}ms`);
-      return result;
+      return await weatherService.fetchMoonlightData(params.lat, params.lon);
     },
     enabled: !!params,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -153,12 +134,7 @@ export const useSunMoonData = (params: WeatherQueryParams | null) => {
     queryKey: params ? WEATHER_QUERY_KEYS.sunMoonData(params.lat, params.lon) : ['sunMoonData', 'disabled'],
     queryFn: async (): Promise<any> => {
       if (!params) throw new Error('No location parameters provided');
-      console.log('☀️🌙 Fetching sun/moon data for:', params);
-      const startTime = Date.now();
-      const result = await weatherService.fetchSunMoonData(params.lat, params.lon);
-      const loadTime = Date.now() - startTime;
-      console.log(`✅ Sun/moon data loaded successfully in ${loadTime}ms`);
-      return result;
+      return await weatherService.fetchSunMoonData(params.lat, params.lon);
     },
     enabled: !!params,
     staleTime: 60 * 60 * 1000, // 1 hour (sun/moon times don't change frequently)
@@ -181,10 +157,7 @@ export const useLocationSearch = () => {
   return useMutation({
     mutationFn: async (query: string): Promise<LocationSearchResult[]> => {
       if (!query.trim()) return [];
-      console.log('🔍 Searching locations for:', query);
-      const results = await weatherService.searchLocations(query);
-      console.log('📍 Found locations:', results.length);
-      return results;
+      return await weatherService.searchLocations(query);
     },
     retry: 1,
   });
@@ -198,10 +171,7 @@ export const useLocationSearch = () => {
 export const useValidateApiKey = () => {
   return useMutation({
     mutationFn: async (): Promise<boolean> => {
-      console.log('🔑 Validating API key...');
-      const isValid = await weatherService.validateApiKey();
-      console.log('🔑 API key validation result:', isValid);
-      return isValid;
+      return await weatherService.validateApiKey();
     },
     retry: false,
   });
@@ -215,7 +185,6 @@ export const useRefreshWeatherData = () => {
 
   return useMutation({
     mutationFn: async (params: WeatherQueryParams) => {
-      console.log('🔄 Refreshing weather data for:', params);
       // Invalidate and refetch all related queries
       await Promise.all([
         queryClient.invalidateQueries({
@@ -236,12 +205,7 @@ export const useRefreshWeatherData = () => {
       ]);
       return params;
     },
-    onSuccess: (params) => {
-      console.log('✅ Weather data refresh initiated for:', params);
-    },
-    onError: (error) => {
-      console.error('❌ Weather data refresh failed:', error);
-    },
+
   });
 };
 
