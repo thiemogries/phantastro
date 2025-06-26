@@ -115,10 +115,39 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.hourly-cell:hover {
-  transform: scale(1.1);
+.hourly-cell:hover,
+.hourly-cell.hour-column-highlight {
+  transform: scaleY(1.5);
   z-index: 10;
   position: relative;
+  transition: transform 0.15s ease-out;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+/* Add subtle column separators */
+.hourly-cell:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+/* Enhanced column highlight effect */
+.hourly-cell.hour-column-highlight::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .hourly-cell.empty {

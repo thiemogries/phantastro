@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
 import { HourlyForecast, DailyForecast } from '../types/weather';
@@ -74,6 +74,51 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   dailyData,
   className
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleMouseEnter = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.classList.contains('hourly-cell')) return;
+
+      // Find the hour index from the cell's position
+      const cells = Array.from(target.parentElement?.children || []);
+      const hourIndex = cells.indexOf(target);
+
+      if (hourIndex === -1) return;
+
+      // Highlight all cells in the same hour column across all rows
+      const allRows = container.querySelectorAll('.hourly-cells');
+      allRows.forEach(row => {
+        const cell = row.children[hourIndex] as HTMLElement;
+        if (cell) {
+          cell.classList.add('hour-column-highlight');
+        }
+      });
+    };
+
+    const handleMouseLeave = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.classList.contains('hourly-cell')) return;
+
+      // Remove highlight from all cells
+      const highlightedCells = container.querySelectorAll('.hour-column-highlight');
+      highlightedCells.forEach(cell => {
+        cell.classList.remove('hour-column-highlight');
+      });
+    };
+
+    container.addEventListener('mouseenter', handleMouseEnter, true);
+    container.addEventListener('mouseleave', handleMouseLeave, true);
+
+    return () => {
+      container.removeEventListener('mouseenter', handleMouseEnter, true);
+      container.removeEventListener('mouseleave', handleMouseLeave, true);
+    };
+  }, []);
 
 
   // Group hourly data by day
@@ -106,7 +151,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   }
 
   return (
-    <div className={`weekly-overview ${className || ''}`}>
+    <div className={`weekly-overview ${className || ''}`} ref={containerRef}>
       <div className="overview-header">
         <h3>7-Day Hourly Outlook</h3>
       </div>
