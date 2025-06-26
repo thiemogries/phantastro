@@ -1,9 +1,51 @@
 /* Phantastro - Stellar Weather App Styles */
 
+:root {
+    /* Color Palette */
+    --primary-color: #7c3aed;
+    --primary-light: #8b5cf6;
+    --primary-dark: #5b21b6;
+    --accent-color: #4f46e5;
+    --background-dark: #0f0f1a;
+    --background-medium: #1a1a2e;
+    --background-light: #16213e;
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.8);
+    --text-tertiary: rgba(255, 255, 255, 0.6);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --border-hover: rgba(255, 255, 255, 0.2);
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-hover: rgba(255, 255, 255, 0.08);
+
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+
+    /* Border Radius */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.2);
+    --shadow-glow: 0 0 20px rgba(124, 58, 237, 0.3);
+
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
 .App {
     min-height: 100vh;
-    background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--background-dark) 0%, var(--background-medium) 50%, var(--background-light) 100%);
+    color: var(--text-primary);
     font-family:
         -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
     position: relative;
@@ -81,24 +123,83 @@ html {
     color: #ffffff;
 }
 
-/* Focus outline for accessibility */
+/* Enhanced focus management for accessibility */
 *:focus {
-    outline: 2px solid #7c3aed;
+    outline: none;
+}
+
+*:focus-visible {
+    outline: 2px solid var(--primary-color);
     outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.2);
+}
+
+/* Skip to main content link for screen readers */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: var(--primary-color);
+    color: white;
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    z-index: 1000;
+    transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+    top: 6px;
+}
+
+/* Improved focus styles for interactive elements */
+button:focus-visible,
+input:focus-visible,
+[role="button"]:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.2);
 }
 
 /* Button reset and styling */
 button {
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal);
+    border: none;
+    background: none;
+    font-family: inherit;
 }
 
-button:hover {
+button:hover:not(:disabled) {
     transform: translateY(-1px);
 }
 
-button:active {
+button:active:not(:disabled) {
     transform: translateY(0);
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .App::before {
+        animation: none;
+    }
+
+    button:hover {
+        transform: none;
+    }
 }
 
 /* Card and panel shadows */
@@ -116,20 +217,45 @@ button:active {
     pointer-events: none;
 }
 
+/* State colors using CSS custom properties */
+:root {
+    --color-error: #ef4444;
+    --color-success: #22c55e;
+    --color-warning: #f59e0b;
+    --color-info: #3b82f6;
+}
+
 /* Error states */
 .error {
-    border-color: #ef4444;
+    border-color: var(--color-error);
     background-color: rgba(239, 68, 68, 0.1);
 }
 
 /* Success states */
 .success {
-    border-color: #22c55e;
+    border-color: var(--color-success);
     background-color: rgba(34, 197, 94, 0.1);
 }
 
 /* Warning states */
 .warning {
-    border-color: #f59e0b;
+    border-color: var(--color-warning);
     background-color: rgba(245, 158, 11, 0.1);
+}
+
+/* Info states */
+.info {
+    border-color: var(--color-info);
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    :root {
+        --border-color: rgba(255, 255, 255, 0.3);
+        --border-hover: rgba(255, 255, 255, 0.5);
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --text-secondary: rgba(255, 255, 255, 0.9);
+        --text-tertiary: rgba(255, 255, 255, 0.8);
+    }
 }

@@ -52,7 +52,7 @@
 /* Header row with day names */
 .grid-header {
   display: grid;
-  grid-template-columns: 120px repeat(7, 1fr);
+  grid-template-columns: 120px repeat(7, 168px);
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -74,19 +74,22 @@
   margin-top: 2px;
 }
 
-/* Grid rows */
-.grid-row {
+/* Column-based grid structure */
+.grid-columns {
   display: grid;
-  grid-template-columns: 120px repeat(7, 1fr);
-  background: rgba(255, 255, 255, 0.01);
+  grid-template-columns: 120px repeat(7, 168px);
+  gap: 1px;
 }
 
-.grid-row:nth-child(even) {
-  background: rgba(255, 255, 255, 0.02);
+/* Row labels column */
+.row-labels-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
-/* Row labels */
 .row-label {
+  height: 50px;
   padding: 8px 12px;
   font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.8);
@@ -97,17 +100,44 @@
   border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Day hours container */
-.day-hours {
+/* Day column container */
+.day-column {
   display: grid;
-  grid-template-columns: repeat(24, 1fr);
+  grid-template-columns: repeat(24, 6px);
   gap: 1px;
-  padding: 2px;
+}
+
+/* Hour column - contains all cells for one hour vertically */
+.hour-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+/* Pure CSS hover effect - highlights entire column on hover */
+.hour-column:hover .hour-label,
+.hour-column:hover .hour-cell {
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.4),
+    0 2px 8px rgba(255, 255, 255, 0.2);
+  z-index: 10;
+  position: relative;
+  transform: scale(1.05);
+}
+
+/* Enhanced hover animation */
+.hour-column {
+  transition: all 0.2s ease-in-out;
+}
+
+.hour-column:hover {
+  filter: brightness(1.2);
 }
 
 /* Hour cells */
 .hour-cell, .hour-label {
-  height: 12px;
+  height: 10px;
   border-radius: 2px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -123,17 +153,7 @@
   align-items: center;
   justify-content: center;
   background: rgba(255, 255, 255, 0.02);
-  height: 16px;
-}
-
-/* Hour column highlighting - spans all rows */
-.hour-label.highlighted,
-.hour-cell.highlighted {
-  box-shadow:
-    inset 0 0 0 2px rgba(255, 255, 255, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.3);
-  z-index: 10;
-  position: relative;
+  height: 14px;
 }
 
 /* Specific cell types */
@@ -167,9 +187,6 @@
 /* Fixed position grid tooltip */
 .grid-tooltip {
   position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
   z-index: 1000;
   pointer-events: none;
 }
@@ -298,19 +315,16 @@
   .row-label {
     padding: 6px 10px;
     font-size: 0.75rem;
-  }
-
-  .day-hours {
-    padding: 1px;
+    height: 42px;
   }
 
   .hour-cell, .hour-label {
-    height: 10px;
+    height: 8px;
   }
 
   .hour-label {
     font-size: 0.55rem;
-    height: 14px;
+    height: 12px;
   }
 }
 
@@ -324,16 +338,17 @@
   }
 
   .grid-header {
-    grid-template-columns: 100px repeat(7, 1fr);
+    grid-template-columns: 100px repeat(7, 120px);
   }
 
-  .grid-row {
-    grid-template-columns: 100px repeat(7, 1fr);
+  .grid-columns {
+    grid-template-columns: 100px repeat(7, 120px);
   }
 
   .row-label {
     padding: 4px 8px;
     font-size: 0.7rem;
+    height: 36px;
   }
 
   .day-name {
@@ -344,20 +359,20 @@
     font-size: 0.65rem;
   }
 
-  .day-hours {
-    grid-template-columns: repeat(12, 1fr);
+  .day-column {
+    grid-template-columns: repeat(12, 8px);
   }
 
-  .hour-cell:nth-child(n+13), .hour-label:nth-child(n+13) {
+  .hour-column:nth-child(n+13) {
     display: none;
   }
 
   .hour-cell, .hour-label {
-    height: 8px;
+    height: 6px;
   }
 
   .hour-label {
-    height: 12px;
+    height: 10px;
     font-size: 0.5rem;
   }
 
@@ -388,16 +403,17 @@
   }
 
   .grid-header {
-    grid-template-columns: 80px repeat(7, 1fr);
+    grid-template-columns: 80px repeat(7, 88px);
   }
 
-  .grid-row {
-    grid-template-columns: 80px repeat(7, 1fr);
+  .grid-columns {
+    grid-template-columns: 80px repeat(7, 88px);
   }
 
   .row-label {
     padding: 3px 6px;
     font-size: 0.65rem;
+    height: 30px;
   }
 
   .day-name {
@@ -408,20 +424,20 @@
     font-size: 0.6rem;
   }
 
-  .day-hours {
-    grid-template-columns: repeat(8, 1fr);
+  .day-column {
+    grid-template-columns: repeat(8, 10px);
   }
 
-  .hour-cell:nth-child(n+9), .hour-label:nth-child(n+9) {
+  .hour-column:nth-child(n+9) {
     display: none;
   }
 
   .hour-cell, .hour-label {
-    height: 6px;
+    height: 4px;
   }
 
   .hour-label {
-    height: 10px;
+    height: 8px;
     font-size: 0.45rem;
   }
 

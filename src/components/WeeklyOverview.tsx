@@ -52,17 +52,19 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   dailyData,
   className
 }) => {
-  const [hoveredCell, setHoveredCell] = useState<{dayIndex: number, hourIndex: number} | null>(null);
   const [tooltipData, setTooltipData] = useState<HourlyForecast | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState<{x: number, y: number} | null>(null);
 
-  const handleHourHover = (dayIndex: number, hourIndex: number, hour: HourlyForecast | null) => {
-    setHoveredCell({dayIndex, hourIndex});
+  const handleHourHover = (hour: HourlyForecast | null, event: React.MouseEvent) => {
     setTooltipData(hour);
+    if (hour) {
+      setTooltipPosition({ x: event.clientX, y: event.clientY });
+    }
   };
 
   const handleHourLeave = () => {
-    setHoveredCell(null);
     setTooltipData(null);
+    setTooltipPosition(null);
   };
 
 
@@ -117,188 +119,94 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           })}
         </div>
 
-        {/* Hour labels row */}
-        <div className="grid-row hour-labels-row">
-          <div className="row-label">Hour</div>
+        {/* Column-based grid structure for CSS-only hover effects */}
+        <div className="grid-columns">
+          <div className="row-labels-column">
+            <div className="row-label">Hour</div>
+            <div className="row-label">☁️ Clouds</div>
+            <div className="row-label">🌧️ Rain</div>
+            <div className="row-label">👁️ Visibility</div>
+            <div className="row-label">🌙 Moonlight</div>
+          </div>
+
           {Array.from({ length: 7 }, (_, dayIndex) => (
-            <div key={dayIndex} className="day-hours">
-              {Array.from({ length: 24 }, (_, hourIndex) => (
-                <div
-                  key={hourIndex}
-                  className={`hour-label ${hoveredCell?.dayIndex === dayIndex && hoveredCell?.hourIndex === hourIndex ? 'highlighted' : ''}`}
-                  onMouseEnter={() => handleHourHover(dayIndex, hourIndex, groupedByDay[dayIndex]?.hours[hourIndex] || null)}
-                  onMouseLeave={handleHourLeave}
-                >
-                  {hourIndex.toString().padStart(2, '0')}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-
-        {/* Cloud coverage row */}
-        <div className="grid-row clouds-row">
-          <div className="row-label">☁️ Clouds</div>
-          {groupedByDay.map(({ date, hours }, dayIndex) => (
-            <div key={`clouds-${date}`} className="day-hours">
+            <div key={dayIndex} className="day-column">
               {Array.from({ length: 24 }, (_, hourIndex) => {
-                const hour = hours[hourIndex];
-                if (!hour) {
-                  return (
-                    <div
-                      key={hourIndex}
-                      className={`hour-cell empty ${hoveredCell?.dayIndex === dayIndex && hoveredCell?.hourIndex === hourIndex ? 'highlighted' : ''}`}
-                      onMouseEnter={() => handleHourHover(dayIndex, hourIndex, null)}
-                      onMouseLeave={handleHourLeave}
-                    ></div>
-                  );
-                }
-
-                const cloudInfo = getCloudCoverageInfo(hour.cloudCover.totalCloudCover);
-                const opacity = hour.cloudCover.totalCloudCover !== null ?
-                  Math.max(0.2, hour.cloudCover.totalCloudCover / 100) : 0.1;
+                const hour = groupedByDay[dayIndex]?.hours[hourIndex];
 
                 return (
-                  <div
-                    key={hourIndex}
-                    className={`hour-cell cloud-cell ${hoveredCell?.dayIndex === dayIndex && hoveredCell?.hourIndex === hourIndex ? 'highlighted' : ''}`}
-                    style={{
-                      backgroundColor: cloudInfo.color,
-                      opacity: opacity
-                    }}
-                    onMouseEnter={() => handleHourHover(dayIndex, hourIndex, hour)}
-                    onMouseLeave={handleHourLeave}
-                  ></div>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-
-        {/* Precipitation row */}
-        <div className="grid-row precipitation-row">
-          <div className="row-label">🌧️ Rain</div>
-          {groupedByDay.map(({ date, hours }, dayIndex) => (
-            <div key={`rain-${date}`} className="day-hours">
-              {Array.from({ length: 24 }, (_, hourIndex) => {
-                const hour = hours[hourIndex];
-                if (!hour) {
-                  return (
+                  <div key={hourIndex} className="hour-column">
+                    {/* Hour label */}
                     <div
-                      key={hourIndex}
-                      className={`hour-cell empty ${hoveredCell?.dayIndex === dayIndex && hoveredCell?.hourIndex === hourIndex ? 'highlighted' : ''}`}
-                      onMouseEnter={() => handleHourHover(dayIndex, hourIndex, null)}
+                      className="hour-label"
+                      onMouseEnter={(e) => handleHourHover(hour || null, e)}
+                      onMouseLeave={handleHourLeave}
+                    >
+                      {hourIndex.toString().padStart(2, '0')}
+                    </div>
+
+                    {/* Cloud cell */}
+                    <div
+                      className="hour-cell cloud-cell"
+                      style={hour ? {
+                        backgroundColor: getCloudCoverageInfo(hour.cloudCover.totalCloudCover).color,
+                        opacity: hour.cloudCover.totalCloudCover !== null ?
+                          Math.max(0.2, hour.cloudCover.totalCloudCover / 100) : 0.1
+                      } : { background: 'rgba(255, 255, 255, 0.05)', opacity: 0.3 }}
+                      onMouseEnter={(e) => handleHourHover(hour || null, e)}
                       onMouseLeave={handleHourLeave}
                     ></div>
-                  );
-                }
 
-                const rainState = getRainState(hour.precipitation.precipitationProbability);
-
-                return (
-                  <div
-                    key={hourIndex}
-                    className={`hour-cell precip-cell ${rainState.hasRain ? 'has-rain' : ''} ${hoveredCell?.dayIndex === dayIndex && hoveredCell?.hourIndex === hourIndex ? 'highlighted' : ''}`}
-                    style={{
-                      backgroundColor: rainState.hasRain ? '#3b82f6' : 'transparent',
-                      opacity: rainState.hasRain ? Math.max(0.3, rainState.intensity) : 0.1
-                    }}
-                    onMouseEnter={() => handleHourHover(dayIndex, hourIndex, hour)}
-                    onMouseLeave={handleHourLeave}
-                  ></div>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-
-        {/* Visibility row */}
-        <div className="grid-row visibility-row">
-          <div className="row-label">👁️ Visibility</div>
-          {groupedByDay.map(({ date, hours }, dayIndex) => (
-            <div key={`visibility-${date}`} className="day-hours">
-              {Array.from({ length: 24 }, (_, hourIndex) => {
-                const hour = hours[hourIndex];
-                if (!hour) {
-                  return (
+                    {/* Precipitation cell */}
                     <div
-                      key={hourIndex}
-                      className={`hour-cell empty ${hoveredCell?.dayIndex === dayIndex && hoveredCell?.hourIndex === hourIndex ? 'highlighted' : ''}`}
-                      onMouseEnter={() => handleHourHover(dayIndex, hourIndex, null)}
+                      className={`hour-cell precip-cell ${hour && getRainState(hour.precipitation.precipitationProbability).hasRain ? 'has-rain' : ''}`}
+                      style={hour ? (() => {
+                        const rainState = getRainState(hour.precipitation.precipitationProbability);
+                        return {
+                          backgroundColor: rainState.hasRain ? '#3b82f6' : 'transparent',
+                          opacity: rainState.hasRain ? Math.max(0.3, rainState.intensity) : 0.1
+                        };
+                      })() : { background: 'rgba(255, 255, 255, 0.05)', opacity: 0.3 }}
+                      onMouseEnter={(e) => handleHourHover(hour || null, e)}
                       onMouseLeave={handleHourLeave}
                     ></div>
-                  );
-                }
 
-                const visibility = hour.visibility;
-                const hasVisibility = visibility !== null && visibility !== undefined;
-
-                const getVisibilityColor = (vis: number): string => {
-                  if (vis >= 20) {
-                    return '#22c55e'; // Green for good visibility (≥20km)
-                  } else if (vis >= 10) {
-                    return '#f59e0b'; // Orange for moderate visibility (10-19km)
-                  } else {
-                    return '#ef4444'; // Red for poor visibility (<10km)
-                  }
-                };
-
-                const visibilityColor = hasVisibility ? getVisibilityColor(visibility) : '#6b7280';
-                const opacity = hasVisibility ? Math.min(1.0, Math.max(0.5, 0.5 + (visibility / 40))) : 0.3;
-
-                return (
-                  <div
-                    key={hourIndex}
-                    className={`hour-cell visibility-cell ${hoveredCell?.dayIndex === dayIndex && hoveredCell?.hourIndex === hourIndex ? 'highlighted' : ''}`}
-                    style={{
-                      backgroundColor: visibilityColor,
-                      opacity
-                    }}
-                    onMouseEnter={() => handleHourHover(dayIndex, hourIndex, hour)}
-                    onMouseLeave={handleHourLeave}
-                  ></div>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-
-        {/* Moonlight row */}
-        <div className="grid-row moonlight-row">
-          <div className="row-label">🌙 Moonlight</div>
-          {groupedByDay.map(({ date, hours }, dayIndex) => (
-            <div key={`moonlight-${date}`} className="day-hours">
-              {Array.from({ length: 24 }, (_, hourIndex) => {
-                const hour = hours[hourIndex];
-                if (!hour) {
-                  return (
+                    {/* Visibility cell */}
                     <div
-                      key={hourIndex}
-                      className={`hour-cell empty ${hoveredCell?.dayIndex === dayIndex && hoveredCell?.hourIndex === hourIndex ? 'highlighted' : ''}`}
-                      onMouseEnter={() => handleHourHover(dayIndex, hourIndex, null)}
+                      className="hour-cell visibility-cell"
+                      style={hour ? (() => {
+                        const visibility = hour.visibility;
+                        const hasVisibility = visibility !== null && visibility !== undefined;
+
+                        const getVisibilityColor = (vis: number): string => {
+                          if (vis >= 20) return '#22c55e';
+                          else if (vis >= 10) return '#f59e0b';
+                          else return '#ef4444';
+                        };
+
+                        const visibilityColor = hasVisibility ? getVisibilityColor(visibility) : '#6b7280';
+                        const opacity = hasVisibility ? Math.min(1.0, Math.max(0.5, 0.5 + (visibility / 40))) : 0.3;
+
+                        return { backgroundColor: visibilityColor, opacity };
+                      })() : { background: 'rgba(255, 255, 255, 0.05)', opacity: 0.3 }}
+                      onMouseEnter={(e) => handleHourHover(hour || null, e)}
                       onMouseLeave={handleHourLeave}
                     ></div>
-                  );
-                }
 
-                const moonlight = hour.moonlight?.moonlightClearSky;
-                const hasMoonlight = moonlight !== null && moonlight !== undefined;
-
-                const opacity = hasMoonlight && moonlight > 0
-                  ? Math.min(1, 0.2 + (moonlight / 100) * 0.8)
-                  : 0;
-
-                return (
-                  <div
-                    key={hourIndex}
-                    className={`hour-cell moonlight-cell ${hoveredCell?.dayIndex === dayIndex && hoveredCell?.hourIndex === hourIndex ? 'highlighted' : ''}`}
-                    style={{
-                      backgroundColor: '#4338ca',
-                      opacity
-                    }}
-                    onMouseEnter={() => handleHourHover(dayIndex, hourIndex, hour)}
-                    onMouseLeave={handleHourLeave}
-                  ></div>
+                    {/* Moonlight cell */}
+                    <div
+                      className="hour-cell moonlight-cell"
+                      style={hour ? (() => {
+                        const moonlight = hour.moonlight?.moonlightClearSky;
+                        const hasMoonlight = moonlight !== null && moonlight !== undefined;
+                        const opacity = hasMoonlight && moonlight > 0 ?
+                          Math.min(1, 0.2 + (moonlight / 100) * 0.8) : 0;
+                        return { backgroundColor: '#4338ca', opacity };
+                      })() : { background: 'rgba(255, 255, 255, 0.05)', opacity: 0.3 }}
+                      onMouseEnter={(e) => handleHourHover(hour || null, e)}
+                      onMouseLeave={handleHourLeave}
+                    ></div>
+                  </div>
                 );
               })}
             </div>
@@ -536,11 +444,18 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
       </div>
 
       {/* Fixed position tooltip */}
-      {tooltipData && hoveredCell !== null && (
-        <div className="grid-tooltip">
+      {tooltipData && tooltipPosition && (
+        <div
+          className="grid-tooltip"
+          style={{
+            left: tooltipPosition.x + 10,
+            top: tooltipPosition.y - 10,
+            transform: 'translateY(-100%)'
+          }}
+        >
           <div className="tooltip-content">
             <div className="tooltip-header">
-              <strong>{formatTime(tooltipData.time)} - Hour {hoveredCell.hourIndex.toString().padStart(2, '0')}</strong>
+              <strong>{formatTime(tooltipData.time)}</strong>
             </div>
             <div className="tooltip-body">
               <div>☁️ Clouds: {tooltipData.cloudCover.totalCloudCover?.toFixed(0) ?? 'N/A'}% ({getCloudDescription(tooltipData.cloudCover.totalCloudCover)})</div>

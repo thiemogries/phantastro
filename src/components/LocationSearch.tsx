@@ -18,6 +18,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   const [results, setResults] = useState<LocationSearchResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [keyboardNavigation, setKeyboardNavigation] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -85,7 +86,21 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   const handleLocationSelect = (location: LocationSearchResult) => {
     setQuery(location.name);
     setIsOpen(false);
+    setSelectedIndex(-1);
+    setKeyboardNavigation(false);
     onLocationSelect(location);
+  };
+
+  const handleMouseEnter = (index: number) => {
+    if (!keyboardNavigation) {
+      setSelectedIndex(index);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!keyboardNavigation) {
+      setSelectedIndex(-1);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -94,12 +109,14 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
+        setKeyboardNavigation(true);
         setSelectedIndex((prev) =>
           prev < results.length - 1 ? prev + 1 : prev,
         );
         break;
       case "ArrowUp":
         e.preventDefault();
+        setKeyboardNavigation(true);
         setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
         break;
       case "Enter":
@@ -111,6 +128,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       case "Escape":
         setIsOpen(false);
         setSelectedIndex(-1);
+        setKeyboardNavigation(false);
         inputRef.current?.blur();
         break;
     }
@@ -147,7 +165,6 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
           placeholder={placeholder}
           className="search-input"
           aria-label="Search for location"
-          aria-expanded={isOpen}
           aria-haspopup="listbox"
           aria-autocomplete="list"
         />
@@ -168,8 +185,10 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
               {results.map((location, index) => (
                 <li
                   key={`${location.lat}-${location.lon}`}
-                  className={`search-result ${index === selectedIndex ? "selected" : ""}`}
+                  className={`search-result ${index === selectedIndex && keyboardNavigation ? "keyboard-selected" : ""}`}
                   onClick={() => handleLocationSelect(location)}
+                  onMouseEnter={() => handleMouseEnter(index)}
+                  onMouseLeave={handleMouseLeave}
                   role="option"
                   aria-selected={index === selectedIndex}
                 >

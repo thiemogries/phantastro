@@ -23,6 +23,7 @@
   outline: none;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  position: relative;
 }
 
 .search-input::placeholder {
@@ -31,8 +32,9 @@
 
 .search-input:focus {
   border-color: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3), 0 4px 15px rgba(124, 58, 237, 0.2);
   background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
 }
 
 .search-icon {
@@ -41,6 +43,7 @@
   font-size: 1.2rem;
   pointer-events: none;
   color: rgba(255, 255, 255, 0.6);
+  transition: all 0.3s ease;
 }
 
 .search-spinner {
@@ -80,16 +83,29 @@
   align-items: center;
   padding: 12px 15px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
 }
 
 .search-result:last-child {
   border-bottom: none;
 }
 
-.search-result:hover,
-.search-result.selected {
+.search-result:hover {
+  background: rgba(124, 58, 237, 0.15);
+  transform: translateX(4px);
+  border-left: 3px solid #7c3aed;
+  padding-left: 12px;
+}
+
+.search-result.keyboard-selected {
+  background: rgba(124, 58, 237, 0.25);
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  box-shadow: inset 0 0 0 1px rgba(124, 58, 237, 0.3);
+}
+
+.search-result:hover:not(.keyboard-selected) {
   background: rgba(124, 58, 237, 0.2);
 }
 
@@ -176,12 +192,15 @@
   color: white;
   font-size: 0.85rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .quick-location:hover {
   background: rgba(124, 58, 237, 0.3);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.2);
 }
 
 /* Responsive */
