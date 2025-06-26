@@ -19,7 +19,8 @@
   position: relative;
   width: 100%;
   height: 100%;
-  animation: rotate 2s linear infinite;
+  animation: rotate 3s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(124, 58, 237, 0.3));
 }
 
 .spinner-ring {
@@ -28,16 +29,20 @@
   left: 0;
   width: 100%;
   height: 100%;
-  border: 2px solid rgba(124, 58, 237, 0.2);
-  border-top: 2px solid #7c3aed;
+  border: 3px solid rgba(124, 58, 237, 0.2);
+  border-top: 3px solid #7c3aed;
+  border-right: 3px solid rgba(124, 58, 237, 0.6);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 1.5s linear infinite;
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
 }
 
 .star {
   position: absolute;
   font-size: 1.2rem;
   animation: twinkle 1.5s ease-in-out infinite alternate;
+  z-index: 10;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
 }
 
 .star-1 {
@@ -87,13 +92,18 @@
 }
 
 @keyframes twinkle {
-  from {
-    opacity: 0.3;
-    transform: scale(0.8);
+  0% {
+    opacity: 0.4;
+    transform: scale(0.8) rotate(0deg);
   }
-  to {
+  50% {
     opacity: 1;
-    transform: scale(1.2);
+    transform: scale(1.3) rotate(180deg);
+    text-shadow: 0 0 15px rgba(255, 255, 255, 1), 0 0 25px rgba(124, 58, 237, 0.6);
+  }
+  100% {
+    opacity: 0.4;
+    transform: scale(0.8) rotate(360deg);
   }
 }
 
@@ -150,5 +160,37 @@
 
   .spinner-message {
     font-size: 0.9rem;
+  }
+}
+
+/* Force animations to always work - override any global animation disabling */
+.loading-spinner * {
+  animation-play-state: running !important;
+}
+
+.loading-spinner .spinner {
+  animation: rotate 3s linear infinite !important;
+}
+
+.loading-spinner .spinner-ring {
+  animation: spin 1.5s linear infinite !important;
+}
+
+.loading-spinner .star {
+  animation: twinkle 1.5s ease-in-out infinite alternate !important;
+}
+
+/* Ensure animations work even with reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner .spinner {
+    animation: rotate 6s linear infinite !important;
+  }
+
+  .loading-spinner .spinner-ring {
+    animation: spin 3s linear infinite !important;
+  }
+
+  .loading-spinner .star {
+    animation: twinkle 3s ease-in-out infinite alternate !important;
   }
 }
