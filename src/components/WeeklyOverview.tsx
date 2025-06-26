@@ -132,11 +132,6 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
                 return (
                   <div key={hourIndex} className="hour-column" data-tooltip-id={tooltipId}>
-                    {/* Hour label */}
-                    <div className="hour-label">
-                      {hourIndex.toString().padStart(2, '0')}
-                    </div>
-
                     {/* Cloud cell */}
                     <div
                       className="hour-cell cloud-cell"
