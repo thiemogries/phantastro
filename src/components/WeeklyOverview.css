@@ -277,7 +277,103 @@ body > .react-tooltip[id*="hour-"] {
   font-weight: 600;
 }
 
-/* Responsive Design removed - using percentage-based grid */
+/* Responsive Design - Remove gaps and borders on smaller screens */
+@media (max-width: 768px) {
+  .weekly-overview {
+    border: none;
+    border-radius: 0;
+    padding: 8px;
+  }
+
+  .weekly-grid {
+    border-radius: 0;
+  }
+
+  .grid-columns {
+    gap: 1px; /* Keep 1px gap between days */
+  }
+
+  .grid-row {
+    gap: 1px; /* Keep 1px gap between days for sun/moon rows */
+  }
+
+  .day-column {
+    gap: 0; /* Remove gaps within each day */
+  }
+
+  .hour-column {
+    gap: 0; /* Remove gaps within each hour */
+  }
+
+  .hour-cell, .hour-label {
+    border: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .weekly-overview {
+    border: none;
+    border-radius: 0;
+    padding: 4px;
+  }
+
+  .weekly-grid {
+    border-radius: 0;
+    margin-bottom: 8px;
+  }
+
+  .overview-header {
+    margin-bottom: 8px;
+  }
+
+  .overview-header h3 {
+    font-size: 1rem;
+  }
+
+  .day-name {
+    font-size: 0.7rem;
+  }
+
+  .day-date {
+    font-size: 0.6rem;
+  }
+
+  .day-column {
+    grid-template-columns: repeat(24, minmax(1px, 4px));
+  }
+
+  .hour-label {
+    font-size: 0.4rem;
+    height: 8px;
+  }
+
+  .hour-cell {
+    height: 6px;
+  }
+
+  .timeline-track {
+    height: 2px;
+  }
+
+  .day-timeline {
+    padding: 2px 1px;
+  }
+
+  .overview-summary {
+    gap: 6px;
+    padding: 6px 0;
+    margin-top: 6px;
+  }
+
+  .summary-label {
+    font-size: 0.7rem;
+  }
+
+  .summary-value {
+    font-size: 0.8rem;
+  }
+}
+
 
 
 
