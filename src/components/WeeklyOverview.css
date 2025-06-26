@@ -47,7 +47,7 @@
   gap: 1px;
   margin-bottom: 16px;
   border-radius: 8px;
-  overflow-x: hidden;
+  overflow-x: auto;
   overflow-y: visible;
   background: rgba(255, 255, 255, 0.02);
 }
@@ -55,7 +55,7 @@
 /* Header row with day names */
 .grid-header {
   display: grid;
-  grid-template-columns: repeat(7, 200px);
+  grid-template-columns: repeat(7, 170px);
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -80,7 +80,7 @@
 /* Column-based grid structure */
 .grid-columns {
   display: grid;
-  grid-template-columns: repeat(7, 200px);
+  grid-template-columns: repeat(7, 170px);
   gap: 1px;
 }
 
@@ -89,7 +89,7 @@
 /* Day column container */
 .day-column {
   display: grid;
-  grid-template-columns: repeat(24, 7px);
+  grid-template-columns: repeat(24, 6px);
   gap: 1px;
 }
 
@@ -192,7 +192,7 @@ body > .react-tooltip[id*="hour-"] {
 /* Grid rows for sun/moon timelines */
 .grid-row {
   display: grid;
-  grid-template-columns: repeat(7, 200px);
+  grid-template-columns: repeat(7, 170px);
   gap: 1px;
   margin-top: 8px;
 }
@@ -313,15 +313,15 @@ body > .react-tooltip[id*="hour-"] {
   }
 
   .grid-header {
-    grid-template-columns: repeat(7, 140px);
+    grid-template-columns: repeat(7, 130px);
   }
 
   .grid-columns {
-    grid-template-columns: repeat(7, 140px);
+    grid-template-columns: repeat(7, 130px);
   }
 
   .grid-row {
-    grid-template-columns: repeat(7, 140px);
+    grid-template-columns: repeat(7, 130px);
   }
 
   .day-name {
@@ -333,7 +333,7 @@ body > .react-tooltip[id*="hour-"] {
   }
 
   .day-column {
-    grid-template-columns: repeat(12, 8px);
+    grid-template-columns: repeat(12, 7px);
   }
 
   .hour-column:nth-child(n+13) {
@@ -376,15 +376,15 @@ body > .react-tooltip[id*="hour-"] {
   }
 
   .grid-header {
-    grid-template-columns: repeat(7, 100px);
+    grid-template-columns: repeat(7, 90px);
   }
 
   .grid-columns {
-    grid-template-columns: repeat(7, 100px);
+    grid-template-columns: repeat(7, 90px);
   }
 
   .grid-row {
-    grid-template-columns: repeat(7, 100px);
+    grid-template-columns: repeat(7, 90px);
   }
 
 
@@ -398,7 +398,7 @@ body > .react-tooltip[id*="hour-"] {
   }
 
   .day-column {
-    grid-template-columns: repeat(8, 10px);
+    grid-template-columns: repeat(8, 9px);
   }
 
   .hour-column:nth-child(n+9) {

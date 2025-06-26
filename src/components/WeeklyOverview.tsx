@@ -67,11 +67,27 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
       days[date].push(hour);
     });
 
-    return Object.entries(days).slice(0, 7).map(([date, hours]) => ({
+    const result = Object.entries(days).slice(0, 7).map(([date, hours]) => ({
       date,
       hours: hours.slice(0, 24), // Ensure max 24 hours per day
       sunMoon: dailyData?.find(day => day.date === date)?.sunMoon
     }));
+
+    // Pad with empty days if we have fewer than 7 days
+    while (result.length < 7) {
+      const lastDate = result[result.length - 1]?.date;
+      const nextDate = lastDate
+        ? new Date(new Date(lastDate).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0];
+
+      result.push({
+        date: nextDate,
+        hours: [],
+        sunMoon: undefined
+      });
+    }
+
+    return result;
   }, [hourlyData, dailyData]);
 
   if (groupedByDay.length === 0) {
@@ -109,7 +125,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
         {/* Column-based grid structure for CSS-only hover effects */}
         <div className="grid-columns">
           {Array.from({ length: 7 }, (_, dayIndex) => (
-            <div key={dayIndex} className="day-column">
+            <div key={groupedByDay[dayIndex]?.date || `empty-${dayIndex}`} className="day-column">
               {Array.from({ length: 24 }, (_, hourIndex) => {
                 const hour = groupedByDay[dayIndex]?.hours[hourIndex];
                 const tooltipId = `hour-${dayIndex}-${hourIndex}`;
