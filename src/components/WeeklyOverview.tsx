@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Tooltip } from 'react-tooltip';
 import { HourlyForecast, DailyForecast } from '../types/weather';
 import {
   getCloudCoverageInfo,
@@ -52,20 +53,6 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   dailyData,
   className
 }) => {
-  const [tooltipData, setTooltipData] = useState<HourlyForecast | null>(null);
-  const [tooltipPosition, setTooltipPosition] = useState<{x: number, y: number} | null>(null);
-
-  const handleHourHover = (hour: HourlyForecast | null, event: React.MouseEvent) => {
-    setTooltipData(hour);
-    if (hour) {
-      setTooltipPosition({ x: event.clientX, y: event.clientY });
-    }
-  };
-
-  const handleHourLeave = () => {
-    setTooltipData(null);
-    setTooltipPosition(null);
-  };
 
 
   // Group hourly data by day
@@ -124,15 +111,12 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
             <div key={dayIndex} className="day-column">
               {Array.from({ length: 24 }, (_, hourIndex) => {
                 const hour = groupedByDay[dayIndex]?.hours[hourIndex];
+                const tooltipId = `hour-${dayIndex}-${hourIndex}`;
 
                 return (
-                  <div key={hourIndex} className="hour-column">
+                  <div key={hourIndex} className="hour-column" data-tooltip-id={tooltipId}>
                     {/* Hour label */}
-                    <div
-                      className="hour-label"
-                      onMouseEnter={(e) => handleHourHover(hour || null, e)}
-                      onMouseLeave={handleHourLeave}
-                    >
+                    <div className="hour-label">
                       {hourIndex.toString().padStart(2, '0')}
                     </div>
 
@@ -144,8 +128,6 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                         opacity: hour.cloudCover.totalCloudCover !== null ?
                           Math.max(0.2, hour.cloudCover.totalCloudCover / 100) : 0.1
                       } : { background: 'rgba(255, 255, 255, 0.05)', opacity: 0.3 }}
-                      onMouseEnter={(e) => handleHourHover(hour || null, e)}
-                      onMouseLeave={handleHourLeave}
                     ></div>
 
                     {/* Precipitation cell */}
@@ -158,8 +140,6 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                           opacity: rainState.hasRain ? Math.max(0.3, rainState.intensity) : 0.1
                         };
                       })() : { background: 'rgba(255, 255, 255, 0.05)', opacity: 0.3 }}
-                      onMouseEnter={(e) => handleHourHover(hour || null, e)}
-                      onMouseLeave={handleHourLeave}
                     ></div>
 
                     {/* Visibility cell */}
@@ -180,8 +160,6 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
                         return { backgroundColor: visibilityColor, opacity };
                       })() : { background: 'rgba(255, 255, 255, 0.05)', opacity: 0.3 }}
-                      onMouseEnter={(e) => handleHourHover(hour || null, e)}
-                      onMouseLeave={handleHourLeave}
                     ></div>
 
                     {/* Moonlight cell */}
@@ -194,15 +172,60 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                           Math.min(1, 0.2 + (moonlight / 100) * 0.8) : 0;
                         return { backgroundColor: '#4338ca', opacity };
                       })() : { background: 'rgba(255, 255, 255, 0.05)', opacity: 0.3 }}
-                      onMouseEnter={(e) => handleHourHover(hour || null, e)}
-                      onMouseLeave={handleHourLeave}
                     ></div>
+
                   </div>
                 );
               })}
             </div>
           ))}
         </div>
+
+        {/* Tooltips for all hour columns */}
+        {groupedByDay.flatMap((day, dayIndex) =>
+          day.hours
+            .map((hour, hourIndex) => {
+              if (!hour) return null;
+              const tooltipId = `hour-${dayIndex}-${hourIndex}`;
+              return (
+                <Tooltip
+                  key={tooltipId}
+                  id={tooltipId}
+                  place="bottom"
+                  offset={50}
+                  delayShow={100}
+                  delayHide={100}
+                  style={{
+                    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                    color: 'white',
+                    fontSize: '0.75rem',
+                    maxWidth: '220px',
+                    zIndex: 1000,
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
+                  }}
+                  // variant="dark"
+                  // float
+                >
+                  <div style={{ marginBottom: '8px', fontSize: '0.8rem', borderBottom: '1px solid rgba(255, 255, 255, 0.2)', paddingBottom: '4px' }}>
+                    <strong>{formatTime(hour.time)}</strong>
+                  </div>
+                  <div style={{ lineHeight: '1.4' }}>
+                    <div style={{ marginBottom: '2px' }}>☁️ Clouds: {hour.cloudCover.totalCloudCover?.toFixed(0) ?? 'N/A'}% ({getCloudDescription(hour.cloudCover.totalCloudCover)})</div>
+                    <div style={{ marginBottom: '2px' }}>🌧️ Rain: {hour.precipitation.precipitationProbability?.toFixed(0) ?? 'N/A'}% ({getRainDescription(hour.precipitation.precipitation, hour.precipitation.precipitationProbability)})</div>
+                    <div style={{ marginBottom: '2px' }}>👁️ Visibility: {hour.visibility?.toFixed(1) ?? 'N/A'}km ({getVisibilityQuality(hour.visibility)})</div>
+                    <div style={{ marginBottom: '2px' }}>🌙 Moonlight: {hour.moonlight?.moonlightClearSky?.toFixed(1) ?? 'N/A'}%</div>
+                    <div style={{ marginBottom: '2px' }}>💨 Wind: {hour.windSpeed?.toFixed(1) ?? 'N/A'} m/s</div>
+                    {hour.temperature !== null && (
+                      <div>🌡️ Temp: {hour.temperature.toFixed(1)}°C</div>
+                    )}
+                  </div>
+                </Tooltip>
+              );
+            })
+            .filter(Boolean)
+        )}
 
         {/* Sun rise/set row */}
         <div className="grid-row sun-row">
@@ -432,33 +455,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
         </div>
       </div>
 
-      {/* Fixed position tooltip */}
-      {tooltipData && tooltipPosition && (
-        <div
-          className="grid-tooltip"
-          style={{
-            left: tooltipPosition.x + 10,
-            top: tooltipPosition.y - 10,
-            transform: 'translateY(-100%)'
-          }}
-        >
-          <div className="tooltip-content">
-            <div className="tooltip-header">
-              <strong>{formatTime(tooltipData.time)}</strong>
-            </div>
-            <div className="tooltip-body">
-              <div>☁️ Clouds: {tooltipData.cloudCover.totalCloudCover?.toFixed(0) ?? 'N/A'}% ({getCloudDescription(tooltipData.cloudCover.totalCloudCover)})</div>
-              <div>🌧️ Rain: {tooltipData.precipitation.precipitationProbability?.toFixed(0) ?? 'N/A'}% ({getRainDescription(tooltipData.precipitation.precipitation, tooltipData.precipitation.precipitationProbability)})</div>
-              <div>👁️ Visibility: {tooltipData.visibility?.toFixed(1) ?? 'N/A'}km ({getVisibilityQuality(tooltipData.visibility)})</div>
-              <div>🌙 Moonlight: {tooltipData.moonlight?.moonlightClearSky?.toFixed(1) ?? 'N/A'}%</div>
-              <div>💨 Wind: {tooltipData.windSpeed?.toFixed(1) ?? 'N/A'} m/s</div>
-              {tooltipData.temperature !== null && (
-                <div>🌡️ Temp: {tooltipData.temperature.toFixed(1)}°C</div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Summary Row */}
       <div className="overview-summary">
