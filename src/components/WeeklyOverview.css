@@ -12,30 +12,43 @@
 
 .overview-header {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
-    text-align: center;
+    margin-bottom: 12px;
+    gap: 16px;
 }
 
 .overview-header h3 {
-    margin: 0 0 8px 0;
-    font-size: 1.3rem;
+    margin: 0;
+    font-size: 1.2rem;
     color: white;
+    line-height: 1.2;
+    flex-shrink: 0;
 }
 
-.overview-header .coordinates {
-    margin: 0 0 4px 0;
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.7);
-    font-family: monospace;
+.location-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    text-align: right;
+    min-width: 0;
 }
 
-.overview-header .last-updated {
+.location-details .coordinates {
     margin: 0;
     font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-family: monospace;
+    line-height: 1.1;
+}
+
+.location-details .last-updated {
+    margin: 0;
+    font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.5);
+    line-height: 1.1;
+    white-space: nowrap;
 }
 
 /* No data state */

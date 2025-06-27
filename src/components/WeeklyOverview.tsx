@@ -436,15 +436,17 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           {location.name}
           {location.country ? `, ${location.country}` : ""}
         </h3>
-        <p className="coordinates">
-          {location.lat.toFixed(4)}°, {location.lon.toFixed(4)}°
-        </p>
-        <p className="last-updated">
-          Last updated:{" "}
-          {new Date(lastUpdated).toLocaleTimeString([], {
-            hour12: false,
-          })}
-        </p>
+        <div className="location-details">
+          <p className="coordinates">
+            {location.lat.toFixed(4)}°, {location.lon.toFixed(4)}°
+          </p>
+          <p className="last-updated">
+            Last updated:{" "}
+            {new Date(lastUpdated).toLocaleTimeString([], {
+              hour12: false,
+            })}
+          </p>
+        </div>
       </div>
 
       <div className="weekly-grid">
