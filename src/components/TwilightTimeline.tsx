@@ -5,26 +5,31 @@ import {
 } from "../utils/solarUtils";
 
 interface TwilightTimelineProps {
-  date: string; // Date in YYYY-MM-DD format
+  dates: string[]; // Array of dates in YYYY-MM-DD format for the week
   latitude: number;
   longitude: number;
-  sunrise?: string | null; // Optional sunrise time from API
-  sunset?: string | null; // Optional sunset time from API
+  sunMoonData?: Array<{
+    date: string;
+    sunrise?: string | null;
+    sunset?: string | null;
+  }>; // Optional sun data from API
 }
 
 interface TwilightSegment {
-  start: number; // Hour of day (0-24)
-  end: number; // Hour of day (0-24)
+  startDay: number; // Day index (0-6)
+  startHour: number; // Hour within start day (0-24)
+  endDay: number; // Day index (0-6)
+  endHour: number; // Hour within end day (0-24)
   type: "day" | "civil" | "nautical" | "astronomical" | "night";
   color: string;
+  totalHours: number; // Total duration in hours
 }
 
 const TwilightTimeline: React.FC<TwilightTimelineProps> = ({
-  date,
+  dates,
   latitude,
   longitude,
-  sunrise,
-  sunset,
+  sunMoonData,
 }) => {
   const parseTimeToHour = (timeStr: string | null | undefined): number => {
     if (!timeStr || timeStr === "---" || timeStr === "----") return -1;
@@ -40,13 +45,6 @@ const TwilightTimeline: React.FC<TwilightTimelineProps> = ({
 
   const createTwilightSegments = (): TwilightSegment[] => {
     try {
-      const targetDate = new Date(date + "T12:00:00");
-
-      // Validate date
-      if (isNaN(targetDate.getTime())) {
-        throw new Error("Invalid date");
-      }
-
       // Validate coordinates
       if (
         latitude < -90 ||
@@ -57,127 +55,145 @@ const TwilightTimeline: React.FC<TwilightTimelineProps> = ({
         throw new Error("Invalid coordinates");
       }
 
-      // Calculate all twilight times
-      const twilightData = calculateTwilightTimes(
-        latitude,
-        longitude,
-        targetDate,
-        targetDate,
-      );
-      const sunTimes = calculateSunriseSunset(latitude, longitude, targetDate);
-
-      // Extract times for each twilight type
-      const civilData = twilightData.find((t) => t.twilight === "civil");
-      const nauticalData = twilightData.find((t) => t.twilight === "nautical");
-      const astronomicalData = twilightData.find(
-        (t) => t.twilight === "astronomical",
-      );
-
-      // Convert to hours
-      const sunriseHour = sunrise
-        ? parseTimeToHour(sunrise)
-        : dateToHour(sunTimes.sunrise);
-      const sunsetHour = sunset
-        ? parseTimeToHour(sunset)
-        : dateToHour(sunTimes.sunset);
-
-      const civilDawn = dateToHour(civilData?.dawn ?? null);
-      const civilDusk = dateToHour(civilData?.dusk ?? null);
-      const nauticalDawn = dateToHour(nauticalData?.dawn ?? null);
-      const nauticalDusk = dateToHour(nauticalData?.dusk ?? null);
-      const astronomicalDawn = dateToHour(astronomicalData?.dawn ?? null);
-      const astronomicalDusk = dateToHour(astronomicalData?.dusk ?? null);
-
       const segments: TwilightSegment[] = [];
+      const allEvents: Array<{
+        dayIndex: number;
+        hour: number;
+        type: string;
+        absoluteTime: number; // Hours from start of week
+      }> = [];
 
-      // Handle polar conditions
-      if (sunriseHour === -1 && sunsetHour === -1) {
-        // No sun - could be polar night
-        if (civilDawn === -1 && civilDusk === -1) {
-          // Complete polar night
-          segments.push({
-            start: 0,
-            end: 24,
-            type: "night",
-            color: "#0f172a",
+      // Calculate twilight times for each day
+      for (let dayIndex = 0; dayIndex < dates.length; dayIndex++) {
+        const currentDate = dates[dayIndex];
+        const targetDate = new Date(currentDate + "T12:00:00");
+
+        if (isNaN(targetDate.getTime())) {
+          continue;
+        }
+
+        // Get sun data for this day
+        const dayData = sunMoonData?.find((d) => d.date === currentDate);
+
+        // Calculate twilight times
+        const twilightData = calculateTwilightTimes(
+          latitude,
+          longitude,
+          targetDate,
+          targetDate,
+        );
+        const sunTimes = calculateSunriseSunset(
+          latitude,
+          longitude,
+          targetDate,
+        );
+
+        // Extract times for each twilight type
+        const civilData = twilightData.find((t) => t.twilight === "civil");
+        const nauticalData = twilightData.find(
+          (t) => t.twilight === "nautical",
+        );
+        const astronomicalData = twilightData.find(
+          (t) => t.twilight === "astronomical",
+        );
+
+        // Convert to hours
+        const sunriseHour = dayData?.sunrise
+          ? parseTimeToHour(dayData.sunrise)
+          : dateToHour(sunTimes.sunrise);
+        const sunsetHour = dayData?.sunset
+          ? parseTimeToHour(dayData.sunset)
+          : dateToHour(sunTimes.sunset);
+
+        const civilDawn = dateToHour(civilData?.dawn ?? null);
+        const civilDusk = dateToHour(civilData?.dusk ?? null);
+        const nauticalDawn = dateToHour(nauticalData?.dawn ?? null);
+        const nauticalDusk = dateToHour(nauticalData?.dusk ?? null);
+        const astronomicalDawn = dateToHour(astronomicalData?.dawn ?? null);
+        const astronomicalDusk = dateToHour(astronomicalData?.dusk ?? null);
+
+        // Add events for this day
+        const dayEvents = [];
+        if (astronomicalDawn !== -1)
+          dayEvents.push({ hour: astronomicalDawn, type: "astronomical-dawn" });
+        if (nauticalDawn !== -1)
+          dayEvents.push({ hour: nauticalDawn, type: "nautical-dawn" });
+        if (civilDawn !== -1)
+          dayEvents.push({ hour: civilDawn, type: "civil-dawn" });
+        if (sunriseHour !== -1)
+          dayEvents.push({ hour: sunriseHour, type: "sunrise" });
+        if (sunsetHour !== -1)
+          dayEvents.push({ hour: sunsetHour, type: "sunset" });
+        if (civilDusk !== -1)
+          dayEvents.push({ hour: civilDusk, type: "civil-dusk" });
+        if (nauticalDusk !== -1)
+          dayEvents.push({ hour: nauticalDusk, type: "nautical-dusk" });
+        if (astronomicalDusk !== -1)
+          dayEvents.push({ hour: astronomicalDusk, type: "astronomical-dusk" });
+
+        // Convert to absolute time and add to all events
+        dayEvents.forEach((event) => {
+          allEvents.push({
+            dayIndex,
+            hour: event.hour,
+            type: event.type,
+            absoluteTime: dayIndex * 24 + event.hour,
           });
-          return segments;
+        });
+      }
+
+      // Sort all events by absolute time
+      allEvents.sort((a, b) => a.absoluteTime - b.absoluteTime);
+
+      // Determine initial state (start of first day)
+      let currentState = "night";
+
+      // Check if we start in a different state by looking at the first day's configuration
+      if (dates.length > 0) {
+        const firstDate = new Date(dates[0] + "T12:00:00");
+        const firstDaySun = calculateSunriseSunset(
+          latitude,
+          longitude,
+          firstDate,
+        );
+
+        const firstDayData = sunMoonData?.find((d) => d.date === dates[0]);
+        const firstSunrise = firstDayData?.sunrise
+          ? parseTimeToHour(firstDayData.sunrise)
+          : dateToHour(firstDaySun.sunrise);
+        const firstSunset = firstDayData?.sunset
+          ? parseTimeToHour(firstDayData.sunset)
+          : dateToHour(firstDaySun.sunset);
+
+        // If sunrise is after sunset, we start in daylight
+        if (
+          firstSunrise > firstSunset &&
+          firstSunrise !== -1 &&
+          firstSunset !== -1
+        ) {
+          currentState = "day";
         }
       }
 
-      if (
-        (sunriseHour === 0 && sunsetHour === 24) ||
-        (sunriseHour === -1 && sunsetHour === -1 && civilDawn !== -1)
-      ) {
-        // Polar day or midnight sun
-        segments.push({
-          start: 0,
-          end: 24,
-          type: "day",
-          color: "linear-gradient(to right, #fbbf24, #f59e0b)",
-        });
-        return segments;
-      }
+      let lastAbsoluteTime = 0;
 
-      // Create timeline segments for normal conditions
-      const events = [];
+      // Process each event to create continuous segments
+      for (const event of allEvents) {
+        // Create segment for current state
+        if (event.absoluteTime > lastAbsoluteTime) {
+          const startDay = Math.floor(lastAbsoluteTime / 24);
+          const startHour = lastAbsoluteTime % 24;
+          const endDay = Math.floor(event.absoluteTime / 24);
+          const endHour = event.absoluteTime % 24;
 
-      if (astronomicalDawn !== -1)
-        events.push({ time: astronomicalDawn, type: "astronomical-dawn" });
-      if (nauticalDawn !== -1)
-        events.push({ time: nauticalDawn, type: "nautical-dawn" });
-      if (civilDawn !== -1)
-        events.push({ time: civilDawn, type: "civil-dawn" });
-      if (sunriseHour !== -1)
-        events.push({ time: sunriseHour, type: "sunrise" });
-      if (sunsetHour !== -1) events.push({ time: sunsetHour, type: "sunset" });
-      if (civilDusk !== -1)
-        events.push({ time: civilDusk, type: "civil-dusk" });
-      if (nauticalDusk !== -1)
-        events.push({ time: nauticalDusk, type: "nautical-dusk" });
-      if (astronomicalDusk !== -1)
-        events.push({ time: astronomicalDusk, type: "astronomical-dusk" });
-
-      // Sort events by time
-      events.sort((a, b) => a.time - b.time);
-
-      // Determine the state at the start of the day (midnight)
-      let currentState = "night";
-      if (sunriseHour > sunsetHour && sunriseHour !== -1 && sunsetHour !== -1) {
-        // Sun crosses midnight - we're in daylight at start of day
-        currentState = "day";
-      } else if (
-        civilDawn > civilDusk &&
-        civilDawn !== -1 &&
-        civilDusk !== -1
-      ) {
-        currentState = "civil";
-      } else if (
-        nauticalDawn > nauticalDusk &&
-        nauticalDawn !== -1 &&
-        nauticalDusk !== -1
-      ) {
-        currentState = "nautical";
-      } else if (
-        astronomicalDawn > astronomicalDusk &&
-        astronomicalDawn !== -1 &&
-        astronomicalDusk !== -1
-      ) {
-        currentState = "astronomical";
-      }
-
-      let lastTime = 0;
-
-      // Process each event
-      for (const event of events) {
-        // Add segment for current state
-        if (event.time > lastTime) {
-          const color = getColorForState(currentState);
           segments.push({
-            start: lastTime,
-            end: event.time,
+            startDay,
+            startHour,
+            endDay,
+            endHour,
             type: currentState as any,
-            color,
+            color: getColorForState(currentState),
+            totalHours: event.absoluteTime - lastAbsoluteTime,
           });
         }
 
@@ -209,38 +225,41 @@ const TwilightTimeline: React.FC<TwilightTimelineProps> = ({
             break;
         }
 
-        lastTime = event.time;
+        lastAbsoluteTime = event.absoluteTime;
       }
 
-      // Add final segment to end of day
-      if (lastTime < 24) {
-        const color = getColorForState(currentState);
+      // Add final segment to end of week
+      const weekEndTime = dates.length * 24;
+      if (lastAbsoluteTime < weekEndTime) {
+        const startDay = Math.floor(lastAbsoluteTime / 24);
+        const startHour = lastAbsoluteTime % 24;
+        const endDay = Math.floor(weekEndTime / 24) - 1;
+        const endHour = 24;
+
         segments.push({
-          start: lastTime,
-          end: 24,
+          startDay,
+          startHour,
+          endDay,
+          endHour,
           type: currentState as any,
-          color,
+          color: getColorForState(currentState),
+          totalHours: weekEndTime - lastAbsoluteTime,
         });
       }
 
       return segments;
     } catch (error) {
       console.warn("Error calculating twilight segments:", error);
-      // Fallback to a simple day/night representation
-      return [
-        {
-          start: 0,
-          end: 12,
-          type: "night",
-          color: "#0f172a",
-        },
-        {
-          start: 12,
-          end: 24,
-          type: "day",
-          color: "linear-gradient(to right, #fbbf24, #f59e0b)",
-        },
-      ];
+      // Fallback to simple night segments for each day
+      return dates.map((_, dayIndex) => ({
+        startDay: dayIndex,
+        startHour: 0,
+        endDay: dayIndex,
+        endHour: 24,
+        type: "night" as const,
+        color: "#0f172a",
+        totalHours: 24,
+      }));
     }
   };
 
@@ -284,11 +303,19 @@ const TwilightTimeline: React.FC<TwilightTimelineProps> = ({
       night: "Sun below -18° - darkest conditions for astronomy",
     };
 
-    const duration = segment.end - segment.start;
+    const startTime = `${formatHour(segment.startHour)}`;
+    const endTime = `${formatHour(segment.endHour)}`;
     const durationText =
-      duration === 24 ? "All day" : `${duration.toFixed(1)}h`;
+      segment.totalHours >= 24
+        ? `${Math.floor(segment.totalHours / 24)}d ${(segment.totalHours % 24).toFixed(1)}h`
+        : `${segment.totalHours.toFixed(1)}h`;
 
-    return `${typeNames[segment.type]}: ${formatHour(segment.start)} - ${formatHour(segment.end)} (${durationText})\n${typeDescriptions[segment.type]}`;
+    const dayText =
+      segment.startDay === segment.endDay
+        ? `Day ${segment.startDay + 1}`
+        : `Days ${segment.startDay + 1}-${segment.endDay + 1}`;
+
+    return `${typeNames[segment.type]} (${dayText}): ${startTime} - ${endTime} (${durationText})\n${typeDescriptions[segment.type]}`;
   };
 
   const segments = createTwilightSegments();
@@ -296,8 +323,14 @@ const TwilightTimeline: React.FC<TwilightTimelineProps> = ({
   return (
     <div className="timeline-track">
       {segments.map((segment, index) => {
-        const segmentWidth = ((segment.end - segment.start) / 24) * 100;
-        const minWidth = 0.5; // Minimum 0.5% width for visibility
+        // Calculate position and width across the entire week
+        const totalWeekHours = dates.length * 24;
+        const startPosition =
+          ((segment.startDay * 24 + segment.startHour) / totalWeekHours) * 100;
+        const endPosition =
+          ((segment.endDay * 24 + segment.endHour) / totalWeekHours) * 100;
+        const segmentWidth = endPosition - startPosition;
+        const minWidth = 0.1; // Minimum width for visibility
         const actualWidth = Math.max(segmentWidth, minWidth);
 
         return (
@@ -305,7 +338,7 @@ const TwilightTimeline: React.FC<TwilightTimelineProps> = ({
             key={index}
             className="twilight-segment"
             style={{
-              left: `${(segment.start / 24) * 100}%`,
+              left: `${startPosition}%`,
               width: `${actualWidth}%`,
               background: segment.color,
               border:

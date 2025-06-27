@@ -197,6 +197,16 @@ body > .react-tooltip[id*="hour-"] {
     margin-top: 2px;
 }
 
+/* Continuous timeline container */
+.continuous-timeline {
+    position: relative;
+    height: 4px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+    grid-column: 1 / -1; /* Span all columns */
+}
+
 /* Timeline tracks for sun/moon lines */
 .day-timeline {
     padding: 1px 0px;
@@ -206,7 +216,7 @@ body > .react-tooltip[id*="hour-"] {
 
 .timeline-track {
     position: relative;
-    height: 2px;
+    height: 4px;
     width: 100%;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 2px;

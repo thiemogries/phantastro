@@ -4,6 +4,7 @@ import { Tooltip } from "react-tooltip";
 import { HourlyForecast, DailyForecast, Location } from "../types/weather";
 import { getCloudCoverageInfo, getRainState } from "../utils/weatherUtils";
 import TwilightTimeline from "./TwilightTimeline";
+import MoonTimeline from "./MoonTimeline";
 
 import "./WeeklyOverview.css";
 
@@ -413,214 +414,72 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           )}
 
         {/* Twilight timeline row */}
+        {/* Sun/Twilight row */}
         <div className="grid-row sun-row">
-          {groupedByDay.map(({ date, sunMoon }, dayIndex) => {
-            // Only render twilight timeline if we have location coordinates
-            if (!location?.lat || !location?.lon) {
-              // Fallback to simple sun line if no coordinates available
-              const parseTimeToHour = (
-                timeStr: string | null | undefined,
-              ): number => {
-                if (!timeStr || timeStr === "---" || timeStr === "----")
-                  return -1;
-                if (timeStr === "24:00") return 24;
-                const [hours, minutes] = timeStr.split(":").map(Number);
-                return hours + minutes / 60;
-              };
+          <div className="continuous-timeline">
+            {location?.lat && location?.lon ? (
+              <TwilightTimeline
+                dates={groupedByDay.map((day) => day.date)}
+                latitude={location.lat}
+                longitude={location.lon}
+                sunMoonData={groupedByDay.map((day) => ({
+                  date: day.date,
+                  sunrise: day.sunMoon?.sunrise,
+                  sunset: day.sunMoon?.sunset,
+                }))}
+              />
+            ) : (
+              // Fallback to simple sun lines for each day when no location
+              <>
+                {groupedByDay.map(({ date, sunMoon }) => {
+                  const parseTimeToHour = (
+                    timeStr: string | null | undefined,
+                  ): number => {
+                    if (!timeStr || timeStr === "---" || timeStr === "----")
+                      return -1;
+                    if (timeStr === "24:00") return 24;
+                    const [hours, minutes] = timeStr.split(":").map(Number);
+                    return hours + minutes / 60;
+                  };
 
-              const sunriseHour = parseTimeToHour(sunMoon?.sunrise);
-              const sunsetHour = parseTimeToHour(sunMoon?.sunset);
+                  const sunriseHour = parseTimeToHour(sunMoon?.sunrise);
+                  const sunsetHour = parseTimeToHour(sunMoon?.sunset);
 
-              return (
-                <div key={`sun-${date}`} className="day-timeline">
-                  <div className="timeline-track">
-                    {sunriseHour !== -1 && sunsetHour !== -1 ? (
-                      <div
-                        className="sun-line"
-                        style={{
-                          left: `${(sunriseHour / 24) * 100}%`,
-                          width: `${(((sunsetHour === 24 ? 24 : sunsetHour) - sunriseHour) / 24) * 100}%`,
-                          display: "block",
-                        }}
-                        title={`Sun: ${sunMoon?.sunrise} - ${sunMoon?.sunset}`}
-                      />
-                    ) : null}
-                  </div>
-                </div>
-              );
-            }
-
-            return (
-              <div key={`twilight-${date}`} className="day-timeline">
-                <TwilightTimeline
-                  date={date}
-                  latitude={location.lat}
-                  longitude={location.lon}
-                  sunrise={sunMoon?.sunrise}
-                  sunset={sunMoon?.sunset}
-                />
-              </div>
-            );
-          })}
+                  return (
+                    <div key={`sun-${date}`} className="day-timeline">
+                      <div className="timeline-track">
+                        {sunriseHour !== -1 && sunsetHour !== -1 ? (
+                          <div
+                            className="sun-line"
+                            style={{
+                              left: `${(sunriseHour / 24) * 100}%`,
+                              width: `${(((sunsetHour === 24 ? 24 : sunsetHour) - sunriseHour) / 24) * 100}%`,
+                              display: "block",
+                            }}
+                            title={`Sun: ${sunMoon?.sunrise} - ${sunMoon?.sunset}`}
+                          />
+                        ) : null}
+                      </div>
+                    </div>
+                  );
+                })}
+              </>
+            )}
+          </div>
         </div>
 
         {/* Moon rise/set row */}
         <div className="grid-row moon-row">
-          {groupedByDay.map(({ date, sunMoon }, dayIndex) => {
-            // Parse sun/moon times to hours (with precision for better positioning)
-            const parseTimeToHour = (
-              timeStr: string | null | undefined,
-            ): number => {
-              if (!timeStr || timeStr === "---" || timeStr === "----")
-                return -1;
-              if (timeStr === "24:00") return 24; // End of day
-              const [hours, minutes] = timeStr.split(":").map(Number);
-              return hours + minutes / 60; // Precise decimal hours for better positioning
-            };
-
-            const moonriseHour = parseTimeToHour(sunMoon?.moonrise);
-            const moonsetHour = parseTimeToHour(sunMoon?.moonset);
-
-            // Determine moon visibility for days with no rise/set events
-            const getMoonVisibility = () => {
-              // Safety checks for NaN values
-              const hasValidRise = moonriseHour !== -1 && !isNaN(moonriseHour);
-              const hasValidSet = moonsetHour !== -1 && !isNaN(moonsetHour);
-
-              // If we have both moonrise and moonset, use normal logic
-              if (hasValidRise && hasValidSet) {
-                return { hasRise: true, hasSet: true };
-              }
-
-              // If we have only moonrise, moon is visible from rise to end of day
-              if (hasValidRise && !hasValidSet) {
-                return { hasRise: true, hasSet: false };
-              }
-
-              // If we have only moonset, moon is visible from start of day to set
-              if (!hasValidRise && hasValidSet) {
-                return { hasRise: false, hasSet: true };
-              }
-
-              // If we have neither rise nor set, check surrounding days for moon activity
-              const prevDay = dayIndex > 0 ? groupedByDay[dayIndex - 1] : null;
-              const nextDay =
-                dayIndex < groupedByDay.length - 1
-                  ? groupedByDay[dayIndex + 1]
-                  : null;
-
-              // Check if previous day has moon events
-              const prevHasMoonEvents =
-                prevDay?.sunMoon &&
-                ((prevDay.sunMoon.moonrise !== null &&
-                  prevDay.sunMoon.moonrise !== "---" &&
-                  prevDay.sunMoon.moonrise !== "----") ||
-                  (prevDay.sunMoon.moonset !== null &&
-                    prevDay.sunMoon.moonset !== "---" &&
-                    prevDay.sunMoon.moonset !== "----"));
-
-              // Check if next day has moon events
-              const nextHasMoonEvents =
-                nextDay?.sunMoon &&
-                ((nextDay.sunMoon.moonrise !== null &&
-                  nextDay.sunMoon.moonrise !== "---" &&
-                  nextDay.sunMoon.moonrise !== "----") ||
-                  (nextDay.sunMoon.moonset !== null &&
-                    nextDay.sunMoon.moonset !== "---" &&
-                    nextDay.sunMoon.moonset !== "----"));
-
-              // If either adjacent day has moon events, assume all-day visibility
-              if (prevHasMoonEvents || nextHasMoonEvents) {
-                return { hasRise: false, hasSet: false, allDay: true };
-              }
-
-              return { hasRise: false, hasSet: false, allDay: false };
-            };
-
-            const moonVisibility = getMoonVisibility();
-
-            return (
-              <div key={`moon-${date}`} className="day-timeline">
-                <div className="timeline-track">
-                  {/* Handle all-day moon case */}
-                  {(moonriseHour === 0 && moonsetHour === 24) ||
-                  moonVisibility.allDay ? (
-                    <div
-                      className="moon-line"
-                      style={{
-                        left: "0%",
-                        width: "100%",
-                        display: "block",
-                      }}
-                      title={
-                        moonVisibility.allDay
-                          ? `Moon: Visible all day (no rise/set events)`
-                          : `Moon: All day (${sunMoon?.moonrise} - ${sunMoon?.moonset})`
-                      }
-                    />
-                  ) : moonriseHour > moonsetHour &&
-                    moonriseHour !== -1 &&
-                    moonsetHour !== -1 &&
-                    moonsetHour !== 24 ? (
-                    // Moon crosses midnight - show two segments
-                    <>
-                      <div
-                        className="moon-line"
-                        style={{
-                          left: "0%",
-                          width: `${(moonsetHour / 24) * 100}%`,
-                          display: "block",
-                        }}
-                        title={`Moon: ${sunMoon?.moonrise || "N/A"} - ${sunMoon?.moonset || "N/A"} (crosses midnight)`}
-                      />
-                      <div
-                        className="moon-line"
-                        style={{
-                          left: `${(moonriseHour / 24) * 100}%`,
-                          width: `${((24 - moonriseHour) / 24) * 100}%`,
-                          display: "block",
-                        }}
-                        title={`Moon: ${sunMoon?.moonrise || "N/A"} - ${sunMoon?.moonset || "N/A"} (crosses midnight)`}
-                      />
-                    </>
-                  ) : moonVisibility.hasRise && !moonVisibility.hasSet ? (
-                    // Moon rises but doesn't set
-                    <div
-                      className="moon-line"
-                      style={{
-                        left: `${(moonriseHour / 24) * 100}%`,
-                        width: `${((24 - moonriseHour) / 24) * 100}%`,
-                        display: "block",
-                      }}
-                      title={`Moon: ${sunMoon?.moonrise} - end of day (sets later)`}
-                    />
-                  ) : !moonVisibility.hasRise && moonVisibility.hasSet ? (
-                    // Moon sets but doesn't rise
-                    <div
-                      className="moon-line"
-                      style={{
-                        left: "0%",
-                        width: `${Math.max(5, (moonsetHour / 24) * 100)}%`,
-                        display: "block",
-                      }}
-                      title={`Moon: start of day - ${sunMoon?.moonset} (rose earlier)`}
-                    />
-                  ) : moonVisibility.hasRise && moonVisibility.hasSet ? (
-                    // Normal moon period
-                    <div
-                      className="moon-line"
-                      style={{
-                        left: `${(moonriseHour / 24) * 100}%`,
-                        width: `${(((moonsetHour === 24 ? 24 : moonsetHour) - moonriseHour) / 24) * 100}%`,
-                        display: "block",
-                      }}
-                      title={`Moon: ${sunMoon?.moonrise} - ${sunMoon?.moonset}`}
-                    />
-                  ) : null}
-                </div>
-              </div>
-            );
-          })}
+          <div className="continuous-timeline">
+            <MoonTimeline
+              dates={groupedByDay.map((day) => day.date)}
+              sunMoonData={groupedByDay.map((day) => ({
+                date: day.date,
+                moonrise: day.sunMoon?.moonrise,
+                moonset: day.sunMoon?.moonset,
+              }))}
+            />
+          </div>
         </div>
       </div>
 
