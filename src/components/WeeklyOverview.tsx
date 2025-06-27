@@ -5,6 +5,7 @@ import { HourlyForecast, DailyForecast, Location } from "../types/weather";
 import { getCloudCoverageInfo, getRainState } from "../utils/weatherUtils";
 import TwilightTimeline from "./TwilightTimeline";
 import MoonTimeline from "./MoonTimeline";
+import SunTimeline from "./SunTimeline";
 
 import "./WeeklyOverview.css";
 
@@ -414,10 +415,9 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           )}
 
         {/* Twilight timeline row */}
-        {/* Sun/Twilight row */}
-        <div className="grid-row sun-row">
-          <div className="continuous-timeline">
-            {location?.lat && location?.lon ? (
+        {location?.lat && location?.lon ? (
+          <div className="grid-row sun-row">
+            <div className="continuous-timeline">
               <TwilightTimeline
                 dates={groupedByDay.map((day) => day.date)}
                 latitude={location.lat}
@@ -428,45 +428,23 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                   sunset: day.sunMoon?.sunset,
                 }))}
               />
-            ) : (
-              // Fallback to simple sun lines for each day when no location
-              <>
-                {groupedByDay.map(({ date, sunMoon }) => {
-                  const parseTimeToHour = (
-                    timeStr: string | null | undefined,
-                  ): number => {
-                    if (!timeStr || timeStr === "---" || timeStr === "----")
-                      return -1;
-                    if (timeStr === "24:00") return 24;
-                    const [hours, minutes] = timeStr.split(":").map(Number);
-                    return hours + minutes / 60;
-                  };
-
-                  const sunriseHour = parseTimeToHour(sunMoon?.sunrise);
-                  const sunsetHour = parseTimeToHour(sunMoon?.sunset);
-
-                  return (
-                    <div key={`sun-${date}`} className="day-timeline">
-                      <div className="timeline-track">
-                        {sunriseHour !== -1 && sunsetHour !== -1 ? (
-                          <div
-                            className="sun-line"
-                            style={{
-                              left: `${(sunriseHour / 24) * 100}%`,
-                              width: `${(((sunsetHour === 24 ? 24 : sunsetHour) - sunriseHour) / 24) * 100}%`,
-                              display: "block",
-                            }}
-                            title={`Sun: ${sunMoon?.sunrise} - ${sunMoon?.sunset}`}
-                          />
-                        ) : null}
-                      </div>
-                    </div>
-                  );
-                })}
-              </>
-            )}
+            </div>
           </div>
-        </div>
+        ) : (
+          // Fallback to continuous sun timeline when no location for twilight
+          <div className="grid-row sun-row">
+            <div className="continuous-timeline">
+              <SunTimeline
+                dates={groupedByDay.map((day) => day.date)}
+                sunMoonData={groupedByDay.map((day) => ({
+                  date: day.date,
+                  sunrise: day.sunMoon?.sunrise,
+                  sunset: day.sunMoon?.sunset,
+                }))}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Moon rise/set row */}
         <div className="grid-row moon-row">
