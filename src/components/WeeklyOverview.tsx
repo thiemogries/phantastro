@@ -2,7 +2,11 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import { HourlyForecast, DailyForecast, Location } from "../types/weather";
-import { getCloudCoverageInfo, getRainState } from "../utils/weatherUtils";
+import {
+  getCloudCoverageInfo,
+  getRainState,
+  getMoonPhaseEmoji,
+} from "../utils/weatherUtils";
 import {
   calculateTwilightForDate,
   calculateSunriseSunset,
@@ -51,7 +55,11 @@ const formatTime = (timeStr: string, location?: Location) => {
 };
 
 // Helper function to format day headers consistently with timezone
-const formatDayHeader = (dateStr: string, location?: Location) => {
+const formatDayHeader = (
+  dateStr: string,
+  location?: Location,
+  sunMoon?: any,
+) => {
   // For dates like "2025-06-23", create a date that represents the location's timezone
   // We'll use the first hour of the day from our hourly data to get the correct timezone context
   const date = new Date(dateStr + "T12:00:00"); // Use noon to avoid timezone edge cases
@@ -62,7 +70,12 @@ const formatDayHeader = (dateStr: string, location?: Location) => {
     day: "numeric",
   });
 
-  return { dayName, dayDate };
+  // Get moon phase emoji if available
+  const moonPhaseEmoji = sunMoon?.moonPhaseName
+    ? getMoonPhaseEmoji(sunMoon.moonPhaseName)
+    : "";
+
+  return { dayName, dayDate, moonPhaseEmoji };
 };
 
 const getVisibilityQuality = (vis: number | null | undefined) => {
@@ -423,12 +436,45 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
       <div className="weekly-grid">
         {/* Header row with day names */}
         <div className="grid-header">
-          {groupedByDay.map(({ date }) => {
-            const { dayName, dayDate } = formatDayHeader(date, location);
+          {groupedByDay.map(({ date, sunMoon }) => {
+            const { dayName, dayDate, moonPhaseEmoji } = formatDayHeader(
+              date,
+              location,
+              sunMoon,
+            );
             return (
               <div key={date} className="day-header">
                 <div className="day-name">{dayName}</div>
                 <div className="day-date">{dayDate}</div>
+                {moonPhaseEmoji && (
+                  <div className="moon-phase-container">
+                    <div
+                      className="moon-phase-indicator"
+                      style={{ fontSize: "1.2rem" }}
+                      title={
+                        sunMoon?.moonPhaseName
+                          ? `${sunMoon.moonPhaseName}${
+                              sunMoon.moonIlluminatedFraction !== null
+                                ? ` (${Math.round(sunMoon.moonIlluminatedFraction)}% illuminated)`
+                                : ""
+                            }${
+                              sunMoon.moonAge !== null
+                                ? ` - ${Math.round(sunMoon.moonAge)} days old`
+                                : ""
+                            }`
+                          : "Moon phase"
+                      }
+                    >
+                      {moonPhaseEmoji}
+                    </div>
+                    {sunMoon?.moonIlluminatedFraction !== null &&
+                      sunMoon?.moonIlluminatedFraction !== undefined && (
+                        <div className="moon-illumination">
+                          {Math.round(sunMoon.moonIlluminatedFraction)}%
+                        </div>
+                      )}
+                  </div>
+                )}
                 {location?.timezone && (
                   <div
                     className="timezone-indicator"

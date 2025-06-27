@@ -76,6 +76,31 @@
     margin-top: 2px;
 }
 
+.moon-phase-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    margin-top: 2px;
+}
+
+.moon-phase-indicator {
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.moon-phase-indicator:hover {
+    transform: scale(1.2);
+}
+
+.moon-illumination {
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+    line-height: 1;
+}
+
 /* Column-based grid structure */
 .grid-columns {
     display: grid;
@@ -342,6 +367,14 @@ body > .react-tooltip[id*="hour-"] {
 
     .day-date {
         font-size: 0.6rem;
+    }
+
+    .moon-phase-indicator {
+        font-size: 1rem;
+    }
+
+    .moon-illumination {
+        font-size: 0.5rem;
     }
 
     .day-column {
