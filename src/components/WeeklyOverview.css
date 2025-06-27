@@ -238,9 +238,11 @@ body > .react-tooltip[id*="hour-"] {
 .sun-line:hover {
     box-shadow: 0 2px 4px rgba(251, 191, 36, 0.6);
     transform: scaleY(1.5);
+    border-radius: 2px;
 }
 
 .moon-line {
+    display: block;
     position: absolute;
     top: 0;
     height: 100%;

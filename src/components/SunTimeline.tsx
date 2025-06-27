@@ -35,14 +35,14 @@ const SunTimeline: React.FC<SunTimelineProps> = ({ dates, sunMoonData }) => {
     const events: Array<{
       dayIndex: number;
       hour: number;
-      type: 'rise' | 'set';
+      type: "rise" | "set";
       absoluteTime: number;
       timeString: string;
     }> = [];
 
     // Collect all sun events across the week
     dates.forEach((date, dayIndex) => {
-      const dayData = sunMoonData.find(d => d.date === date);
+      const dayData = sunMoonData.find((d) => d.date === date);
       if (!dayData) return;
 
       const sunriseHour = parseTimeToHour(dayData.sunrise);
@@ -52,9 +52,9 @@ const SunTimeline: React.FC<SunTimelineProps> = ({ dates, sunMoonData }) => {
         events.push({
           dayIndex,
           hour: sunriseHour,
-          type: 'rise',
+          type: "rise",
           absoluteTime: dayIndex * 24 + sunriseHour,
-          timeString: dayData.sunrise || '',
+          timeString: dayData.sunrise || "",
         });
       }
 
@@ -62,9 +62,9 @@ const SunTimeline: React.FC<SunTimelineProps> = ({ dates, sunMoonData }) => {
         events.push({
           dayIndex,
           hour: sunsetHour,
-          type: 'set',
+          type: "set",
           absoluteTime: dayIndex * 24 + sunsetHour,
-          timeString: dayData.sunset || '',
+          timeString: dayData.sunset || "",
         });
       }
     });
@@ -79,7 +79,7 @@ const SunTimeline: React.FC<SunTimelineProps> = ({ dates, sunMoonData }) => {
     // Look for patterns that suggest sun was visible before the week started
     if (events.length > 0) {
       const firstEvent = events[0];
-      if (firstEvent.type === 'set') {
+      if (firstEvent.type === "set") {
         // First event is a sunset, so sun must have been visible
         sunVisible = true;
       }
@@ -87,18 +87,18 @@ const SunTimeline: React.FC<SunTimelineProps> = ({ dates, sunMoonData }) => {
 
     // Process events to create continuous segments
     let segmentStart = 0; // Start of current segment in absolute hours
-    let currentRise = '';
-    let currentSet = '';
+    let currentRise = "";
+    let currentSet = "";
 
     for (let i = 0; i < events.length; i++) {
       const event = events[i];
 
-      if (event.type === 'rise' && !sunVisible) {
+      if (event.type === "rise" && !sunVisible) {
         // Sun rises - start a new visible segment
         segmentStart = event.absoluteTime;
         currentRise = event.timeString;
         sunVisible = true;
-      } else if (event.type === 'set' && sunVisible) {
+      } else if (event.type === "set" && sunVisible) {
         // Sun sets - end the current visible segment
         const segmentEnd = event.absoluteTime;
         currentSet = event.timeString;
@@ -122,8 +122,8 @@ const SunTimeline: React.FC<SunTimelineProps> = ({ dates, sunMoonData }) => {
         }
 
         sunVisible = false;
-        currentRise = '';
-        currentSet = '';
+        currentRise = "";
+        currentSet = "";
       }
     }
 
@@ -142,14 +142,14 @@ const SunTimeline: React.FC<SunTimelineProps> = ({ dates, sunMoonData }) => {
         endHour,
         totalHours: weekEnd - segmentStart,
         sunrise: currentRise,
-        sunset: 'continues',
+        sunset: "continues",
         crossesMidnight: startDay !== endDay,
       });
     }
 
     // Handle special cases for days with no rise/set events (polar conditions)
     dates.forEach((date, dayIndex) => {
-      const dayData = sunMoonData.find(d => d.date === date);
+      const dayData = sunMoonData.find((d) => d.date === date);
       if (!dayData) return;
 
       const sunriseHour = parseTimeToHour(dayData.sunrise);
@@ -158,35 +158,49 @@ const SunTimeline: React.FC<SunTimelineProps> = ({ dates, sunMoonData }) => {
       // If no rise/set events for this day, check if we should assume all-day visibility (polar day)
       if (sunriseHour === -1 && sunsetHour === -1) {
         // Check if adjacent days have sun events, suggesting continuation
-        const prevDay = dayIndex > 0 ? sunMoonData.find(d => d.date === dates[dayIndex - 1]) : null;
-        const nextDay = dayIndex < dates.length - 1 ? sunMoonData.find(d => d.date === dates[dayIndex + 1]) : null;
+        const prevDay =
+          dayIndex > 0
+            ? sunMoonData.find((d) => d.date === dates[dayIndex - 1])
+            : null;
+        const nextDay =
+          dayIndex < dates.length - 1
+            ? sunMoonData.find((d) => d.date === dates[dayIndex + 1])
+            : null;
 
-        const prevHasEvents = prevDay && (
-          parseTimeToHour(prevDay.sunrise) !== -1 || parseTimeToHour(prevDay.sunset) !== -1
-        );
-        const nextHasEvents = nextDay && (
-          parseTimeToHour(nextDay.sunrise) !== -1 || parseTimeToHour(nextDay.sunset) !== -1
-        );
+        const prevHasEvents =
+          prevDay &&
+          (parseTimeToHour(prevDay.sunrise) !== -1 ||
+            parseTimeToHour(prevDay.sunset) !== -1);
+        const nextHasEvents =
+          nextDay &&
+          (parseTimeToHour(nextDay.sunrise) !== -1 ||
+            parseTimeToHour(nextDay.sunset) !== -1);
 
         // For polar day conditions (midnight sun), assume all-day visibility
         // This typically happens in high latitudes during summer
-        if ((prevHasEvents || nextHasEvents) &&
-            !segments.some(seg => seg.startDay <= dayIndex && seg.endDay >= dayIndex)) {
+        if (
+          (prevHasEvents || nextHasEvents) &&
+          !segments.some(
+            (seg) => seg.startDay <= dayIndex && seg.endDay >= dayIndex,
+          )
+        ) {
           segments.push({
             startDay: dayIndex,
             startHour: 0,
             endDay: dayIndex,
             endHour: 24,
             totalHours: 24,
-            sunrise: 'midnight sun',
-            sunset: 'midnight sun',
+            sunrise: "midnight sun",
+            sunset: "midnight sun",
             crossesMidnight: false,
           });
         }
       }
     });
 
-    return segments.sort((a, b) => (a.startDay * 24 + a.startHour) - (b.startDay * 24 + b.startHour));
+    return segments.sort(
+      (a, b) => a.startDay * 24 + a.startHour - (b.startDay * 24 + b.startHour),
+    );
   };
 
   const getTooltipText = (segment: SunSegment): string => {
@@ -199,18 +213,23 @@ const SunTimeline: React.FC<SunTimelineProps> = ({ dates, sunMoonData }) => {
     const startTime = formatHour(segment.startHour);
     const endTime = formatHour(segment.endHour);
 
-    const durationText = segment.totalHours >= 24
-      ? `${Math.floor(segment.totalHours / 24)}d ${(segment.totalHours % 24).toFixed(1)}h`
-      : `${segment.totalHours.toFixed(1)}h`;
+    const durationText =
+      segment.totalHours >= 24
+        ? `${Math.floor(segment.totalHours / 24)}d ${(segment.totalHours % 24).toFixed(1)}h`
+        : `${segment.totalHours.toFixed(1)}h`;
 
-    const dayText = segment.startDay === segment.endDay
-      ? `Day ${segment.startDay + 1}`
-      : `Days ${segment.startDay + 1}-${segment.endDay + 1}`;
+    const dayText =
+      segment.startDay === segment.endDay
+        ? `Day ${segment.startDay + 1}`
+        : `Days ${segment.startDay + 1}-${segment.endDay + 1}`;
 
-    let riseSetText = '';
-    if (segment.sunrise === 'midnight sun' && segment.sunset === 'midnight sun') {
-      riseSetText = 'Midnight sun (no rise/set events)';
-    } else if (segment.sunset === 'continues') {
+    let riseSetText = "";
+    if (
+      segment.sunrise === "midnight sun" &&
+      segment.sunset === "midnight sun"
+    ) {
+      riseSetText = "Midnight sun (no rise/set events)";
+    } else if (segment.sunset === "continues") {
       riseSetText = `Sunrise: ${segment.sunrise} - continues beyond week`;
     } else if (segment.sunrise && segment.sunset) {
       riseSetText = `Sunrise: ${segment.sunrise} - Sunset: ${segment.sunset}`;
@@ -226,8 +245,10 @@ const SunTimeline: React.FC<SunTimelineProps> = ({ dates, sunMoonData }) => {
       {segments.map((segment, index) => {
         // Calculate position and width across the entire week
         const totalWeekHours = dates.length * 24;
-        const startPosition = ((segment.startDay * 24 + segment.startHour) / totalWeekHours) * 100;
-        const endPosition = ((segment.endDay * 24 + segment.endHour) / totalWeekHours) * 100;
+        const startPosition =
+          ((segment.startDay * 24 + segment.startHour) / totalWeekHours) * 100;
+        const endPosition =
+          ((segment.endDay * 24 + segment.endHour) / totalWeekHours) * 100;
         const segmentWidth = endPosition - startPosition;
         const minWidth = 0.1; // Minimum width for visibility
         const actualWidth = Math.max(segmentWidth, minWidth);
@@ -236,30 +257,24 @@ const SunTimeline: React.FC<SunTimelineProps> = ({ dates, sunMoonData }) => {
           <div
             key={index}
             className="sun-line"
-            style={{
-              left: `${startPosition}%`,
-              width: `${actualWidth}%`,
-              display: "block",
-              position: "absolute",
-              top: 0,
-              height: "100%",
-              background: "linear-gradient(to right, #fbbf24, #f59e0b)",
-              borderRadius: "2px",
-              border: "1px solid rgba(251, 191, 36, 0.6)",
-              boxShadow: "0 1px 2px rgba(251, 191, 36, 0.4)",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-              zIndex: index,
-            }}
+            style={
+              {
+                // left: `${startPosition}%`,
+                // width: `${actualWidth}%`,
+                // display: "block",
+                // position: "absolute",
+                // top: 0,
+                // height: "100%",
+                // background: "linear-gradient(to right, #fbbf24, #f59e0b)",
+                // borderRadius: "2px",
+                // border: "1px solid rgba(251, 191, 36, 0.6)",
+                // boxShadow: "0 1px 2px rgba(251, 191, 36, 0.4)",
+                // cursor: "pointer",
+                // transition: "all 0.2s ease",
+                // zIndex: index,
+              }
+            }
             title={getTooltipText(segment)}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = "0 2px 4px rgba(251, 191, 36, 0.6)";
-              e.currentTarget.style.transform = "scaleY(1.5)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = "0 1px 2px rgba(251, 191, 36, 0.4)";
-              e.currentTarget.style.transform = "scaleY(1)";
-            }}
           />
         );
       })}
