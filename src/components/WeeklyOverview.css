@@ -200,7 +200,7 @@ body > .react-tooltip[id*="hour-"] {
 /* Continuous timeline container */
 .continuous-timeline {
     position: relative;
-    height: 4px;
+    height: 2px;
     width: 100%;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 2px;
@@ -216,7 +216,7 @@ body > .react-tooltip[id*="hour-"] {
 
 .timeline-track {
     position: relative;
-    height: 4px;
+    height: 100%;
     width: 100%;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 2px;
