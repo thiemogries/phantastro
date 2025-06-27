@@ -44,6 +44,15 @@ export interface MoonlightData {
   zenithAngle: number | null;            // degrees (solar zenith angle)
 }
 
+// Solar position data
+export interface SolarData {
+  elevation: number | null;              // degrees (solar elevation angle above horizon)
+  azimuth: number | null;                // degrees (solar azimuth angle, 0° = north)
+  declination: number | null;            // degrees (solar declination angle)
+  hourAngle: number | null;              // degrees (hour angle, 0° = solar noon)
+  period: 'day' | 'civil-twilight' | 'nautical-twilight' | 'astronomical-twilight' | 'night' | null;
+}
+
 // Sun and Moon rise/set data
 export interface SunMoonData {
   sunrise: string | null;               // "hh:mm" format
