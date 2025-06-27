@@ -149,21 +149,6 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
           className="weather-app__content"
           data-initial-load={isInitialLoad ? "true" : "false"}
         >
-          {/* Location Info */}
-          <div className="weather-app__location">
-            <h2>📍 {forecast.location.name}</h2>
-            <p className="coordinates">
-              {forecast.location.lat.toFixed(4)}°,{" "}
-              {forecast.location.lon.toFixed(4)}°
-            </p>
-            <p className="last-updated">
-              Last updated:{" "}
-              {new Date(forecast.lastUpdated).toLocaleTimeString([], {
-                hour12: false,
-              })}
-            </p>
-          </div>
-
           {/* Data Availability Notice */}
           {(forecast.hourlyForecast.length === 0 ||
             (forecast.currentWeather.temperature === null &&
@@ -203,6 +188,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
             hourlyData={forecast.hourlyForecast}
             dailyData={forecast.dailyForecast}
             location={forecast.location}
+            lastUpdated={forecast.lastUpdated}
           />
         </div>
       )}

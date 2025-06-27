@@ -20,6 +20,7 @@ interface WeeklyOverviewProps {
   hourlyData: HourlyForecast[];
   dailyData?: DailyForecast[]; // Daily forecast data with sun/moon times
   location: Location; // Location info for timezone-aware formatting
+  lastUpdated: string; // Last updated timestamp
   className?: string;
 }
 
@@ -373,6 +374,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   hourlyData,
   dailyData,
   location,
+  lastUpdated,
   className,
 }) => {
   // Group hourly data by day
@@ -430,7 +432,19 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   return (
     <div className={`weekly-overview ${className || ""}`}>
       <div className="overview-header">
-        <h3>7-Day Hourly Outlook</h3>
+        <h3>
+          {location.name}
+          {location.country ? `, ${location.country}` : ""}
+        </h3>
+        <p className="coordinates">
+          {location.lat.toFixed(4)}°, {location.lon.toFixed(4)}°
+        </p>
+        <p className="last-updated">
+          Last updated:{" "}
+          {new Date(lastUpdated).toLocaleTimeString([], {
+            hour12: false,
+          })}
+        </p>
       </div>
 
       <div className="weekly-grid">
