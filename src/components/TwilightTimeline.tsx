@@ -332,7 +332,13 @@ const TwilightTimeline: React.FC<TwilightTimelineProps> = ({
         const segmentWidth = endPosition - startPosition;
         const minWidth = 0.1; // Minimum width for visibility
         const actualWidth = Math.max(segmentWidth, minWidth);
-
+        const zIndexOffset: Record<TwilightSegment["type"], number> = {
+          day: 300,
+          civil: 200,
+          nautical: 100,
+          astronomical: 0,
+          night: 0,
+        };
         return (
           <div
             key={index}
@@ -349,7 +355,7 @@ const TwilightTimeline: React.FC<TwilightTimelineProps> = ({
                 segment.type === "day"
                   ? "0 1px 2px rgba(251, 191, 36, 0.4)"
                   : "0 1px 2px rgba(0, 0, 0, 0.2)",
-              zIndex: index,
+              zIndex: index + zIndexOffset[segment.type],
             }}
             title={getTooltipText(segment)}
           />
