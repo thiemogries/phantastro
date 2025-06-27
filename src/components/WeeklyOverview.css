@@ -365,14 +365,6 @@ body > .react-tooltip[id*="hour-"] {
         height: 6px;
     }
 
-    .timeline-track {
-        height: 2px;
-    }
-
-    .day-timeline {
-        padding: 2px 1px;
-    }
-
     .overview-summary {
         gap: 6px;
         padding: 6px 0;

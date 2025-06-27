@@ -294,44 +294,49 @@ const TwilightTimeline: React.FC<TwilightTimelineProps> = ({
   const segments = createTwilightSegments();
 
   return (
-    <div
-      className="timeline-track"
-      style={{ position: "relative", height: "100%" }}
-    >
-      {segments.map((segment, index) => (
-        <div
-          key={index}
-          className="twilight-segment"
-          style={{
-            position: "absolute",
-            top: 0,
-            height: "100%",
-            left: `${(segment.start / 24) * 100}%`,
-            width: `${((segment.end - segment.start) / 24) * 100}%`,
-            background: segment.color,
-            borderRadius: "2px",
-            cursor: "pointer",
-            transition: "all 0.2s ease",
-            border:
-              segment.type === "day"
-                ? "1px solid rgba(251, 191, 36, 0.6)"
-                : "none",
-            boxShadow:
-              segment.type === "day"
-                ? "0 1px 2px rgba(251, 191, 36, 0.4)"
-                : "none",
-          }}
-          title={getTooltipText(segment)}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "scaleY(1.5)";
-            e.currentTarget.style.zIndex = "10";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "scaleY(1)";
-            e.currentTarget.style.zIndex = "1";
-          }}
-        />
-      ))}
+    <div className="timeline-track">
+      {segments.map((segment, index) => {
+        const segmentWidth = ((segment.end - segment.start) / 24) * 100;
+        const minWidth = 0.5; // Minimum 0.5% width for visibility
+        const actualWidth = Math.max(segmentWidth, minWidth);
+
+        return (
+          <div
+            key={index}
+            className="twilight-segment"
+            style={{
+              position: "absolute",
+              top: 0,
+              height: "100%",
+              left: `${(segment.start / 24) * 100}%`,
+              width: `${actualWidth}%`,
+              background: segment.color,
+              borderRadius: "2px",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              border:
+                segment.type === "day"
+                  ? "1px solid rgba(251, 191, 36, 0.6)"
+                  : "1px solid rgba(255, 255, 255, 0.2)",
+              boxShadow:
+                segment.type === "day"
+                  ? "0 1px 2px rgba(251, 191, 36, 0.4)"
+                  : "0 1px 2px rgba(0, 0, 0, 0.2)",
+              zIndex: index,
+              minWidth: "2px", // Ensure minimum pixel width
+            }}
+            title={getTooltipText(segment)}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "scaleY(1.5)";
+              e.currentTarget.style.zIndex = "10";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "scaleY(1)";
+              e.currentTarget.style.zIndex = index.toString();
+            }}
+          />
+        );
+      })}
     </div>
   );
 };
