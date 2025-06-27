@@ -96,11 +96,12 @@ Phantastro features a **cosmic dark theme** inspired by the night sky:
 - **Precipitation Row**: Blue cells indicate rain/snow with intensity showing probability
 - **Enhanced Tooltips**: Hover over any hour cell for detailed conditions including:
   - Current weather (clouds, rain, visibility, wind, temperature)
-  - Sun rise and set times for the day
-  - Moon rise and set times for the day
-  - Complete twilight sequence:
-    - Evening: Civil end → Nautical end → Astronomical end (darkest point)
-    - Morning: Astronomical start → Nautical start → Civil start (towards sunrise)
+  - **Complete Observing Cycle**: Shows the full astronomical timeline from sunrise to next sunrise
+    - Current cycle's sunrise and sunset times
+    - Next sunrise time (end of observing period)
+    - Evening twilight progression: Civil end → Nautical end → Astronomical end
+    - Morning twilight progression: Astronomical start → Nautical start → Civil start
+  - Moon rise and set times for the current day
 
 ### Observing Quality Scale (0-10)
 - **9-10**: Excellent - Perfect conditions for any observation
@@ -122,6 +123,13 @@ Phantastro features a **cosmic dark theme** inspired by the night sky:
 - **📸 Astrophotography**: Requires stable conditions, minimal wind
 - **🌙 Lunar**: Works with some clouds, wind-tolerant
 - **☀️ Solar**: Can work with partial cloud coverage
+
+### Observing Cycle Logic
+The enhanced tooltips show a complete **observing cycle** that spans from sunrise to the next sunrise:
+- **From sunrise onwards**: Shows current day's sunset → twilight sequence → next day's sunrise
+- **Before sunrise**: Shows previous day's sunset → twilight sequence → current day's sunrise
+- **Example**: Monday 2 PM tooltip shows Monday sunset, Monday evening twilights, Tuesday morning twilights, Tuesday sunrise
+- **Benefit**: Perfect for planning overnight observing sessions that span two calendar days
 
 ## 🛠️ Technology Stack
 

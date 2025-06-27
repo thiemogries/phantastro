@@ -103,8 +103,9 @@ const getRainDescription = (
 // Helper function to format solar, twilight and moon data for tooltips
 const getSolarTwilightAndMoonData = (
   date: string,
+  hourTime: string,
   location: Location,
-  sunMoonData: any,
+  groupedByDay: any[],
 ) => {
   const formatTimeOnly = (timeStr: string | null | undefined) => {
     if (!timeStr || timeStr === "---" || timeStr === "----") return "N/A";
@@ -125,16 +126,11 @@ const getSolarTwilightAndMoonData = (
     }
   };
 
-  // Calculate sunrise/sunset and twilight times for the specific date with error handling
-  const targetDate = new Date(date + "T12:00:00");
-
-  // Check if date is valid
-  if (isNaN(targetDate.getTime())) {
+  // Parse the current hour time to determine which observing cycle we're in
+  const currentHour = new Date(hourTime);
+  if (isNaN(currentHour.getTime())) {
     return {
-      sun: {
-        rise: formatTimeOnly(sunMoonData?.sunrise),
-        set: formatTimeOnly(sunMoonData?.sunset),
-      },
+      sun: { rise: "N/A", set: "N/A" },
       twilight: {
         civilDusk: "N/A",
         nauticalDusk: "N/A",
@@ -143,84 +139,219 @@ const getSolarTwilightAndMoonData = (
         nauticalDawn: "N/A",
         civilDawn: "N/A",
       },
-      moon: {
-        rise: formatTimeOnly(sunMoonData?.moonrise),
-        set: formatTimeOnly(sunMoonData?.moonset),
+      moon: { rise: "N/A", set: "N/A" },
+      dayLabels: {
+        startDay: "",
+        endDay: "",
       },
     };
   }
 
-  // Calculate sunrise/sunset as fallback when API data is not available
-  let sunriseTime = formatTimeOnly(sunMoonData?.sunrise);
-  let sunsetTime = formatTimeOnly(sunMoonData?.sunset);
+  // Find the current day and next day data
+  const currentDayIndex = groupedByDay.findIndex((day) => day.date === date);
+  const currentDayData = groupedByDay[currentDayIndex];
+  const nextDayData =
+    currentDayIndex < groupedByDay.length - 1
+      ? groupedByDay[currentDayIndex + 1]
+      : null;
+  const prevDayData =
+    currentDayIndex > 0 ? groupedByDay[currentDayIndex - 1] : null;
 
-  if (sunriseTime === "N/A" || sunsetTime === "N/A") {
-    try {
-      const calculatedSun = calculateSunriseSunset(
-        location.lat,
-        location.lon,
-        targetDate,
-      );
-      if (sunriseTime === "N/A" && calculatedSun.sunrise) {
-        sunriseTime = formatTwilightTime(calculatedSun.sunrise);
+  // Helper to get sunrise time for a day
+  const getSunriseTime = (dayData: any) => {
+    if (!dayData?.sunMoon?.sunrise || dayData.sunMoon.sunrise === "N/A") {
+      try {
+        const targetDate = new Date(dayData.date + "T12:00:00");
+        const calculatedSun = calculateSunriseSunset(
+          location.lat,
+          location.lon,
+          targetDate,
+        );
+        return calculatedSun.sunrise
+          ? formatTwilightTime(calculatedSun.sunrise)
+          : "N/A";
+      } catch {
+        return "N/A";
       }
-      if (sunsetTime === "N/A" && calculatedSun.sunset) {
-        sunsetTime = formatTwilightTime(calculatedSun.sunset);
-      }
-    } catch {
-      // Keep "N/A" values if calculation fails
     }
+    return formatTimeOnly(dayData.sunMoon.sunrise);
+  };
+
+  // Helper to get sunset time for a day
+  const getSunsetTime = (dayData: any) => {
+    if (!dayData?.sunMoon?.sunset || dayData.sunMoon.sunset === "N/A") {
+      try {
+        const targetDate = new Date(dayData.date + "T12:00:00");
+        const calculatedSun = calculateSunriseSunset(
+          location.lat,
+          location.lon,
+          targetDate,
+        );
+        return calculatedSun.sunset
+          ? formatTwilightTime(calculatedSun.sunset)
+          : "N/A";
+      } catch {
+        return "N/A";
+      }
+    }
+    return formatTimeOnly(dayData.sunMoon.sunset);
+  };
+
+  // Determine the observing cycle based on current time
+  const currentSunrise = getSunriseTime(currentDayData);
+  const nextSunrise = nextDayData ? getSunriseTime(nextDayData) : "N/A";
+
+  // Parse times to compare
+  const parseTimeToMinutes = (timeStr: string) => {
+    if (timeStr === "N/A") return -1;
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
+
+  const currentTimeMinutes =
+    currentHour.getHours() * 60 + currentHour.getMinutes();
+  const currentSunriseMinutes = parseTimeToMinutes(currentSunrise);
+
+  // Determine if we're in the current day's cycle or spanning to next day
+  let cycleStartDay, cycleEndDay, cycleStartSunrise, cycleEndSunrise;
+
+  if (
+    currentSunriseMinutes !== -1 &&
+    currentTimeMinutes >= currentSunriseMinutes
+  ) {
+    // We're after today's sunrise, so cycle is from today's sunrise to tomorrow's sunrise
+    cycleStartDay = currentDayData;
+    cycleEndDay = nextDayData;
+    cycleStartSunrise = currentSunrise;
+    cycleEndSunrise = nextSunrise;
+  } else {
+    // We're before today's sunrise, so cycle is from yesterday's sunrise to today's sunrise
+    cycleStartDay = prevDayData;
+    cycleEndDay = currentDayData;
+    cycleStartSunrise = prevDayData ? getSunriseTime(prevDayData) : "N/A";
+    cycleEndSunrise = currentSunrise;
   }
 
-  let twilightData;
+  // Get sunset and twilight times for both days
+  const startDayTargetDate = cycleStartDay
+    ? new Date(cycleStartDay.date + "T12:00:00")
+    : null;
+  const endDayTargetDate = cycleEndDay
+    ? new Date(cycleEndDay.date + "T12:00:00")
+    : null;
+
+  // Format day names for display
+  const formatDayName = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr + "T12:00:00");
+      return date.toLocaleDateString([], { weekday: "short" });
+    } catch {
+      return "";
+    }
+  };
+
+  const startDayName = cycleStartDay ? formatDayName(cycleStartDay.date) : "";
+  const endDayName = cycleEndDay ? formatDayName(cycleEndDay.date) : "";
+
+  // Calculate twilight times for the cycle
+  let startDayTwilight, endDayTwilight;
+
   try {
-    twilightData = {
-      civil: calculateTwilightForDate(
-        location.lat,
-        location.lon,
-        targetDate,
-        "civil",
-      ),
-      nautical: calculateTwilightForDate(
-        location.lat,
-        location.lon,
-        targetDate,
-        "nautical",
-      ),
-      astronomical: calculateTwilightForDate(
-        location.lat,
-        location.lon,
-        targetDate,
-        "astronomical",
-      ),
-    };
-  } catch (error) {
-    // Handle cases where twilight calculations fail (e.g., polar regions)
-    twilightData = {
-      civil: { dawn: null, dusk: null },
-      nautical: { dawn: null, dusk: null },
-      astronomical: { dawn: null, dusk: null },
-    };
+    startDayTwilight = startDayTargetDate
+      ? {
+          civil: calculateTwilightForDate(
+            location.lat,
+            location.lon,
+            startDayTargetDate,
+            "civil",
+          ),
+          nautical: calculateTwilightForDate(
+            location.lat,
+            location.lon,
+            startDayTargetDate,
+            "nautical",
+          ),
+          astronomical: calculateTwilightForDate(
+            location.lat,
+            location.lon,
+            startDayTargetDate,
+            "astronomical",
+          ),
+        }
+      : null;
+  } catch {
+    startDayTwilight = null;
   }
+
+  try {
+    endDayTwilight = endDayTargetDate
+      ? {
+          civil: calculateTwilightForDate(
+            location.lat,
+            location.lon,
+            endDayTargetDate,
+            "civil",
+          ),
+          nautical: calculateTwilightForDate(
+            location.lat,
+            location.lon,
+            endDayTargetDate,
+            "nautical",
+          ),
+          astronomical: calculateTwilightForDate(
+            location.lat,
+            location.lon,
+            endDayTargetDate,
+            "astronomical",
+          ),
+        }
+      : null;
+  } catch {
+    endDayTwilight = null;
+  }
+
+  // Get sunset from the start day and sunrise from end day
+  const cycleStartSunset = cycleStartDay ? getSunsetTime(cycleStartDay) : "N/A";
+
+  // Get moon rise/set for the current calendar day (not the cycle)
+  const currentMoonRise = formatTimeOnly(currentDayData?.sunMoon?.moonrise);
+  const currentMoonSet = formatTimeOnly(currentDayData?.sunMoon?.moonset);
 
   return {
     sun: {
-      rise: sunriseTime,
-      set: sunsetTime,
+      rise: cycleStartSunrise,
+      set: cycleStartSunset,
+      nextRise: cycleEndSunrise,
     },
     twilight: {
-      // Evening sequence: sunset -> civil dusk -> nautical dusk -> astronomical dusk
-      civilDusk: formatTwilightTime(twilightData.civil.dusk),
-      nauticalDusk: formatTwilightTime(twilightData.nautical.dusk),
-      astronomicalDusk: formatTwilightTime(twilightData.astronomical.dusk),
-      // Morning sequence: astronomical dawn -> nautical dawn -> civil dawn -> sunrise
-      astronomicalDawn: formatTwilightTime(twilightData.astronomical.dawn),
-      nauticalDawn: formatTwilightTime(twilightData.nautical.dawn),
-      civilDawn: formatTwilightTime(twilightData.civil.dawn),
+      // Evening sequence from start day
+      civilDusk: startDayTwilight
+        ? formatTwilightTime(startDayTwilight.civil.dusk)
+        : "N/A",
+      nauticalDusk: startDayTwilight
+        ? formatTwilightTime(startDayTwilight.nautical.dusk)
+        : "N/A",
+      astronomicalDusk: startDayTwilight
+        ? formatTwilightTime(startDayTwilight.astronomical.dusk)
+        : "N/A",
+      // Morning sequence to end day
+      astronomicalDawn: endDayTwilight
+        ? formatTwilightTime(endDayTwilight.astronomical.dawn)
+        : "N/A",
+      nauticalDawn: endDayTwilight
+        ? formatTwilightTime(endDayTwilight.nautical.dawn)
+        : "N/A",
+      civilDawn: endDayTwilight
+        ? formatTwilightTime(endDayTwilight.civil.dawn)
+        : "N/A",
     },
     moon: {
-      rise: formatTimeOnly(sunMoonData?.moonrise),
-      set: formatTimeOnly(sunMoonData?.moonset),
+      rise: currentMoonRise,
+      set: currentMoonSet,
+    },
+    dayLabels: {
+      startDay: startDayName,
+      endDay: endDayName,
     },
   };
 };
@@ -538,13 +669,11 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
                         {/* Solar, Twilight and Moon Data */}
                         {(() => {
-                          const dayData = groupedByDay.find(
-                            (d) => d.date === day.date,
-                          );
                           const solarData = getSolarTwilightAndMoonData(
                             day.date,
+                            hour.time,
                             location,
-                            dayData?.sunMoon,
+                            groupedByDay,
                           );
 
                           return (
@@ -563,10 +692,12 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                                   fontWeight: "bold",
                                 }}
                               >
-                                Daily Times
+                                Observing Cycle (
+                                {solarData.dayLabels?.startDay || ""} →{" "}
+                                {solarData.dayLabels?.endDay || ""})
                               </div>
 
-                              {/* Sun Rise/Set */}
+                              {/* Sun Rise/Set for current observing cycle */}
                               <div
                                 style={{
                                   marginBottom: "2px",
@@ -575,6 +706,14 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                               >
                                 ☀️ Sunrise: {solarData.sun.rise} | Sunset:{" "}
                                 {solarData.sun.set}
+                              </div>
+                              <div
+                                style={{
+                                  marginBottom: "3px",
+                                  fontSize: "0.7rem",
+                                }}
+                              >
+                                ☀️ Next sunrise: {solarData.sun.nextRise}
                               </div>
 
                               {/* Moon Rise/Set */}
@@ -596,7 +735,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                                   marginBottom: "1px",
                                 }}
                               >
-                                Evening Twilight:
+                                {solarData.dayLabels?.startDay || ""} Evening:
                               </div>
                               <div
                                 style={{
@@ -636,7 +775,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                                   marginBottom: "1px",
                                 }}
                               >
-                                Morning Twilight:
+                                {solarData.dayLabels?.endDay || ""} Morning:
                               </div>
                               <div
                                 style={{
