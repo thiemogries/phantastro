@@ -147,7 +147,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                       style={hour ? {
                         backgroundColor: getCloudCoverageInfo(hour.cloudCover.totalCloudCover).color,
                         opacity: hour.cloudCover.totalCloudCover !== null ?
-                          Math.max(0.2, hour.cloudCover.totalCloudCover / 100) : 0.1
+                          hour.cloudCover.totalCloudCover / 100 : 0.1
                       } : { background: 'rgba(255, 255, 255, 0.05)', opacity: 0.3 }}
                     ></div>
 
@@ -190,7 +190,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                         const moonlight = hour.moonlight?.moonlightClearSky;
                         const hasMoonlight = moonlight !== null && moonlight !== undefined;
                         const opacity = hasMoonlight && moonlight > 0 ?
-                          Math.min(1, 0.2 + (moonlight / 100) * 0.8) : 0;
+                          Math.min(1, 0.2 + (moonlight / 10) * 0.8) : 0;
                         return { backgroundColor: '#4338ca', opacity };
                       })() : { background: 'rgba(255, 255, 255, 0.05)', opacity: 0.3 }}
                     ></div>
