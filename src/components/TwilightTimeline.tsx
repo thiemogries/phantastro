@@ -305,15 +305,9 @@ const TwilightTimeline: React.FC<TwilightTimelineProps> = ({
             key={index}
             className="twilight-segment"
             style={{
-              position: "absolute",
-              top: 0,
-              height: "100%",
               left: `${(segment.start / 24) * 100}%`,
               width: `${actualWidth}%`,
               background: segment.color,
-              borderRadius: "2px",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
               border:
                 segment.type === "day"
                   ? "1px solid rgba(251, 191, 36, 0.6)"
@@ -323,7 +317,6 @@ const TwilightTimeline: React.FC<TwilightTimelineProps> = ({
                   ? "0 1px 2px rgba(251, 191, 36, 0.4)"
                   : "0 1px 2px rgba(0, 0, 0, 0.2)",
               zIndex: index,
-              minWidth: "2px", // Ensure minimum pixel width
             }}
             title={getTooltipText(segment)}
           />
