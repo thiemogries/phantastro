@@ -326,14 +326,6 @@ const TwilightTimeline: React.FC<TwilightTimelineProps> = ({
               minWidth: "2px", // Ensure minimum pixel width
             }}
             title={getTooltipText(segment)}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "scaleY(1.5)";
-              e.currentTarget.style.zIndex = "10";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "scaleY(1)";
-              e.currentTarget.style.zIndex = index.toString();
-            }}
           />
         );
       })}
