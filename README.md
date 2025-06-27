@@ -94,7 +94,13 @@ Phantastro features a **cosmic dark theme** inspired by the night sky:
 - **Cloud Coverage Row**: White opacity shows cloud percentage (more opaque = more clouds)
 - **Wind Quality Row**: Green = excellent, yellow = fair, red = poor wind conditions for stability  
 - **Precipitation Row**: Blue cells indicate rain/snow with intensity showing probability
-- **Interactive Tooltips**: Hover over any hour cell for detailed conditions
+- **Enhanced Tooltips**: Hover over any hour cell for detailed conditions including:
+  - Current weather (clouds, rain, visibility, wind, temperature)
+  - Sun rise and set times for the day
+  - Moon rise and set times for the day
+  - Complete twilight sequence:
+    - Evening: Civil end → Nautical end → Astronomical end (darkest point)
+    - Morning: Astronomical start → Nautical start → Civil start (towards sunrise)
 
 ### Observing Quality Scale (0-10)
 - **9-10**: Excellent - Perfect conditions for any observation

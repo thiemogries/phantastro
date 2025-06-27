@@ -3,6 +3,10 @@ import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import { HourlyForecast, DailyForecast, Location } from "../types/weather";
 import { getCloudCoverageInfo, getRainState } from "../utils/weatherUtils";
+import {
+  calculateTwilightForDate,
+  calculateSunriseSunset,
+} from "../utils/solarUtils";
 import TwilightTimeline from "./TwilightTimeline";
 import MoonTimeline from "./MoonTimeline";
 
@@ -94,6 +98,131 @@ const getRainDescription = (
   if (probability && probability > 30) return "Moderate Chance";
   if (probability && probability > 0) return "Low Chance";
   return "No Rain";
+};
+
+// Helper function to format solar, twilight and moon data for tooltips
+const getSolarTwilightAndMoonData = (
+  date: string,
+  location: Location,
+  sunMoonData: any,
+) => {
+  const formatTimeOnly = (timeStr: string | null | undefined) => {
+    if (!timeStr || timeStr === "---" || timeStr === "----") return "N/A";
+    if (timeStr === "24:00") return "00:00";
+    return timeStr;
+  };
+
+  const formatTwilightTime = (date: Date | null) => {
+    if (!date) return "N/A";
+    try {
+      return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+    } catch {
+      return "N/A";
+    }
+  };
+
+  // Calculate sunrise/sunset and twilight times for the specific date with error handling
+  const targetDate = new Date(date + "T12:00:00");
+
+  // Check if date is valid
+  if (isNaN(targetDate.getTime())) {
+    return {
+      sun: {
+        rise: formatTimeOnly(sunMoonData?.sunrise),
+        set: formatTimeOnly(sunMoonData?.sunset),
+      },
+      twilight: {
+        civilDusk: "N/A",
+        nauticalDusk: "N/A",
+        astronomicalDusk: "N/A",
+        astronomicalDawn: "N/A",
+        nauticalDawn: "N/A",
+        civilDawn: "N/A",
+      },
+      moon: {
+        rise: formatTimeOnly(sunMoonData?.moonrise),
+        set: formatTimeOnly(sunMoonData?.moonset),
+      },
+    };
+  }
+
+  // Calculate sunrise/sunset as fallback when API data is not available
+  let sunriseTime = formatTimeOnly(sunMoonData?.sunrise);
+  let sunsetTime = formatTimeOnly(sunMoonData?.sunset);
+
+  if (sunriseTime === "N/A" || sunsetTime === "N/A") {
+    try {
+      const calculatedSun = calculateSunriseSunset(
+        location.lat,
+        location.lon,
+        targetDate,
+      );
+      if (sunriseTime === "N/A" && calculatedSun.sunrise) {
+        sunriseTime = formatTwilightTime(calculatedSun.sunrise);
+      }
+      if (sunsetTime === "N/A" && calculatedSun.sunset) {
+        sunsetTime = formatTwilightTime(calculatedSun.sunset);
+      }
+    } catch {
+      // Keep "N/A" values if calculation fails
+    }
+  }
+
+  let twilightData;
+  try {
+    twilightData = {
+      civil: calculateTwilightForDate(
+        location.lat,
+        location.lon,
+        targetDate,
+        "civil",
+      ),
+      nautical: calculateTwilightForDate(
+        location.lat,
+        location.lon,
+        targetDate,
+        "nautical",
+      ),
+      astronomical: calculateTwilightForDate(
+        location.lat,
+        location.lon,
+        targetDate,
+        "astronomical",
+      ),
+    };
+  } catch (error) {
+    // Handle cases where twilight calculations fail (e.g., polar regions)
+    twilightData = {
+      civil: { dawn: null, dusk: null },
+      nautical: { dawn: null, dusk: null },
+      astronomical: { dawn: null, dusk: null },
+    };
+  }
+
+  return {
+    sun: {
+      rise: sunriseTime,
+      set: sunsetTime,
+    },
+    twilight: {
+      // Evening sequence: sunset -> civil dusk -> nautical dusk -> astronomical dusk
+      civilDusk: formatTwilightTime(twilightData.civil.dusk),
+      nauticalDusk: formatTwilightTime(twilightData.nautical.dusk),
+      astronomicalDusk: formatTwilightTime(twilightData.astronomical.dusk),
+      // Morning sequence: astronomical dawn -> nautical dawn -> civil dawn -> sunrise
+      astronomicalDawn: formatTwilightTime(twilightData.astronomical.dawn),
+      nauticalDawn: formatTwilightTime(twilightData.nautical.dawn),
+      civilDawn: formatTwilightTime(twilightData.civil.dawn),
+    },
+    moon: {
+      rise: formatTimeOnly(sunMoonData?.moonrise),
+      set: formatTimeOnly(sunMoonData?.moonset),
+    },
+  };
 };
 
 const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
@@ -402,8 +531,144 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                           💨 Wind: {hour.windSpeed?.toFixed(1) ?? "N/A"} m/s
                         </div>
                         {hour.temperature !== null && (
-                          <div>🌡️ Temp: {hour.temperature.toFixed(1)}°C</div>
+                          <div style={{ marginBottom: "4px" }}>
+                            🌡️ Temp: {hour.temperature.toFixed(1)}°C
+                          </div>
                         )}
+
+                        {/* Solar, Twilight and Moon Data */}
+                        {(() => {
+                          const dayData = groupedByDay.find(
+                            (d) => d.date === day.date,
+                          );
+                          const solarData = getSolarTwilightAndMoonData(
+                            day.date,
+                            location,
+                            dayData?.sunMoon,
+                          );
+
+                          return (
+                            <div
+                              style={{
+                                borderTop: "1px solid rgba(255, 255, 255, 0.2)",
+                                paddingTop: "4px",
+                                marginTop: "4px",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  fontSize: "0.75rem",
+                                  opacity: 0.9,
+                                  marginBottom: "3px",
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                Daily Times
+                              </div>
+
+                              {/* Sun Rise/Set */}
+                              <div
+                                style={{
+                                  marginBottom: "2px",
+                                  fontSize: "0.7rem",
+                                }}
+                              >
+                                ☀️ Sunrise: {solarData.sun.rise} | Sunset:{" "}
+                                {solarData.sun.set}
+                              </div>
+
+                              {/* Moon Rise/Set */}
+                              <div
+                                style={{
+                                  marginBottom: "3px",
+                                  fontSize: "0.7rem",
+                                }}
+                              >
+                                🌙 Moonrise: {solarData.moon.rise} | Moonset:{" "}
+                                {solarData.moon.set}
+                              </div>
+
+                              {/* Evening Twilight */}
+                              <div
+                                style={{
+                                  fontSize: "0.65rem",
+                                  opacity: 0.8,
+                                  marginBottom: "1px",
+                                }}
+                              >
+                                Evening Twilight:
+                              </div>
+                              <div
+                                style={{
+                                  marginBottom: "1px",
+                                  fontSize: "0.7rem",
+                                  paddingLeft: "4px",
+                                }}
+                              >
+                                🌅 Civil ends: {solarData.twilight.civilDusk}
+                              </div>
+                              <div
+                                style={{
+                                  marginBottom: "1px",
+                                  fontSize: "0.7rem",
+                                  paddingLeft: "4px",
+                                }}
+                              >
+                                🌇 Nautical ends:{" "}
+                                {solarData.twilight.nauticalDusk}
+                              </div>
+                              <div
+                                style={{
+                                  marginBottom: "3px",
+                                  fontSize: "0.7rem",
+                                  paddingLeft: "4px",
+                                }}
+                              >
+                                ⭐ Astro ends:{" "}
+                                {solarData.twilight.astronomicalDusk}
+                              </div>
+
+                              {/* Morning Twilight */}
+                              <div
+                                style={{
+                                  fontSize: "0.65rem",
+                                  opacity: 0.8,
+                                  marginBottom: "1px",
+                                }}
+                              >
+                                Morning Twilight:
+                              </div>
+                              <div
+                                style={{
+                                  marginBottom: "1px",
+                                  fontSize: "0.7rem",
+                                  paddingLeft: "4px",
+                                }}
+                              >
+                                ⭐ Astro starts:{" "}
+                                {solarData.twilight.astronomicalDawn}
+                              </div>
+                              <div
+                                style={{
+                                  marginBottom: "1px",
+                                  fontSize: "0.7rem",
+                                  paddingLeft: "4px",
+                                }}
+                              >
+                                🌇 Nautical starts:{" "}
+                                {solarData.twilight.nauticalDawn}
+                              </div>
+                              <div
+                                style={{
+                                  fontSize: "0.7rem",
+                                  paddingLeft: "4px",
+                                }}
+                              >
+                                🌅 Civil starts: {solarData.twilight.civilDawn}
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </Tooltip>
                   );
