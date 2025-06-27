@@ -1,4 +1,4 @@
-# ⭐ Phantastro
+# Phantastro
 
 **A stellar weather app for astronomical observations**
 
@@ -92,7 +92,7 @@ Phantastro features a **cosmic dark theme** inspired by the night sky:
 
 ### Hourly 7-Day Grid
 - **Cloud Coverage Row**: White opacity shows cloud percentage (more opaque = more clouds)
-- **Wind Quality Row**: Green = excellent, yellow = fair, red = poor wind conditions for stability  
+- **Wind Quality Row**: Green = excellent, yellow = fair, red = poor wind conditions for stability
 - **Precipitation Row**: Blue cells indicate rain/snow with intensity showing probability
 - **Enhanced Tooltips**: Hover over any hour cell for detailed conditions including:
   - Current weather (clouds, rain, visibility, wind, temperature)
@@ -164,7 +164,7 @@ Phantastro includes quick access to world-renowned astronomical sites:
 
 ### Meteoblue Integration
 - **Free Tier**: 500 API calls per day
-- **Packages Used**: 
+- **Packages Used**:
   - Basic hourly weather data (`basic-1h`)
   - Cloud coverage data (`clouds-1h_clouds-day`)
 - **Data Coverage**: Global weather data with detailed cloud analysis

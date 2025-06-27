@@ -444,37 +444,40 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
             );
             return (
               <div key={date} className="day-header">
-                <div className="day-name">{dayName}</div>
-                <div className="day-date">{dayDate}</div>
-                {moonPhaseEmoji && (
-                  <div className="moon-phase-container">
-                    <div
-                      className="moon-phase-indicator"
-                      style={{ fontSize: "1.2rem" }}
-                      title={
-                        sunMoon?.moonPhaseName
-                          ? `${sunMoon.moonPhaseName}${
-                              sunMoon.moonIlluminatedFraction !== null
-                                ? ` (${Math.round(sunMoon.moonIlluminatedFraction)}% illuminated)`
-                                : ""
-                            }${
-                              sunMoon.moonAge !== null
-                                ? ` - ${Math.round(sunMoon.moonAge)} days old`
-                                : ""
-                            }`
-                          : "Moon phase"
-                      }
-                    >
-                      {moonPhaseEmoji}
-                    </div>
-                    {sunMoon?.moonIlluminatedFraction !== null &&
-                      sunMoon?.moonIlluminatedFraction !== undefined && (
-                        <div className="moon-illumination">
-                          {Math.round(sunMoon.moonIlluminatedFraction)}%
-                        </div>
-                      )}
+                <div className="day-info-container">
+                  <div className="day-text">
+                    <div className="day-name">{dayName}</div>
+                    <div className="day-date">{dayDate}</div>
                   </div>
-                )}
+                  {moonPhaseEmoji && (
+                    <div className="moon-phase-container">
+                      <div
+                        className="moon-phase-indicator"
+                        title={
+                          sunMoon?.moonPhaseName
+                            ? `${sunMoon.moonPhaseName}${
+                                sunMoon.moonIlluminatedFraction !== null
+                                  ? ` (${Math.round(sunMoon.moonIlluminatedFraction)}% illuminated)`
+                                  : ""
+                              }${
+                                sunMoon.moonAge !== null
+                                  ? ` - ${Math.round(sunMoon.moonAge)} days old`
+                                  : ""
+                              }`
+                            : "Moon phase"
+                        }
+                      >
+                        {moonPhaseEmoji}
+                      </div>
+                      {sunMoon?.moonIlluminatedFraction !== null &&
+                        sunMoon?.moonIlluminatedFraction !== undefined && (
+                          <div className="moon-illumination">
+                            {Math.round(sunMoon.moonIlluminatedFraction)}%
+                          </div>
+                        )}
+                    </div>
+                  )}
+                </div>
                 {location?.timezone && (
                   <div
                     className="timezone-indicator"

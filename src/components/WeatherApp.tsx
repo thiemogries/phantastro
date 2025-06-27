@@ -1,39 +1,59 @@
-import React, { useState } from 'react';
-import { LocationSearchResult } from '../types/weather';
+import React, { useState } from "react";
+import { LocationSearchResult } from "../types/weather";
 import {
   useWeatherData,
   useRefreshWeatherData,
-  WeatherQueryParams
-} from '../hooks/useWeatherData';
-import LocationSearch from './LocationSearch';
-import WeeklyOverview from './WeeklyOverview';
-import LoadingSpinner from './LoadingSpinner';
-import ErrorMessage from './ErrorMessage';
-import './WeatherApp.css';
+  WeatherQueryParams,
+} from "../hooks/useWeatherData";
+import LocationSearch from "./LocationSearch";
+import WeeklyOverview from "./WeeklyOverview";
+import LoadingSpinner from "./LoadingSpinner";
+import ErrorMessage from "./ErrorMessage";
+import "./WeatherApp.css";
 
 interface WeatherAppProps {
   className?: string;
 }
 
 const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
-  const [weatherParams, setWeatherParams] = useState<WeatherQueryParams | null>(null);
+  const [weatherParams, setWeatherParams] = useState<WeatherQueryParams | null>(
+    null,
+  );
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [lastError, setLastError] = useState<string | null>(null);
 
   // Initialize with default location
   React.useEffect(() => {
     if (!weatherParams) {
-      const defaultLat = parseFloat(process.env.REACT_APP_DEFAULT_LAT || '53.5511');
-      const defaultLon = parseFloat(process.env.REACT_APP_DEFAULT_LON || '9.9937');
-      const defaultName = process.env.REACT_APP_DEFAULT_LOCATION || 'Hamburg, Germany';
+      const defaultLat = parseFloat(
+        process.env.REACT_APP_DEFAULT_LAT || "53.5511",
+      );
+      const defaultLon = parseFloat(
+        process.env.REACT_APP_DEFAULT_LON || "9.9937",
+      );
+      const defaultName =
+        process.env.REACT_APP_DEFAULT_LOCATION || "Hamburg, Germany";
 
-      console.log('🏠 WeatherApp: Loading default location:', { defaultLat, defaultLon, defaultName });
-      setWeatherParams({ lat: defaultLat, lon: defaultLon, locationName: defaultName });
+      console.log("🏠 WeatherApp: Loading default location:", {
+        defaultLat,
+        defaultLon,
+        defaultName,
+      });
+      setWeatherParams({
+        lat: defaultLat,
+        lon: defaultLon,
+        locationName: defaultName,
+      });
     }
   }, [weatherParams]);
 
   // Use TanStack Query hooks
-  const { data: forecast, isLoading, error: queryError, isFetching } = useWeatherData(weatherParams);
+  const {
+    data: forecast,
+    isLoading,
+    error: queryError,
+    isFetching,
+  } = useWeatherData(weatherParams);
   const refreshWeatherData = useRefreshWeatherData();
 
   // Stable loading state - only show loading when actually fetching and no data exists
@@ -61,26 +81,30 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
 
   const handleLocationSelect = (location: LocationSearchResult) => {
     if (loading) return; // Prevent duplicate requests
-    console.log('📍 WeatherApp: Location selected:', location);
+    console.log("📍 WeatherApp: Location selected:", location);
     // Clear previous error when selecting new location
     setLastError(null);
-    setWeatherParams({ lat: location.lat, lon: location.lon, locationName: location.name });
+    setWeatherParams({
+      lat: location.lat,
+      lon: location.lon,
+      locationName: location.name,
+    });
   };
 
   const handleRefresh = () => {
     if (loading || !weatherParams) return; // Prevent duplicate requests
-    console.log('🔄 WeatherApp: Refresh requested for:', weatherParams);
+    console.log("🔄 WeatherApp: Refresh requested for:", weatherParams);
     // Clear previous error when refreshing
     setLastError(null);
     refreshWeatherData.mutate(weatherParams);
   };
 
   return (
-    <div className={`weather-app ${className || ''}`}>
+    <div className={`weather-app ${className || ""}`}>
       {/* Header */}
       <header className="weather-app__header">
         <div className="weather-app__title">
-          <h1>⭐ Phantastro</h1>
+          <h1>Phantastro</h1>
           <p>Astronomical Weather Forecast</p>
         </div>
         <div className="weather-app__controls">
@@ -116,33 +140,35 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
 
       {/* Error State */}
       {error && !loading && (
-        <ErrorMessage
-          message={error}
-          onRetry={handleRefresh}
-        />
+        <ErrorMessage message={error} onRetry={handleRefresh} />
       )}
 
       {/* Weather Content */}
       {forecast && (
-        <div className="weather-app__content" data-initial-load={isInitialLoad ? "true" : "false"}>
+        <div
+          className="weather-app__content"
+          data-initial-load={isInitialLoad ? "true" : "false"}
+        >
           {/* Location Info */}
           <div className="weather-app__location">
             <h2>📍 {forecast.location.name}</h2>
             <p className="coordinates">
-              {forecast.location.lat.toFixed(4)}°, {forecast.location.lon.toFixed(4)}°
+              {forecast.location.lat.toFixed(4)}°,{" "}
+              {forecast.location.lon.toFixed(4)}°
             </p>
             <p className="last-updated">
-              Last updated: {new Date(forecast.lastUpdated).toLocaleTimeString([], { hour12: false })}
+              Last updated:{" "}
+              {new Date(forecast.lastUpdated).toLocaleTimeString([], {
+                hour12: false,
+              })}
             </p>
           </div>
-
-
 
           {/* Data Availability Notice */}
           {(forecast.hourlyForecast.length === 0 ||
             (forecast.currentWeather.temperature === null &&
-             forecast.currentWeather.windSpeed === null &&
-             forecast.currentWeather.cloudCover.totalCloudCover === null)) && (
+              forecast.currentWeather.windSpeed === null &&
+              forecast.currentWeather.cloudCover.totalCloudCover === null)) && (
             <div className="data-notice">
               <div className="notice-icon">📡</div>
               <div className="notice-content">
@@ -157,8 +183,16 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
                   <li>Temporary API service outage</li>
                 </ul>
                 <p>
-                  To get real weather data, please configure your Meteoblue API key in the <code>.env</code> file.
-                  Get your free API key at <a href="https://www.meteoblue.com/en/weather-api" target="_blank" rel="noopener noreferrer">meteoblue.com</a>.
+                  To get real weather data, please configure your Meteoblue API
+                  key in the <code>.env</code> file. Get your free API key at{" "}
+                  <a
+                    href="https://www.meteoblue.com/en/weather-api"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    meteoblue.com
+                  </a>
+                  .
                 </p>
               </div>
             </div>
@@ -177,10 +211,11 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
       {!forecast && !loading && !error && !isInitialLoad && (
         <div className="weather-app__welcome">
           <div className="welcome-content">
-            <h2>🌟 Welcome to Phantastro</h2>
+            <h2>Welcome to Phantastro</h2>
             <p>
               Your specialized weather companion for astronomical observations.
-              Get detailed forecasts for cloud coverage and atmospheric transparency.
+              Get detailed forecasts for cloud coverage and atmospheric
+              transparency.
             </p>
             <div className="feature-list">
               <div className="feature">
@@ -215,10 +250,19 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
             <button
               className="get-started-button"
               onClick={() => {
-                const defaultLat = parseFloat(process.env.REACT_APP_DEFAULT_LAT || '53.5511');
-                const defaultLon = parseFloat(process.env.REACT_APP_DEFAULT_LON || '9.9937');
-                const defaultName = process.env.REACT_APP_DEFAULT_LOCATION || 'Hamburg, Germany';
-                setWeatherParams({ lat: defaultLat, lon: defaultLon, locationName: defaultName });
+                const defaultLat = parseFloat(
+                  process.env.REACT_APP_DEFAULT_LAT || "53.5511",
+                );
+                const defaultLon = parseFloat(
+                  process.env.REACT_APP_DEFAULT_LON || "9.9937",
+                );
+                const defaultName =
+                  process.env.REACT_APP_DEFAULT_LOCATION || "Hamburg, Germany";
+                setWeatherParams({
+                  lat: defaultLat,
+                  lon: defaultLon,
+                  locationName: defaultName,
+                });
               }}
             >
               Get Started
