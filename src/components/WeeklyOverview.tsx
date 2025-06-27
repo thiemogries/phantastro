@@ -5,14 +5,13 @@ import { HourlyForecast, DailyForecast, Location } from "../types/weather";
 import { getCloudCoverageInfo, getRainState } from "../utils/weatherUtils";
 import TwilightTimeline from "./TwilightTimeline";
 import MoonTimeline from "./MoonTimeline";
-import SunTimeline from "./SunTimeline";
 
 import "./WeeklyOverview.css";
 
 interface WeeklyOverviewProps {
   hourlyData: HourlyForecast[];
   dailyData?: DailyForecast[]; // Daily forecast data with sun/moon times
-  location?: Location; // Location info for timezone-aware formatting
+  location: Location; // Location info for timezone-aware formatting
   className?: string;
 }
 
@@ -415,36 +414,20 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           )}
 
         {/* Twilight timeline row */}
-        {location?.lat && location?.lon ? (
-          <div className="grid-row sun-row">
-            <div className="continuous-timeline">
-              <TwilightTimeline
-                dates={groupedByDay.map((day) => day.date)}
-                latitude={location.lat}
-                longitude={location.lon}
-                sunMoonData={groupedByDay.map((day) => ({
-                  date: day.date,
-                  sunrise: day.sunMoon?.sunrise,
-                  sunset: day.sunMoon?.sunset,
-                }))}
-              />
-            </div>
+        <div className="grid-row sun-row">
+          <div className="continuous-timeline">
+            <TwilightTimeline
+              dates={groupedByDay.map((day) => day.date)}
+              latitude={location.lat}
+              longitude={location.lon}
+              sunMoonData={groupedByDay.map((day) => ({
+                date: day.date,
+                sunrise: day.sunMoon?.sunrise,
+                sunset: day.sunMoon?.sunset,
+              }))}
+            />
           </div>
-        ) : (
-          // Fallback to continuous sun timeline when no location for twilight
-          <div className="grid-row sun-row">
-            <div className="continuous-timeline">
-              <SunTimeline
-                dates={groupedByDay.map((day) => day.date)}
-                sunMoonData={groupedByDay.map((day) => ({
-                  date: day.date,
-                  sunrise: day.sunMoon?.sunrise,
-                  sunset: day.sunMoon?.sunset,
-                }))}
-              />
-            </div>
-          </div>
-        )}
+        </div>
 
         {/* Moon rise/set row */}
         <div className="grid-row moon-row">
