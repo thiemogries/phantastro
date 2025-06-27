@@ -744,7 +744,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                                   paddingLeft: "4px",
                                 }}
                               >
-                                🌅 Civil ends: {solarData.twilight.civilDusk}
+                                🌆 Civil dusk: {solarData.twilight.civilDusk}
                               </div>
                               <div
                                 style={{
@@ -753,7 +753,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                                   paddingLeft: "4px",
                                 }}
                               >
-                                🌇 Nautical ends:{" "}
+                                🌃 Nautical dusk:{" "}
                                 {solarData.twilight.nauticalDusk}
                               </div>
                               <div
@@ -763,7 +763,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                                   paddingLeft: "4px",
                                 }}
                               >
-                                ⭐ Astro ends:{" "}
+                                🌌 Astronomical dusk:{" "}
                                 {solarData.twilight.astronomicalDusk}
                               </div>
 
@@ -784,7 +784,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                                   paddingLeft: "4px",
                                 }}
                               >
-                                ⭐ Astro starts:{" "}
+                                🌌 Astronomical dawn:{" "}
                                 {solarData.twilight.astronomicalDawn}
                               </div>
                               <div
@@ -794,7 +794,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                                   paddingLeft: "4px",
                                 }}
                               >
-                                🌇 Nautical starts:{" "}
+                                🌇 Nautical dawn:{" "}
                                 {solarData.twilight.nauticalDawn}
                               </div>
                               <div
@@ -803,7 +803,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                                   paddingLeft: "4px",
                                 }}
                               >
-                                🌅 Civil starts: {solarData.twilight.civilDawn}
+                                🌅 Civil dawn: {solarData.twilight.civilDawn}
                               </div>
                             </div>
                           );
