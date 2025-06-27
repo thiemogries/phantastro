@@ -132,7 +132,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
               {forecast.location.lat.toFixed(4)}°, {forecast.location.lon.toFixed(4)}°
             </p>
             <p className="last-updated">
-              Last updated: {new Date(forecast.lastUpdated).toLocaleTimeString()}
+              Last updated: {new Date(forecast.lastUpdated).toLocaleTimeString([], { hour12: false })}
             </p>
           </div>
 
@@ -168,6 +168,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
           <WeeklyOverview
             hourlyData={forecast.hourlyForecast}
             dailyData={forecast.dailyForecast}
+            location={forecast.location}
           />
         </div>
       )}

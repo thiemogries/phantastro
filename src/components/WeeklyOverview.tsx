@@ -1,7 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { Tooltip } from 'react-tooltip';
-import { HourlyForecast, DailyForecast } from '../types/weather';
+import { HourlyForecast, DailyForecast, Location } from '../types/weather';
 import {
   getCloudCoverageInfo,
   getRainState
@@ -12,12 +12,51 @@ import './WeeklyOverview.css';
 interface WeeklyOverviewProps {
   hourlyData: HourlyForecast[];
   dailyData?: DailyForecast[]; // Daily forecast data with sun/moon times
+  location?: Location; // Location info for timezone-aware formatting
   className?: string;
 }
 
 // Helper functions for tooltip content
-const formatTime = (timeStr: string) => {
-  return new Date(timeStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const formatTime = (timeStr: string, location?: Location) => {
+  // Handle null/undefined input
+  if (!timeStr) {
+    return '--:--';
+  }
+
+  // Extract time directly from ISO string to avoid timezone conversion
+  // API returns times like "2025-06-23T14:30+02:00" for local timezone
+  const timeMatch = timeStr.match(/T(\d{2}):(\d{2})/);
+  if (timeMatch) {
+    const [, hours, minutes] = timeMatch;
+    return `${hours}:${minutes}`;
+  }
+
+  // Fallback to Date parsing if format is unexpected
+  try {
+    const date = new Date(timeStr);
+    if (isNaN(date.getTime())) {
+      return '--:--';
+    }
+    return date.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  } catch (error) {
+    return '--:--';
+  }
+};
+
+// Helper function to format day headers consistently with timezone
+const formatDayHeader = (dateStr: string, location?: Location) => {
+  // For dates like "2025-06-23", create a date that represents the location's timezone
+  // We'll use the first hour of the day from our hourly data to get the correct timezone context
+  const date = new Date(dateStr + 'T12:00:00'); // Use noon to avoid timezone edge cases
+
+  const dayName = date.toLocaleDateString([], { weekday: 'short' });
+  const dayDate = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+  return { dayName, dayDate };
 };
 
 const getVisibilityQuality = (vis: number | null | undefined) => {
@@ -53,7 +92,8 @@ const getRainDescription = (precipitation: number | null | undefined, probabilit
 const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   hourlyData,
   dailyData,
-  className
+  location,
+  className,
 }) => {
 
 
@@ -114,12 +154,16 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
         {/* Header row with day names */}
         <div className="grid-header">
           {groupedByDay.map(({ date }) => {
-            const dayName = new Date(date).toLocaleDateString([], { weekday: 'short' });
-            const dayDate = new Date(date).toLocaleDateString([], { month: 'short', day: 'numeric' });
+            const { dayName, dayDate } = formatDayHeader(date, location);
             return (
               <div key={date} className="day-header">
                 <div className="day-name">{dayName}</div>
                 <div className="day-date">{dayDate}</div>
+                {location?.timezone && (
+                  <div className="timezone-indicator" style={{ fontSize: '0.6rem', opacity: 0.7 }}>
+                    {location.timezone}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -231,7 +275,12 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                     border="1px solid rgba(255, 255, 255, 0.2)"
                   >
                     <div style={{ marginBottom: '8px', fontSize: '0.8rem', borderBottom: '1px solid rgba(255, 255, 255, 0.2)', paddingBottom: '4px' }}>
-                      <strong>{formatTime(hour.time)}</strong>
+                      <strong>{formatTime(hour.time, location)}</strong>
+                      {location?.timezone && (
+                        <span style={{ fontSize: '0.7rem', opacity: 0.8, marginLeft: '4px' }}>
+                          {location.timezone}
+                        </span>
+                      )}
                     </div>
                     <div style={{ lineHeight: '1.4' }}>
                       <div style={{ marginBottom: '2px' }}>☁️ Clouds: {hour.cloudCover.totalCloudCover?.toFixed(0) ?? 'N/A'}% ({getCloudDescription(hour.cloudCover.totalCloudCover)})</div>

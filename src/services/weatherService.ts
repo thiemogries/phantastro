@@ -88,6 +88,7 @@ class WeatherService {
         lon,
         name: locationName || `${lat.toFixed(2)}, ${lon.toFixed(2)}`,
         timezone: basicData.metadata?.timezone_abbreviation,
+        utcOffset: basicData.metadata?.utc_timeoffset,
       };
 
       const forecast = this.transformMeteoblueData(basicData, location, cloudData);
@@ -215,7 +216,6 @@ class WeatherService {
       lon,
       format: "json",
       timeformat: "iso8601",
-      tz: "utc"
     };
 
     this.requestCounter++;
@@ -256,7 +256,6 @@ class WeatherService {
       lon,
       format: "json",
       timeformat: "iso8601",
-      tz: "utc"
     };
 
     this.requestCounter++;
@@ -302,7 +301,6 @@ class WeatherService {
       lon,
       format: "json",
       timeformat: "iso8601",
-      tz: "utc"
     };
 
     this.requestCounter++;

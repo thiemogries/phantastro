@@ -5,6 +5,7 @@ export interface Location {
   name: string;
   country?: string;
   timezone?: string;
+  utcOffset?: number;
 }
 
 // Basic weather data point
