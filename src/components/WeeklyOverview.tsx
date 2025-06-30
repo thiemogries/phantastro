@@ -1,7 +1,8 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
-import { HourlyForecast, DailyForecast, Location } from "../types/weather";
+import { HourlyForecast, Location } from "../types/weather";
+import { useWeatherData, WeatherQueryParams } from "../hooks/useWeatherData";
 import {
   getCloudCoverageInfo,
   getRainState,
@@ -13,14 +14,13 @@ import {
 } from "../utils/solarUtils";
 import TwilightTimeline from "./TwilightTimeline";
 import MoonTimeline from "./MoonTimeline";
+import LoadingSpinner from "./LoadingSpinner";
+import ErrorMessage from "./ErrorMessage";
 
 import "./WeeklyOverview.css";
 
 interface WeeklyOverviewProps {
-  hourlyData: HourlyForecast[];
-  dailyData?: DailyForecast[]; // Daily forecast data with sun/moon times
-  location: Location; // Location info for timezone-aware formatting
-  lastUpdated: string; // Last updated timestamp
+  location: WeatherQueryParams; // Location parameters for data fetching
   className?: string;
 }
 
@@ -371,17 +371,25 @@ const getSolarTwilightAndMoonData = (
 };
 
 const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
-  hourlyData,
-  dailyData,
   location,
-  lastUpdated,
   className,
 }) => {
-  // Group hourly data by day
+  // Fetch weather data for this location
+  const {
+    data: forecast,
+    isLoading,
+    error: queryError,
+    isFetching,
+  } = useWeatherData(location);
+
+  // Group hourly data by day - always call this hook
   const groupedByDay = React.useMemo(() => {
-    if (!hourlyData || hourlyData.length === 0) {
+    if (!forecast?.hourlyForecast || forecast.hourlyForecast.length === 0) {
       return [];
     }
+
+    const hourlyData = forecast.hourlyForecast;
+    const dailyData = forecast.dailyForecast;
 
     const days: { [key: string]: HourlyForecast[] } = {};
     hourlyData.slice(0, 168).forEach((hour, index) => {
@@ -416,7 +424,57 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
     }
 
     return result;
-  }, [hourlyData, dailyData]);
+  }, [forecast?.hourlyForecast, forecast?.dailyForecast]);
+
+  // Handle loading state
+  if (isLoading && !forecast) {
+    return (
+      <div className={`weekly-overview ${className || ""}`}>
+        <div className="overview-header">
+          <h3>{location.locationName}</h3>
+        </div>
+        <div className="loading-container">
+          <LoadingSpinner size="medium" />
+          <p>Loading weather data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle error state
+  if (queryError && !forecast) {
+    return (
+      <div className={`weekly-overview ${className || ""}`}>
+        <div className="overview-header">
+          <h3>{location.locationName}</h3>
+        </div>
+        <ErrorMessage
+          message={(queryError as Error).message}
+          onRetry={() => window.location.reload()}
+        />
+      </div>
+    );
+  }
+
+  // Handle no data state
+  if (!forecast) {
+    return (
+      <div className={`weekly-overview ${className || ""}`}>
+        <div className="overview-header">
+          <h3>{location.locationName}</h3>
+        </div>
+        <div className="no-data-message">
+          <div className="no-data-icon">📡</div>
+          <div className="no-data-text">
+            <h4>No weather data available</h4>
+            <p>Unable to load weather data for this location.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const { lastUpdated } = forecast;
 
   if (groupedByDay.length === 0) {
     return (
@@ -433,18 +491,19 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
     <div className={`weekly-overview ${className || ""}`}>
       <div className="overview-header">
         <h3>
-          {location.name}
-          {location.country ? `, ${location.country}` : ""}
+          {forecast.location.name}
+          {forecast.location.country ? `, ${forecast.location.country}` : ""}
         </h3>
         <div className="location-details">
           <p className="coordinates">
-            {location.lat.toFixed(4)}°, {location.lon.toFixed(4)}°
+            {forecast.location.lat.toFixed(4)}°, {forecast.location.lon.toFixed(4)}°
           </p>
           <p className="last-updated">
             Last updated:{" "}
             {new Date(lastUpdated).toLocaleTimeString([], {
               hour12: false,
             })}
+            {isFetching && <span className="updating-indicator"> • Updating...</span>}
           </p>
         </div>
       </div>
@@ -455,7 +514,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           {groupedByDay.map(({ date, sunMoon }) => {
             const { dayName, dayDate, moonPhaseEmoji } = formatDayHeader(
               date,
-              location,
+              forecast.location,
               sunMoon,
             );
             return (
@@ -494,12 +553,12 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                     </div>
                   )}
                 </div>
-                {location?.timezone && (
+                {forecast.location?.timezone && (
                   <div
                     className="timezone-indicator"
                     style={{ fontSize: "0.6rem", opacity: 0.7 }}
                   >
-                    {location.timezone}
+                    {forecast.location.timezone}
                   </div>
                 )}
               </div>
@@ -680,8 +739,8 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                           paddingBottom: "4px",
                         }}
                       >
-                        <strong>{formatTime(hour.time, location)}</strong>
-                        {location?.timezone && (
+                        <strong>{formatTime(hour.time, forecast.location)}</strong>
+                        {forecast.location?.timezone && (
                           <span
                             style={{
                               fontSize: "0.7rem",
@@ -689,7 +748,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                               marginLeft: "4px",
                             }}
                           >
-                            {location.timezone}
+                            {forecast.location.timezone}
                           </span>
                         )}
                       </div>
@@ -737,7 +796,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                           const solarData = getSolarTwilightAndMoonData(
                             day.date,
                             hour.time,
-                            location,
+                            forecast.location,
                             groupedByDay,
                           );
 
@@ -919,8 +978,8 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           <span className="summary-label">Best Hours:</span>
           <span className="summary-value">
             {
-              hourlyData.filter(
-                (hour) =>
+              forecast.hourlyForecast.filter(
+                (hour: HourlyForecast) =>
                   hour.cloudCover.totalCloudCover !== null &&
                   hour.windSpeed !== null &&
                   hour.cloudCover.totalCloudCover < 30 &&
@@ -933,8 +992,8 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
         <div className="summary-item">
           <span className="summary-label">Avg Clouds:</span>
           <span className="summary-value">
-            {hourlyData.length > 0
-              ? `${Math.round(hourlyData.filter((h) => h.cloudCover.totalCloudCover !== null).reduce((sum, hour) => sum + (hour.cloudCover.totalCloudCover || 0), 0) / hourlyData.filter((h) => h.cloudCover.totalCloudCover !== null).length)}%`
+            {forecast.hourlyForecast.length > 0
+              ? `${Math.round(forecast.hourlyForecast.filter((h: HourlyForecast) => h.cloudCover.totalCloudCover !== null).reduce((sum: number, hour: HourlyForecast) => sum + (hour.cloudCover.totalCloudCover || 0), 0) / forecast.hourlyForecast.filter((h: HourlyForecast) => h.cloudCover.totalCloudCover !== null).length)}%`
               : "N/A"}
           </span>
         </div>
@@ -942,8 +1001,8 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           <span className="summary-label">Clear Periods:</span>
           <span className="summary-value">
             {
-              hourlyData.filter(
-                (hour) =>
+              forecast.hourlyForecast.filter(
+                (hour: HourlyForecast) =>
                   hour.cloudCover.totalCloudCover !== null &&
                   hour.cloudCover.totalCloudCover < 20,
               ).length
@@ -954,8 +1013,8 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
         <div className="summary-item">
           <span className="summary-label">Avg Visibility:</span>
           <span className="summary-value">
-            {hourlyData.filter((h) => h.visibility !== null).length > 0
-              ? `${(hourlyData.filter((h) => h.visibility !== null).reduce((sum, hour) => sum + (hour.visibility || 0), 0) / hourlyData.filter((h) => h.visibility !== null).length).toFixed(1)}km`
+            {forecast.hourlyForecast.filter((h: HourlyForecast) => h.visibility !== null).length > 0
+              ? `${(forecast.hourlyForecast.filter((h: HourlyForecast) => h.visibility !== null).reduce((sum: number, hour: HourlyForecast) => sum + (hour.visibility || 0), 0) / forecast.hourlyForecast.filter((h: HourlyForecast) => h.visibility !== null).length).toFixed(1)}km`
               : "N/A"}
           </span>
         </div>
@@ -963,8 +1022,8 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           <span className="summary-label">Dark Hours:</span>
           <span className="summary-value">
             {
-              hourlyData.filter(
-                (hour) =>
+              forecast.hourlyForecast.filter(
+                (hour: HourlyForecast) =>
                   hour.moonlight?.moonlightClearSky !== null &&
                   hour.moonlight.moonlightClearSky < 25,
               ).length
@@ -975,9 +1034,9 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
         <div className="summary-item">
           <span className="summary-label">Avg Moonlight:</span>
           <span className="summary-value">
-            {hourlyData.filter((h) => h.moonlight?.moonlightClearSky !== null)
+            {forecast.hourlyForecast.filter((h: HourlyForecast) => h.moonlight?.moonlightClearSky !== null)
               .length > 0
-              ? `${Math.round(hourlyData.filter((h) => h.moonlight?.moonlightClearSky !== null).reduce((sum, hour) => sum + (hour.moonlight?.moonlightClearSky || 0), 0) / hourlyData.filter((h) => h.moonlight?.moonlightClearSky !== null).length)}%`
+              ? `${Math.round(forecast.hourlyForecast.filter((h: HourlyForecast) => h.moonlight?.moonlightClearSky !== null).reduce((sum: number, hour: HourlyForecast) => sum + (hour.moonlight?.moonlightClearSky || 0), 0) / forecast.hourlyForecast.filter((h: HourlyForecast) => h.moonlight?.moonlightClearSky !== null).length)}%`
               : "N/A"}
           </span>
         </div>

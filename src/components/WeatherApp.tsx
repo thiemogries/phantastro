@@ -1,14 +1,11 @@
 import React, { useState } from "react";
 import { LocationSearchResult } from "../types/weather";
 import {
-  useWeatherData,
-  useRefreshWeatherData,
   WeatherQueryParams,
 } from "../hooks/useWeatherData";
 import LocationSearch from "./LocationSearch";
 import WeeklyOverview from "./WeeklyOverview";
 import LoadingSpinner from "./LoadingSpinner";
-import ErrorMessage from "./ErrorMessage";
 import "./WeatherApp.css";
 
 interface WeatherAppProps {
@@ -16,15 +13,12 @@ interface WeatherAppProps {
 }
 
 const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
-  const [weatherParams, setWeatherParams] = useState<WeatherQueryParams | null>(
-    null,
-  );
+  const [locations, setLocations] = useState<WeatherQueryParams[]>([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [lastError, setLastError] = useState<string | null>(null);
 
   // Initialize with default location
   React.useEffect(() => {
-    if (!weatherParams) {
+    if (locations.length === 0) {
       const defaultLat = parseFloat(
         process.env.REACT_APP_DEFAULT_LAT || "53.5511",
       );
@@ -39,64 +33,48 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
         defaultLon,
         defaultName,
       });
-      setWeatherParams({
+      setLocations([{
         lat: defaultLat,
         lon: defaultLon,
         locationName: defaultName,
-      });
+      }]);
     }
-  }, [weatherParams]);
+  }, [locations.length]);
 
-  // Use TanStack Query hooks
-  const {
-    data: forecast,
-    isLoading,
-    error: queryError,
-    isFetching,
-  } = useWeatherData(weatherParams);
-  const refreshWeatherData = useRefreshWeatherData();
-
-  // Stable loading state - only show loading when actually fetching and no data exists
-  const loading = isLoading && !forecast;
-
-  // Mark initial load as complete when we get data or error
+  // Mark initial load as complete when we have locations
   React.useEffect(() => {
-    if ((forecast || queryError) && isInitialLoad) {
+    if (locations.length > 0 && isInitialLoad) {
       setIsInitialLoad(false);
     }
-  }, [forecast, queryError, isInitialLoad]);
-
-  // Stable error handling - prevent error flickering
-  const currentError = queryError ? (queryError as Error).message : null;
-  React.useEffect(() => {
-    if (currentError) {
-      setLastError(currentError);
-    } else if (forecast) {
-      // Clear error only when we have successful data
-      setLastError(null);
-    }
-  }, [currentError, forecast]);
-
-  const error = lastError;
+  }, [locations.length, isInitialLoad]);
 
   const handleLocationSelect = (location: LocationSearchResult) => {
-    if (loading) return; // Prevent duplicate requests
     console.log("📍 WeatherApp: Location selected:", location);
-    // Clear previous error when selecting new location
-    setLastError(null);
-    setWeatherParams({
-      lat: location.lat,
-      lon: location.lon,
-      locationName: location.name,
-    });
+
+    // Check if location already exists
+    const locationExists = locations.some(
+      loc => Math.abs(loc.lat - location.lat) < 0.001 &&
+             Math.abs(loc.lon - location.lon) < 0.001
+    );
+
+    if (!locationExists) {
+      const newLocation: WeatherQueryParams = {
+        lat: location.lat,
+        lon: location.lon,
+        locationName: location.name,
+      };
+      setLocations(prev => [...prev, newLocation]);
+    }
+  };
+
+  const handleLocationRemove = (index: number) => {
+    setLocations(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleRefresh = () => {
-    if (loading || !weatherParams) return; // Prevent duplicate requests
-    console.log("🔄 WeatherApp: Refresh requested for:", weatherParams);
-    // Clear previous error when refreshing
-    setLastError(null);
-    refreshWeatherData.mutate(weatherParams);
+    console.log("🔄 WeatherApp: Refreshing weather data for all locations");
+    // Refresh will be handled by individual WeeklyOverview components
+    window.location.reload();
   };
 
   return (
@@ -112,7 +90,6 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
           <button
             className="refresh-button"
             onClick={handleRefresh}
-            disabled={loading}
             aria-label="Refresh weather data"
           >
             🔄
@@ -120,81 +97,47 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
         </div>
       </header>
 
-      {/* Loading State */}
-      {loading && (
+      {/* Loading State - only show when no locations */}
+      {locations.length === 0 && (
         <div className="weather-app__loading">
           <LoadingSpinner size="large" />
           <p>Loading stellar conditions...</p>
         </div>
       )}
 
-      {/* Subtle loading indicator for background updates */}
-      {isFetching && forecast && !loading && (
-        <div className="weather-app__updating">
-          <div className="update-indicator">
-            <span className="update-dot"></span>
-            <span>Updating...</span>
-          </div>
-        </div>
-      )}
-
-      {/* Error State */}
-      {error && !loading && (
-        <ErrorMessage message={error} onRetry={handleRefresh} />
-      )}
-
-      {/* Weather Content */}
-      {forecast && (
+      {/* Weather Content - Multiple Locations */}
+      {locations.length > 0 && (
         <div
           className="weather-app__content"
           data-initial-load={isInitialLoad ? "true" : "false"}
         >
-          {/* Data Availability Notice */}
-          {(forecast.hourlyForecast.length === 0 ||
-            (forecast.currentWeather.temperature === null &&
-              forecast.currentWeather.windSpeed === null &&
-              forecast.currentWeather.cloudCover.totalCloudCover === null)) && (
-            <div className="data-notice">
-              <div className="notice-icon">📡</div>
-              <div className="notice-content">
-                <h3>Weather Data Not Available</h3>
-                <p>
-                  Weather data is currently unavailable. This could be due to:
-                </p>
-                <ul>
-                  <li>Missing or invalid Meteoblue API key</li>
-                  <li>API rate limit exceeded (500 calls/day limit)</li>
-                  <li>Network connectivity issues</li>
-                  <li>Temporary API service outage</li>
-                </ul>
-                <p>
-                  To get real weather data, please configure your Meteoblue API
-                  key in the <code>.env</code> file. Get your free API key at{" "}
-                  <a
-                    href="https://www.meteoblue.com/en/weather-api"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    meteoblue.com
-                  </a>
-                  .
-                </p>
+          <div className="locations-container">
+            {locations.map((location, index) => (
+              <div key={`${location.lat}-${location.lon}`} className="location-item">
+                <div className="location-header">
+                  <h3>{location.locationName}</h3>
+                  {locations.length > 1 && (
+                    <button
+                      className="remove-location-button"
+                      onClick={() => handleLocationRemove(index)}
+                      aria-label={`Remove ${location.locationName}`}
+                      title={`Remove ${location.locationName}`}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+                <WeeklyOverview
+                  location={location}
+                />
               </div>
-            </div>
-          )}
-
-          {/* 7-Day Hourly Overview */}
-          <WeeklyOverview
-            hourlyData={forecast.hourlyForecast}
-            dailyData={forecast.dailyForecast}
-            location={forecast.location}
-            lastUpdated={forecast.lastUpdated}
-          />
+            ))}
+          </div>
         </div>
       )}
 
       {/* App Info */}
-      {!forecast && !loading && !error && !isInitialLoad && (
+      {locations.length === 0 && !isInitialLoad && (
         <div className="weather-app__welcome">
           <div className="welcome-content">
             <h2>Welcome to Phantastro</h2>
@@ -244,11 +187,11 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
                 );
                 const defaultName =
                   process.env.REACT_APP_DEFAULT_LOCATION || "Hamburg, Germany";
-                setWeatherParams({
+                setLocations([{
                   lat: defaultLat,
                   lon: defaultLon,
                   locationName: defaultName,
-                });
+                }]);
               }}
             >
               Get Started

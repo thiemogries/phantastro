@@ -51,6 +51,27 @@
     white-space: nowrap;
 }
 
+.updating-indicator {
+    color: rgba(124, 58, 237, 0.8);
+    font-weight: 500;
+}
+
+/* Loading container for individual locations */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.loading-container p {
+    margin-top: 15px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
 /* No data state */
 .no-data-compact {
     display: flex;
