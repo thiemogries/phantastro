@@ -1,9 +1,7 @@
 import React from "react";
-import { HourlyForecast, Location } from "../types/weather";
+import { HourlyForecast } from "../types/weather";
 import { useWeatherData, WeatherQueryParams } from "../hooks/useWeatherData";
-import {
-  getMoonPhaseEmoji,
-} from "../utils/weatherUtils";
+
 
 import TwilightTimeline from "./TwilightTimeline";
 import MoonTimeline from "./MoonTimeline";
@@ -12,6 +10,8 @@ import ErrorMessage from "./ErrorMessage";
 import WeatherSummary from "./WeatherSummary";
 import HourGrid from "./HourGrid";
 import HourTooltips from "./HourTooltips";
+import LocationHeader from "./LocationHeader";
+import DayHeaders from "./DayHeaders";
 
 import "./WeeklyOverview.css";
 
@@ -21,31 +21,9 @@ interface WeeklyOverviewProps {
   onRemove?: () => void; // Optional remove callback
 }
 
-// Helper functions
 
-// Helper function to format day headers consistently with timezone
-const formatDayHeader = (
-  dateStr: string,
-  location?: Location,
-  sunMoon?: any,
-) => {
-  // For dates like "2025-06-23", create a date that represents the location's timezone
-  // We'll use the first hour of the day from our hourly data to get the correct timezone context
-  const date = new Date(dateStr + "T12:00:00"); // Use noon to avoid timezone edge cases
 
-  const dayName = date.toLocaleDateString([], { weekday: "short" });
-  const dayDate = date.toLocaleDateString([], {
-    month: "short",
-    day: "numeric",
-  });
 
-  // Get moon phase emoji if available
-  const moonPhaseEmoji = sunMoon?.moonPhaseName
-    ? getMoonPhaseEmoji(sunMoon.moonPhaseName)
-    : "";
-
-  return { dayName, dayDate, moonPhaseEmoji };
-};
 
 
 
@@ -172,94 +150,16 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
   return (
     <div className={`weekly-overview ${className || ""}`}>
-      <div className="overview-header">
-        <h3>
-          {forecast.location.name}
-          {forecast.location.country ? `, ${forecast.location.country}` : ""}
-        </h3>
-        <div className="header-controls">
-          <div className="location-details">
-            <p className="coordinates">
-              {forecast.location.lat.toFixed(4)}°, {forecast.location.lon.toFixed(4)}°
-            </p>
-            <p className="last-updated">
-              Last updated:{" "}
-              {new Date(lastUpdated).toLocaleTimeString([], {
-                hour12: false,
-              })}
-              {isFetching && <span className="updating-indicator"> • Updating...</span>}
-            </p>
-          </div>
-          {onRemove && (
-            <button
-              className="remove-location-button"
-              onClick={onRemove}
-              aria-label={`Remove ${forecast.location.name}`}
-              title={`Remove ${forecast.location.name}`}
-            >
-              ✕
-            </button>
-          )}
-        </div>
-      </div>
+      <LocationHeader
+        location={forecast.location}
+        lastUpdated={lastUpdated}
+        isFetching={isFetching}
+        onRemove={onRemove}
+      />
 
       <div className="weekly-grid">
         {/* Header row with day names */}
-        <div className="grid-header">
-          {groupedByDay.map(({ date, sunMoon }) => {
-            const { dayName, dayDate, moonPhaseEmoji } = formatDayHeader(
-              date,
-              forecast.location,
-              sunMoon,
-            );
-            return (
-              <div key={date} className="day-header">
-                <div className="day-info-container">
-                  <div className="day-text">
-                    <div className="day-name">{dayName}</div>
-                    <div className="day-date">{dayDate}</div>
-                  </div>
-                  {moonPhaseEmoji && (
-                    <div className="moon-phase-container">
-                      <div
-                        className="moon-phase-indicator"
-                        title={
-                          sunMoon?.moonPhaseName
-                            ? `${sunMoon.moonPhaseName}${
-                                sunMoon.moonIlluminatedFraction !== null
-                                  ? ` (${Math.round(sunMoon.moonIlluminatedFraction)}% illuminated)`
-                                  : ""
-                              }${
-                                sunMoon.moonAge !== null
-                                  ? ` - ${Math.round(sunMoon.moonAge)} days old`
-                                  : ""
-                              }`
-                            : "Moon phase"
-                        }
-                      >
-                        {moonPhaseEmoji}
-                      </div>
-                      {sunMoon?.moonIlluminatedFraction !== null &&
-                        sunMoon?.moonIlluminatedFraction !== undefined && (
-                          <div className="moon-illumination">
-                            {Math.round(sunMoon.moonIlluminatedFraction)}%
-                          </div>
-                        )}
-                    </div>
-                  )}
-                </div>
-                {forecast.location?.timezone && (
-                  <div
-                    className="timezone-indicator"
-                    style={{ fontSize: "0.6rem", opacity: 0.7 }}
-                  >
-                    {forecast.location.timezone}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <DayHeaders groupedByDay={groupedByDay} location={forecast.location} />
 
         {/* Column-based grid structure for CSS-only hover effects */}
         <HourGrid groupedByDay={groupedByDay} />
