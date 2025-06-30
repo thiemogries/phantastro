@@ -131,18 +131,6 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     }
   };
 
-  const getLocationIcon = (location: LocationSearchResult): string => {
-    if (
-      location.name.toLowerCase().includes("mauna kea") ||
-      location.name.toLowerCase().includes("atacama") ||
-      location.name.toLowerCase().includes("palomar") ||
-      location.name.toLowerCase().includes("mount wilson")
-    ) {
-      return "🔭"; // Observatory
-    }
-    return "📍"; // Regular location
-  };
-
   const getElevationText = (elevation?: number): string => {
     if (!elevation || elevation <= 0) return "";
     if (elevation < 1000) return `${elevation}m`;
@@ -189,7 +177,6 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
                   role="option"
                   aria-selected={index === selectedIndex}
                 >
-                  <div className="result-icon">{getLocationIcon(location)}</div>
                   <div className="result-content">
                     <div className="result-name">{location.name}</div>
                     <div className="result-details">

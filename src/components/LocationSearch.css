@@ -82,9 +82,9 @@
 .search-result {
   display: flex;
   align-items: center;
-  padding: 12px 15px;
+  padding: 8px 15px; /* Reduced padding for slimmer appearance */
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.2s ease; /* Only animate background, no transform */
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
 }
@@ -95,9 +95,7 @@
 
 .search-result:hover {
   background: rgba(124, 58, 237, 0.15);
-  transform: translateX(4px);
-  border-left: 3px solid #7c3aed;
-  padding-left: 12px;
+  /* Removed transform and border-left changes to prevent movement */
 }
 
 .search-result.keyboard-selected {
@@ -110,12 +108,6 @@
   background: rgba(124, 58, 237, 0.2);
 }
 
-.result-icon {
-  font-size: 1.5rem;
-  margin-right: 12px;
-  min-width: 30px;
-}
-
 .result-content {
   flex: 1;
 }
@@ -123,13 +115,13 @@
 .result-name {
   font-weight: 600;
   color: white;
-  margin-bottom: 4px;
+  margin-bottom: 2px; /* Reduced spacing for slimmer appearance */
 }
 
 .result-details {
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 2px;
+  margin-bottom: 1px; /* Reduced spacing for slimmer appearance */
 }
 
 .result-coordinates {
