@@ -44,6 +44,15 @@
   display: flex;
   gap: 15px;
   align-items: center;
+  flex: 1; /* Allow controls to take available space */
+  max-width: 350px; /* Ensure enough space for wider search */
+  justify-content: flex-end; /* Align controls to the right */
+}
+
+/* Ensure LocationSearch gets proper width within controls */
+.weather-app__controls .location-search {
+  flex: 1; /* Take available space */
+  min-width: 300px; /* Minimum width to ensure usability */
 }
 
 .refresh-button {
