@@ -180,15 +180,17 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
                   <div className="result-content">
                     <div className="result-name">{location.name}</div>
                     <div className="result-details">
-                      <span className="result-country">{location.country}</span>
-                      {location.elevation && (
-                        <span className="result-elevation">
-                          • {getElevationText(location.elevation)}
-                        </span>
-                      )}
-                    </div>
-                    <div className="result-coordinates">
-                      {location.lat.toFixed(4)}°, {location.lon.toFixed(4)}°
+                      <div className="result-left">
+                        <span className="result-country">{location.country}</span>
+                        {location.elevation && (
+                          <span className="result-elevation">
+                            • {getElevationText(location.elevation)}
+                          </span>
+                        )}
+                      </div>
+                      <span className="result-coordinates">
+                        {location.lat.toFixed(4)}°, {location.lon.toFixed(4)}°
+                      </span>
                     </div>
                   </div>
                 </li>

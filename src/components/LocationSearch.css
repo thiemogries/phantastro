@@ -3,7 +3,7 @@
 .location-search {
   position: relative;
   width: 100%;
-  max-width: 400px;
+  max-width: 600px; /* Increased from 400px for wider search field */
   z-index: 9999; /* Ensure the entire search component is above other content */
 }
 
@@ -119,15 +119,28 @@
 }
 
 .result-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline; /* Use baseline alignment for better text alignment */
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.7);
   margin-bottom: 1px; /* Reduced spacing for slimmer appearance */
+  line-height: 1.2; /* Consistent line height */
+  gap: 8px;
+}
+
+.result-left {
+  display: flex;
+  align-items: baseline; /* Use baseline alignment for consistent text alignment */
+  gap: 8px; /* Space between country and elevation */
 }
 
 .result-coordinates {
-  font-size: 0.75rem;
+  font-size: 0.7rem; /* Slightly larger to better match country text */
   color: rgba(255, 255, 255, 0.5);
   font-family: monospace;
+  flex-shrink: 0; /* Prevent coordinates from shrinking */
+  line-height: 1.2; /* Match parent line height */
 }
 
 .result-elevation {
