@@ -187,15 +187,27 @@ export const useSunMoonData = (params: WeatherQueryParams | null) => {
 };
 
 /**
- * Custom hook for searching locations
+ * Custom hook for searching locations using TanStack Query for caching
  */
-export const useLocationSearch = () => {
-  return useMutation({
-    mutationFn: async (query: string): Promise<LocationSearchResult[]> => {
-      if (!query.trim()) return [];
-      return await weatherService.searchLocations(query);
+export const useLocationSearch = (query: string) => {
+  return useQuery({
+    queryKey: ['locationSearch', query.trim().toLowerCase()],
+    queryFn: async ({ signal }): Promise<LocationSearchResult[]> => {
+      if (!query.trim() || query.trim().length < 3) return [];
+      return await weatherService.searchLocations(query, signal);
     },
-    retry: 1,
+    enabled: Boolean(query.trim() && query.trim().length >= 3),
+    staleTime: 5 * 60 * 1000, // 5 minutes - location data doesn't change often
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: (failureCount, error: any) => {
+      // Don't retry on aborted requests or network errors
+      if (error.name === 'AbortError' || error.code === 'ERR_CANCELED' || error.code === 'ECONNABORTED') {
+        return false;
+      }
+      return failureCount < 1; // Only retry once for other errors
+    },
+    retryDelay: 1000, // 1 second delay between retries
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
 };
 

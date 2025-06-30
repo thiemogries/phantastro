@@ -13,6 +13,7 @@ class WeatherService {
   private apiKey: string;
   private baseUrl: string;
   private requestCounter = 0;
+  private currentLocationSearchController: AbortController | null = null;
 
   constructor() {
     this.apiKey = process.env.REACT_APP_METEOBLUE_API_KEY || "";
@@ -103,104 +104,170 @@ class WeatherService {
 
 
   /**
-   * Search for locations by name
+   * Search for locations by name using OpenStreetMap Nominatim API
    */
-  async searchLocations(query: string): Promise<LocationSearchResult[]> {
+  async searchLocations(query: string, signal?: AbortSignal): Promise<LocationSearchResult[]> {
     try {
-      // This is a simplified search - in production you'd use a proper geocoding service
-      // For now, return some example locations that include common astronomical sites
-      const commonLocations: LocationSearchResult[] = [
-        {
-          name: "Mauna Kea, Hawaii",
-          country: "USA",
-          lat: 19.8207,
-          lon: -155.468,
-          elevation: 4207,
-        },
-        {
-          name: "Atacama Desert, Chile",
-          country: "Chile",
-          lat: -24.6282,
-          lon: -70.4044,
-          elevation: 2400,
-        },
-        {
-          name: "La Palma, Spain",
-          country: "Spain",
-          lat: 28.7636,
-          lon: -17.8915,
-          elevation: 2396,
-        },
-        {
-          name: "Mount Wilson, California",
-          country: "USA",
-          lat: 34.2258,
-          lon: -118.0569,
-          elevation: 1742,
-        },
-        {
-          name: "Pic du Midi, France",
-          country: "France",
-          lat: 42.9363,
-          lon: 0.1415,
-          elevation: 2877,
-        },
-        {
-          name: "Hamburg, Germany",
-          country: "Germany",
-          lat: 53.5511,
-          lon: 9.9937,
-          elevation: 6,
-        },
-        {
-          name: "Zurich, Switzerland",
-          country: "Switzerland",
-          lat: 47.3769,
-          lon: 8.5417,
-          elevation: 408,
-        },
-        {
-          name: "New York, USA",
-          country: "USA",
-          lat: 40.7128,
-          lon: -74.006,
-          elevation: 10,
-        },
-        {
-          name: "London, UK",
-          country: "UK",
-          lat: 51.5074,
-          lon: -0.1278,
-          elevation: 11,
-        },
-        {
-          name: "Tokyo, Japan",
-          country: "Japan",
-          lat: 35.6762,
-          lon: 139.6503,
-          elevation: 40,
-        },
-        {
-          name: "Sydney, Australia",
-          country: "Australia",
-          lat: -33.8688,
-          lon: 151.2093,
-          elevation: 58,
-        },
-      ];
+      if (!query.trim() || query.trim().length < 2) {
+        return [];
+      }
 
-      return commonLocations.filter(
-        (location) =>
-          location.name.toLowerCase().includes(query.toLowerCase()) ||
-          location.country.toLowerCase().includes(query.toLowerCase()),
-      );
-    } catch (error) {
+      const trimmedQuery = query.trim();
+
+      // Use OpenStreetMap Nominatim API for geocoding
+      const nominatimUrl = 'https://nominatim.openstreetmap.org/search';
+      const params = {
+        q: trimmedQuery,
+        format: 'json',
+        addressdetails: '1',
+        limit: '8', // Reduced limit to decrease response size
+        dedupe: '1',
+        'accept-language': 'en'
+      };
+
+      const response = await axios.get(nominatimUrl, {
+        params,
+        timeout: 8000, // Increased timeout to 8 seconds
+        signal: signal, // Use the signal passed from TanStack Query
+        headers: {
+          'User-Agent': 'PhantAstro Weather App (https://github.com/user/phantastro)'
+        }
+      });
+
+      if (!response.data || !Array.isArray(response.data)) {
+        console.warn('Invalid response from Nominatim API');
+        return this.getFallbackLocations(query);
+      }
+
+      // Transform Nominatim response to our LocationSearchResult format
+      const results: LocationSearchResult[] = response.data.map((item: any) => {
+        const lat = parseFloat(item.lat);
+        const lon = parseFloat(item.lon);
+
+        // Extract location name and country from the response
+        const displayName = item.display_name || '';
+        const address = item.address || {};
+
+        // Build a clean location name
+        let name = '';
+        if (address.city) {
+          name = address.city;
+        } else if (address.town) {
+          name = address.town;
+        } else if (address.village) {
+          name = address.village;
+        } else if (address.hamlet) {
+          name = address.hamlet;
+        } else if (address.county) {
+          name = address.county;
+        } else if (address.state) {
+          name = address.state;
+        } else {
+          // Fallback to first part of display name
+          name = displayName.split(',')[0] || 'Unknown Location';
+        }
+
+        // Add state/region if available and different from name
+        if (address.state && address.state !== name) {
+          name += `, ${address.state}`;
+        }
+
+        const country = address.country || 'Unknown';
+
+        return {
+          name: name.trim(),
+          country: country,
+          lat: lat,
+          lon: lon,
+          elevation: undefined, // Nominatim doesn't provide elevation
+          timezone: undefined
+        };
+      }).filter((result: LocationSearchResult) => {
+        // Filter out invalid coordinates
+        return !isNaN(result.lat) && !isNaN(result.lon) &&
+               result.lat >= -90 && result.lat <= 90 &&
+               result.lon >= -180 && result.lon <= 180;
+      });
+
+      return results;
+
+    } catch (error: any) {
+      // Don't log errors for aborted requests (user is typing)
+      if (error.name === 'AbortError' || error.code === 'ERR_CANCELED') {
+        return []; // Return empty array for cancelled requests
+      }
+
       console.error("Location search failed:", error);
-      return [];
+      // Return fallback locations on error
+      return this.getFallbackLocations(query);
     }
   }
 
+  /**
+   * Get fallback locations when API fails
+   */
+  private getFallbackLocations(query: string): LocationSearchResult[] {
+    const commonLocations: LocationSearchResult[] = [
+      {
+        name: "Mauna Kea, Hawaii",
+        country: "USA",
+        lat: 19.8207,
+        lon: -155.468,
+        elevation: 4207,
+      },
+      {
+        name: "Atacama Desert, Chile",
+        country: "Chile",
+        lat: -24.6282,
+        lon: -70.4044,
+        elevation: 2400,
+      },
+      {
+        name: "La Palma, Spain",
+        country: "Spain",
+        lat: 28.7636,
+        lon: -17.8915,
+        elevation: 2396,
+      },
+      {
+        name: "Mount Wilson, California",
+        country: "USA",
+        lat: 34.2258,
+        lon: -118.0569,
+        elevation: 1742,
+      },
+      {
+        name: "New York, New York",
+        country: "USA",
+        lat: 40.7128,
+        lon: -74.0060,
+      },
+      {
+        name: "London, England",
+        country: "UK",
+        lat: 51.5074,
+        lon: -0.1278,
+      },
+      {
+        name: "Paris, France",
+        country: "France",
+        lat: 48.8566,
+        lon: 2.3522,
+      },
+      {
+        name: "Tokyo, Japan",
+        country: "Japan",
+        lat: 35.6762,
+        lon: 139.6503,
+      },
+    ];
 
+    return commonLocations.filter(
+      (location) =>
+        location.name.toLowerCase().includes(query.toLowerCase()) ||
+        location.country.toLowerCase().includes(query.toLowerCase()),
+    );
+  }
 
   /**
    * Fetch basic weather data from Meteoblue
@@ -386,6 +453,8 @@ class WeatherService {
       totalRequests: this.requestCounter
     };
   }
+
+
 
 
 

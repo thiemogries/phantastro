@@ -15,7 +15,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   className,
 }) => {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<LocationSearchResult[]>([]);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [keyboardNavigation, setKeyboardNavigation] = useState(false);
@@ -23,38 +23,35 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Use TanStack Query mutation for location search
-  const locationSearchMutation = useLocationSearch();
-  const loading = locationSearchMutation.isPending;
-
-  const performSearch = React.useCallback((searchQuery: string) => {
-    locationSearchMutation.mutate(searchQuery, {
-      onSuccess: (searchResults) => {
-        setResults(searchResults);
-        setIsOpen(searchResults.length > 0);
-        setSelectedIndex(-1);
-      },
-      onError: (error) => {
-        console.error("Location search failed:", error);
-        setResults([]);
-        setIsOpen(false);
-      }
-    });
-  }, [locationSearchMutation]);
-
-  // Debounce search
+  // Debounce the query to reduce API calls
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (query.trim().length >= 2) {
-        performSearch(query);
-      } else {
-        setResults([]);
-        setIsOpen(false);
-      }
-    }, 300);
+      setDebouncedQuery(query);
+    }, 600); // 600ms debounce delay
 
     return () => clearTimeout(timeoutId);
-  }, [query, performSearch]);
+  }, [query]);
+
+  // Use TanStack Query for location search with automatic caching and cancellation
+  const { data: results = [], isLoading: loading, error } = useLocationSearch(debouncedQuery);
+
+  // Update dropdown visibility when results change
+  useEffect(() => {
+    if (debouncedQuery.trim().length >= 3) {
+      setIsOpen(results.length > 0);
+      setSelectedIndex(-1);
+    } else {
+      setIsOpen(false);
+    }
+  }, [results, debouncedQuery]);
+
+  // Handle search errors
+  useEffect(() => {
+    if (error) {
+      console.error("Location search failed:", error);
+      setIsOpen(false);
+    }
+  }, [error]);
 
   // Handle click outside
   useEffect(() => {
