@@ -4,8 +4,6 @@ import { Tooltip } from "react-tooltip";
 import { HourlyForecast, Location } from "../types/weather";
 import { useWeatherData, WeatherQueryParams } from "../hooks/useWeatherData";
 import {
-  getCloudCoverageInfo,
-  getRainState,
   getMoonPhaseEmoji,
 } from "../utils/weatherUtils";
 import {
@@ -16,6 +14,8 @@ import TwilightTimeline from "./TwilightTimeline";
 import MoonTimeline from "./MoonTimeline";
 import LoadingSpinner from "./LoadingSpinner";
 import ErrorMessage from "./ErrorMessage";
+import WeatherSummary from "./WeatherSummary";
+import HourGrid from "./HourGrid";
 
 import "./WeeklyOverview.css";
 
@@ -581,141 +581,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
         </div>
 
         {/* Column-based grid structure for CSS-only hover effects */}
-        <div className="grid-columns">
-          {Array.from({ length: 7 }, (_, dayIndex) => {
-            // Create stable key that doesn't change on rerender
-            const dayData = groupedByDay[dayIndex];
-            const stableKey = dayData?.date || `empty-${dayIndex}`;
-
-            return (
-              <div key={stableKey} className="day-column">
-                {Array.from({ length: 24 }, (_, hourIndex) => {
-                  const hour = dayData?.hours[hourIndex];
-                  const tooltipId = `hour-${dayIndex}-${hourIndex}`;
-                  const cellKey = `${stableKey}-${hourIndex}`;
-
-                  return (
-                    <div
-                      key={cellKey}
-                      className="hour-column"
-                      data-tooltip-id={tooltipId}
-                    >
-                      {/* Cloud cell */}
-                      <div
-                        className="hour-cell cloud-cell"
-                        style={
-                          hour
-                            ? {
-                                backgroundColor: getCloudCoverageInfo(
-                                  hour.cloudCover.totalCloudCover,
-                                ).color,
-                                opacity:
-                                  hour.cloudCover.totalCloudCover !== null
-                                    ? hour.cloudCover.totalCloudCover / 100
-                                    : 0.1,
-                              }
-                            : {
-                                background: "rgba(255, 255, 255, 0.05)",
-                                opacity: 0.3,
-                              }
-                        }
-                      ></div>
-
-                      {/* Precipitation cell */}
-                      <div
-                        className={`hour-cell precip-cell ${hour && getRainState(hour.precipitation.precipitationProbability).hasRain ? "has-rain" : ""}`}
-                        style={
-                          hour
-                            ? (() => {
-                                const rainState = getRainState(
-                                  hour.precipitation.precipitationProbability,
-                                );
-                                return {
-                                  backgroundColor: rainState.hasRain
-                                    ? "#3b82f6"
-                                    : "transparent",
-                                  opacity: rainState.hasRain
-                                    ? Math.max(0.3, rainState.intensity)
-                                    : 0.1,
-                                };
-                              })()
-                            : {
-                                background: "rgba(255, 255, 255, 0.05)",
-                                opacity: 0.3,
-                              }
-                        }
-                      ></div>
-
-                      {/* Visibility cell */}
-                      <div
-                        className="hour-cell visibility-cell"
-                        style={
-                          hour
-                            ? (() => {
-                                const visibility = hour.visibility;
-                                const hasVisibility =
-                                  visibility !== null &&
-                                  visibility !== undefined;
-
-                                const getVisibilityColor = (
-                                  vis: number,
-                                ): string => {
-                                  if (vis >= 20) return "#22c55e";
-                                  else if (vis >= 10) return "#f59e0b";
-                                  else return "#ef4444";
-                                };
-
-                                const visibilityColor = hasVisibility
-                                  ? getVisibilityColor(visibility)
-                                  : "#6b7280";
-                                const opacity = hasVisibility
-                                  ? Math.min(
-                                      1.0,
-                                      Math.max(0.5, 0.5 + visibility / 40),
-                                    )
-                                  : 0.3;
-
-                                return {
-                                  backgroundColor: visibilityColor,
-                                  opacity,
-                                };
-                              })()
-                            : {
-                                background: "rgba(255, 255, 255, 0.05)",
-                                opacity: 0.3,
-                              }
-                        }
-                      ></div>
-
-                      {/* Moonlight cell */}
-                      <div
-                        className="hour-cell moonlight-cell"
-                        style={
-                          hour
-                            ? (() => {
-                                const moonlight =
-                                  hour.moonlight?.moonlightClearSky;
-                                const hasMoonlight =
-                                  moonlight !== null && moonlight !== undefined;
-                                const opacity =
-                                  hasMoonlight && moonlight > 0
-                                    ? Math.min(1, 0.2 + (moonlight / 10) * 0.8)
-                                    : 0;
-                                return { backgroundColor: "#4338ca", opacity };
-                              })()
-                            : {
-                                background: "rgba(255, 255, 255, 0.05)",
-                                opacity: 0.3,
-                              }
-                        }
-                      ></div>
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
+        <HourGrid groupedByDay={groupedByDay} />
 
         {/* Tooltips for all hour columns - rendered in portal to break out of container */}
         {typeof document !== "undefined" &&
@@ -987,74 +853,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
       </div>
 
       {/* Summary Row */}
-      <div className="overview-summary">
-        <div className="summary-item">
-          <span className="summary-label">Best Hours:</span>
-          <span className="summary-value">
-            {
-              forecast.hourlyForecast.filter(
-                (hour: HourlyForecast) =>
-                  hour.cloudCover.totalCloudCover !== null &&
-                  hour.windSpeed !== null &&
-                  hour.cloudCover.totalCloudCover < 30 &&
-                  hour.windSpeed < 10,
-              ).length
-            }{" "}
-            clear hours
-          </span>
-        </div>
-        <div className="summary-item">
-          <span className="summary-label">Avg Clouds:</span>
-          <span className="summary-value">
-            {forecast.hourlyForecast.length > 0
-              ? `${Math.round(forecast.hourlyForecast.filter((h: HourlyForecast) => h.cloudCover.totalCloudCover !== null).reduce((sum: number, hour: HourlyForecast) => sum + (hour.cloudCover.totalCloudCover || 0), 0) / forecast.hourlyForecast.filter((h: HourlyForecast) => h.cloudCover.totalCloudCover !== null).length)}%`
-              : "N/A"}
-          </span>
-        </div>
-        <div className="summary-item">
-          <span className="summary-label">Clear Periods:</span>
-          <span className="summary-value">
-            {
-              forecast.hourlyForecast.filter(
-                (hour: HourlyForecast) =>
-                  hour.cloudCover.totalCloudCover !== null &&
-                  hour.cloudCover.totalCloudCover < 20,
-              ).length
-            }
-            h total
-          </span>
-        </div>
-        <div className="summary-item">
-          <span className="summary-label">Avg Visibility:</span>
-          <span className="summary-value">
-            {forecast.hourlyForecast.filter((h: HourlyForecast) => h.visibility !== null).length > 0
-              ? `${(forecast.hourlyForecast.filter((h: HourlyForecast) => h.visibility !== null).reduce((sum: number, hour: HourlyForecast) => sum + (hour.visibility || 0), 0) / forecast.hourlyForecast.filter((h: HourlyForecast) => h.visibility !== null).length).toFixed(1)}km`
-              : "N/A"}
-          </span>
-        </div>
-        <div className="summary-item">
-          <span className="summary-label">Dark Hours:</span>
-          <span className="summary-value">
-            {
-              forecast.hourlyForecast.filter(
-                (hour: HourlyForecast) =>
-                  hour.moonlight?.moonlightClearSky !== null &&
-                  hour.moonlight.moonlightClearSky < 25,
-              ).length
-            }
-            h moonlight &lt;25%
-          </span>
-        </div>
-        <div className="summary-item">
-          <span className="summary-label">Avg Moonlight:</span>
-          <span className="summary-value">
-            {forecast.hourlyForecast.filter((h: HourlyForecast) => h.moonlight?.moonlightClearSky !== null)
-              .length > 0
-              ? `${Math.round(forecast.hourlyForecast.filter((h: HourlyForecast) => h.moonlight?.moonlightClearSky !== null).reduce((sum: number, hour: HourlyForecast) => sum + (hour.moonlight?.moonlightClearSky || 0), 0) / forecast.hourlyForecast.filter((h: HourlyForecast) => h.moonlight?.moonlightClearSky !== null).length)}%`
-              : "N/A"}
-          </span>
-        </div>
-      </div>
+      <WeatherSummary hourlyForecast={forecast.hourlyForecast} />
     </div>
   );
 };
