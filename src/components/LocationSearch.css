@@ -4,6 +4,7 @@
   position: relative;
   width: 100%;
   max-width: 400px;
+  z-index: 9999; /* Ensure the entire search component is above other content */
 }
 
 .search-input-container {
@@ -61,15 +62,15 @@
   top: 100%;
   left: 0;
   right: 0;
-  z-index: 1000;
-  background: rgba(26, 26, 46, 0.95);
+  z-index: 10000; /* Very high z-index to ensure it appears above all other content */
+  background: rgba(26, 26, 46, 0.98); /* Slightly more opaque for better visibility */
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
   margin-top: 5px;
   max-height: 300px;
   overflow-y: auto;
   backdrop-filter: blur(20px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(124, 58, 237, 0.2); /* Enhanced shadow for better visibility */
 }
 
 .search-results {
