@@ -3,6 +3,7 @@ import { LocationSearchResult } from "../types/weather";
 import {
   WeatherQueryParams,
 } from "../hooks/useWeatherData";
+import { useLocationsStorage } from "../hooks/useLocationsStorage";
 import LocationSearch from "./LocationSearch";
 import WeeklyOverview from "./WeeklyOverview";
 import LoadingSpinner from "./LoadingSpinner";
@@ -13,10 +14,10 @@ interface WeatherAppProps {
 }
 
 const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
-  const [locations, setLocations] = useState<WeatherQueryParams[]>([]);
+  const [locations, setLocations] = useLocationsStorage();
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // Initialize with default location
+  // Initialize with default location only if no locations are stored
   React.useEffect(() => {
     if (locations.length === 0) {
       const defaultLat = parseFloat(
@@ -28,7 +29,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
       const defaultName =
         process.env.REACT_APP_DEFAULT_LOCATION || "Hamburg, Germany";
 
-      console.log("🏠 WeatherApp: Loading default location:", {
+      console.log("🏠 WeatherApp: No stored locations found, loading default location:", {
         defaultLat,
         defaultLon,
         defaultName,
@@ -38,8 +39,10 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
         lon: defaultLon,
         locationName: defaultName,
       }]);
+    } else {
+      console.log("📍 WeatherApp: Loaded stored locations:", locations);
     }
-  }, [locations.length]);
+  }, [locations.length, setLocations]);
 
   // Mark initial load as complete when we have locations
   React.useEffect(() => {
