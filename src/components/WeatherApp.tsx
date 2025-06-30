@@ -113,24 +113,11 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
         >
           <div className="locations-container">
             {locations.map((location, index) => (
-              <div key={`${location.lat}-${location.lon}`} className="location-item">
-                <div className="location-header">
-                  <h3>{location.locationName}</h3>
-                  {locations.length > 1 && (
-                    <button
-                      className="remove-location-button"
-                      onClick={() => handleLocationRemove(index)}
-                      aria-label={`Remove ${location.locationName}`}
-                      title={`Remove ${location.locationName}`}
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-                <WeeklyOverview
-                  location={location}
-                />
-              </div>
+              <WeeklyOverview
+                key={`${location.lat}-${location.lon}`}
+                location={location}
+                onRemove={locations.length > 1 ? () => handleLocationRemove(index) : undefined}
+              />
             ))}
           </div>
         </div>

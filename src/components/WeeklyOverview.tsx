@@ -22,6 +22,7 @@ import "./WeeklyOverview.css";
 interface WeeklyOverviewProps {
   location: WeatherQueryParams; // Location parameters for data fetching
   className?: string;
+  onRemove?: () => void; // Optional remove callback
 }
 
 // Helper functions for tooltip content
@@ -373,6 +374,7 @@ const getSolarTwilightAndMoonData = (
 const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   location,
   className,
+  onRemove,
 }) => {
   // Fetch weather data for this location
   const {
@@ -494,17 +496,29 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           {forecast.location.name}
           {forecast.location.country ? `, ${forecast.location.country}` : ""}
         </h3>
-        <div className="location-details">
-          <p className="coordinates">
-            {forecast.location.lat.toFixed(4)}°, {forecast.location.lon.toFixed(4)}°
-          </p>
-          <p className="last-updated">
-            Last updated:{" "}
-            {new Date(lastUpdated).toLocaleTimeString([], {
-              hour12: false,
-            })}
-            {isFetching && <span className="updating-indicator"> • Updating...</span>}
-          </p>
+        <div className="header-controls">
+          <div className="location-details">
+            <p className="coordinates">
+              {forecast.location.lat.toFixed(4)}°, {forecast.location.lon.toFixed(4)}°
+            </p>
+            <p className="last-updated">
+              Last updated:{" "}
+              {new Date(lastUpdated).toLocaleTimeString([], {
+                hour12: false,
+              })}
+              {isFetching && <span className="updating-indicator"> • Updating...</span>}
+            </p>
+          </div>
+          {onRemove && (
+            <button
+              className="remove-location-button"
+              onClick={onRemove}
+              aria-label={`Remove ${forecast.location.name}`}
+              title={`Remove ${forecast.location.name}`}
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
 

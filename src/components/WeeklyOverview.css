@@ -18,6 +18,12 @@
     gap: 16px;
 }
 
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 .overview-header h3 {
     margin: 0;
     font-size: 1.2rem;
@@ -70,6 +76,39 @@
     margin-top: 15px;
     color: rgba(255, 255, 255, 0.7);
     font-size: 0.9rem;
+}
+
+/* Remove button styles */
+.remove-location-button {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 6px;
+    padding: 6px 8px;
+    color: #ef4444;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.remove-location-button:hover {
+    background: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.5);
+    transform: scale(1.05);
+}
+
+.remove-location-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3);
+}
+
+.remove-location-button:active {
+    transform: scale(0.95);
 }
 
 /* No data state */
