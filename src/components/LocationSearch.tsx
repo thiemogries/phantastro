@@ -166,36 +166,49 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
           aria-label="Location search results"
         >
           {results.length > 0 ? (
-            <ul className="search-results">
-              {results.map((location, index) => (
-                <li
-                  key={`${location.lat}-${location.lon}`}
-                  className={`search-result ${index === selectedIndex && keyboardNavigation ? "keyboard-selected" : ""}`}
-                  onClick={() => handleLocationSelect(location)}
-                  onMouseEnter={() => handleMouseEnter(index)}
-                  onMouseLeave={handleMouseLeave}
-                  role="option"
-                  aria-selected={index === selectedIndex}
-                >
-                  <div className="result-content">
-                    <div className="result-name">{location.name}</div>
-                    <div className="result-details">
-                      <div className="result-left">
-                        <span className="result-country">{location.country}</span>
-                        {location.elevation && (
-                          <span className="result-elevation">
-                            • {getElevationText(location.elevation)}
-                          </span>
-                        )}
+            <>
+              <ul className="search-results">
+                {results.map((location, index) => (
+                  <li
+                    key={`${location.lat}-${location.lon}`}
+                    className={`search-result ${index === selectedIndex && keyboardNavigation ? "keyboard-selected" : ""}`}
+                    onClick={() => handleLocationSelect(location)}
+                    onMouseEnter={() => handleMouseEnter(index)}
+                    onMouseLeave={handleMouseLeave}
+                    role="option"
+                    aria-selected={index === selectedIndex}
+                  >
+                    <div className="result-content">
+                      <div className="result-name">{location.name}</div>
+                      <div className="result-details">
+                        <div className="result-left">
+                          <span className="result-country">{location.country}</span>
+                          {location.elevation && (
+                            <span className="result-elevation">
+                              • {getElevationText(location.elevation)}
+                            </span>
+                          )}
+                        </div>
+                        <span className="result-coordinates">
+                          {location.lat.toFixed(4)}°, {location.lon.toFixed(4)}°
+                        </span>
                       </div>
-                      <span className="result-coordinates">
-                        {location.lat.toFixed(4)}°, {location.lon.toFixed(4)}°
-                      </span>
                     </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
+              <div className="search-attribution">
+                Search powered by{" "}
+                <a
+                  href="https://nominatim.openstreetmap.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="attribution-link"
+                >
+                  OpenStreetMap Nominatim
+                </a>
+              </div>
+            </>
           ) : (
             <div className="no-results">
               <div className="no-results-icon">🌍</div>
