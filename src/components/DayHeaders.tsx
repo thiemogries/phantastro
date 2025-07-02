@@ -32,7 +32,11 @@ const formatDayHeader = (
 
   // Get moon phase icon if available
   const moonPhaseIcon = sunMoon?.moonPhaseName
-    ? getMoonPhaseIcon(sunMoon.moonPhaseName)
+    ? getMoonPhaseIcon(
+        sunMoon.moonPhaseName,
+        sunMoon.moonIlluminatedFraction,
+        sunMoon.moonAge
+      )
     : "";
 
   return { dayName, dayDate, moonPhaseIcon };
