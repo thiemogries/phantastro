@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { LocationSearchResult } from "../types/weather";
 import {
   WeatherQueryParams,
@@ -18,36 +18,6 @@ interface WeatherAppProps {
 const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
   const { apiKey, clearApiKey } = useApiKey();
   const [locations, setLocations] = useLocationsStorage();
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-
-  // Initialize with default location only if no locations are stored
-  React.useEffect(() => {
-    if (locations.length === 0) {
-      const defaultLat = 53.5511; // Hamburg, Germany
-      const defaultLon = 9.9937;
-      const defaultName = "Hamburg, Germany";
-
-      console.log("🏠 WeatherApp: No stored locations found, loading default location:", {
-        defaultLat,
-        defaultLon,
-        defaultName,
-      });
-      setLocations([{
-        lat: defaultLat,
-        lon: defaultLon,
-        locationName: defaultName,
-      }]);
-    } else {
-      console.log("📍 WeatherApp: Loaded stored locations:", locations);
-    }
-  }, [locations.length, setLocations]);
-
-  // Mark initial load as complete when we have locations
-  React.useEffect(() => {
-    if (locations.length > 0 && isInitialLoad) {
-      setIsInitialLoad(false);
-    }
-  }, [locations.length, isInitialLoad]);
 
   const handleLocationSelect = (location: LocationSearchResult) => {
     console.log("📍 WeatherApp: Location selected:", location);
@@ -115,20 +85,9 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
         </div>
       </header>
 
-      {/* Loading State - only show when no locations */}
-      {locations.length === 0 && (
-        <div className="weather-app__loading">
-          <LoadingSpinner size="large" />
-          <p>Loading stellar conditions...</p>
-        </div>
-      )}
-
       {/* Weather Content - Multiple Locations */}
       {locations.length > 0 && (
-        <div
-          className="weather-app__content"
-          data-initial-load={isInitialLoad ? "true" : "false"}
-        >
+        <div className="weather-app__content">
           <div className="locations-container">
             {locations.map((location, index) => (
               <WeeklyOverview
@@ -141,8 +100,8 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
         </div>
       )}
 
-      {/* App Info */}
-      {locations.length === 0 && !isInitialLoad && (
+      {/* Welcome Screen - show when no locations */}
+      {locations.length === 0 && (
         <div className="weather-app__welcome">
           <div className="welcome-content">
             <h2>Welcome to Phantastro</h2>
@@ -181,21 +140,9 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
                 </div>
               </div>
             </div>
-            <button
-              className="get-started-button"
-              onClick={() => {
-                const defaultLat = 53.5511; // Hamburg, Germany
-                const defaultLon = 9.9937;
-                const defaultName = "Hamburg, Germany";
-                setLocations([{
-                  lat: defaultLat,
-                  lon: defaultLon,
-                  locationName: defaultName,
-                }]);
-              }}
-            >
-              Get Started
-            </button>
+            <p className="get-started-text">
+              Use the search bar above to add your first location and start observing!
+            </p>
           </div>
         </div>
       )}
