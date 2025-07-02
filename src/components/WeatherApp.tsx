@@ -7,8 +7,8 @@ import { useLocationsStorage } from "../hooks/useLocationsStorage";
 import { useApiKey } from "../contexts/ApiKeyContext";
 import LocationSearch from "./LocationSearch";
 import WeeklyOverview from "./WeeklyOverview";
-import LoadingSpinner from "./LoadingSpinner";
 import ApiKeyLogin from "./ApiKeyLogin";
+import SettingsMenu from "./SettingsMenu";
 import "./WeatherApp.css";
 
 interface WeatherAppProps {
@@ -16,7 +16,7 @@ interface WeatherAppProps {
 }
 
 const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
-  const { apiKey, clearApiKey } = useApiKey();
+  const { apiKey } = useApiKey();
   const [locations, setLocations] = useLocationsStorage();
 
   const handleLocationSelect = (location: LocationSearchResult) => {
@@ -48,9 +48,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
     window.location.reload();
   };
 
-  const handleChangeApiKey = () => {
-    clearApiKey();
-  };
+
 
   // Show login page if no API key is present
   if (!apiKey) {
@@ -69,23 +67,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
           {locations.length > 0 && (
             <LocationSearch onLocationSelect={handleLocationSelect} />
           )}
-          {locations.length > 0 && (
-            <button
-              className="refresh-button"
-              onClick={handleRefresh}
-              aria-label="Refresh weather data"
-            >
-              🔄
-            </button>
-          )}
-          <button
-            className="settings-button"
-            onClick={handleChangeApiKey}
-            aria-label="Change API key"
-            title="Change API key"
-          >
-            ⚙️
-          </button>
+          <SettingsMenu onRefresh={locations.length > 0 ? handleRefresh : undefined} />
         </div>
       </header>
 
@@ -97,7 +79,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
               <WeeklyOverview
                 key={`${location.lat}-${location.lon}`}
                 location={location}
-                onRemove={locations.length > 1 ? () => handleLocationRemove(index) : undefined}
+                onRemove={() => handleLocationRemove(index)}
               />
             ))}
           </div>

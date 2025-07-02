@@ -55,49 +55,9 @@
   min-width: 300px; /* Minimum width to ensure usability */
 }
 
-.refresh-button,
-.settings-button {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  padding: 10px 15px;
-  color: white;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-}
 
-.refresh-button:hover,
-.settings-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.4);
-}
 
-.refresh-button:focus,
-.settings-button:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3);
-}
 
-.refresh-button:active {
-  transform: translateY(0);
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.refresh-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.refresh-button:disabled:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: none;
-  box-shadow: none;
-}
 
 /* Loading State */
 .weather-app__loading {

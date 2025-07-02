@@ -46,30 +46,30 @@
 }
 
 .star-1 {
-  top: 10%;
+  top: 15%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   animation-delay: 0s;
 }
 
 .star-2 {
   top: 50%;
-  right: 10%;
-  transform: translateY(-50%);
+  right: 15%;
+  transform: translate(50%, -50%);
   animation-delay: 0.3s;
 }
 
 .star-3 {
-  bottom: 10%;
+  bottom: 15%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, 50%);
   animation-delay: 0.6s;
 }
 
 .star-4 {
   top: 50%;
-  left: 10%;
-  transform: translateY(-50%);
+  left: 15%;
+  transform: translate(-50%, -50%);
   animation-delay: 0.9s;
 }
 
@@ -94,16 +94,16 @@
 @keyframes twinkle {
   0% {
     opacity: 0.4;
-    transform: scale(0.8) rotate(0deg);
+    transform: scale(0.8);
   }
   50% {
     opacity: 1;
-    transform: scale(1.3) rotate(180deg);
+    transform: scale(1.3);
     text-shadow: 0 0 15px rgba(255, 255, 255, 1), 0 0 25px rgba(124, 58, 237, 0.6);
   }
   100% {
     opacity: 0.4;
-    transform: scale(0.8) rotate(360deg);
+    transform: scale(0.8);
   }
 }
 
