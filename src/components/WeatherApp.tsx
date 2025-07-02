@@ -100,46 +100,10 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
         </div>
       )}
 
-      {/* Welcome Screen - show when no locations */}
+      {/* Getting Started - show when no locations */}
       {locations.length === 0 && (
         <div className="weather-app__welcome">
           <div className="welcome-content">
-            <h2>Welcome to Phantastro</h2>
-            <p>
-              Your specialized weather companion for astronomical observations.
-              Get detailed forecasts for cloud coverage and atmospheric
-              transparency.
-            </p>
-            <div className="feature-list">
-              <div className="feature">
-                <div className="feature-icon">☁️</div>
-                <div>
-                  <h4>Cloud Coverage</h4>
-                  <p>Detailed cloud layer analysis</p>
-                </div>
-              </div>
-              <div className="feature">
-                <div className="feature-icon">💨</div>
-                <div>
-                  <h4>Wind Conditions</h4>
-                  <p>Wind speed and stability forecast</p>
-                </div>
-              </div>
-              <div className="feature">
-                <div className="feature-icon">💨</div>
-                <div>
-                  <h4>Wind & Stability</h4>
-                  <p>Equipment stability predictions</p>
-                </div>
-              </div>
-              <div className="feature">
-                <div className="feature-icon">🌡️</div>
-                <div>
-                  <h4>Temperature & Humidity</h4>
-                  <p>Dew point and comfort analysis</p>
-                </div>
-              </div>
-            </div>
             <p className="get-started-text">
               Use the search bar above to add your first location and start observing!
             </p>
