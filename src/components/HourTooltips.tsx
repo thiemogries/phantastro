@@ -356,7 +356,7 @@ const HourTooltips: React.FC<HourTooltipsProps> = ({ groupedByDay, location }) =
                       backgroundColor: "rgba(0, 0, 0, 0.95)",
                       color: "white",
                       fontSize: "0.75rem",
-                      maxWidth: "180px",
+                      maxWidth: "240px",
                       zIndex: 1000,
                       borderRadius: "8px",
                       boxShadow: "0 4px 12px rgba(0, 0, 0, 0.4)",

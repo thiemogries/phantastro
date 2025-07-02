@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Icon } from '@iconify/react';
 import { useApiKey } from '../contexts/ApiKeyContext';
 import './SettingsMenu.css';
 
@@ -68,7 +69,7 @@ const SettingsMenu: React.FC = () => {
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        ⋮
+        <Icon icon="mdi:dots-vertical" width="20" height="20" />
       </button>
       
       {isOpen && (
@@ -78,7 +79,9 @@ const SettingsMenu: React.FC = () => {
             onClick={handleClearApiKey}
             role="menuitem"
           >
-            <span className="menu-icon">🔑</span>
+            <span className="menu-icon">
+              <Icon icon="mdi:brush" width="16" height="16" />
+            </span>
             Clear API Key
           </button>
         </div>

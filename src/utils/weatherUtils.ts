@@ -127,7 +127,27 @@ export const getObservingQualityColor = (quality: string): string => {
 };
 
 /**
- * Get observing quality emoji
+ * Get observing quality icon name for Iconify
+ */
+export const getObservingQualityIcon = (quality: string): string => {
+  switch (quality) {
+    case "excellent":
+      return "mdi:star";
+    case "good":
+      return "mdi:star-outline";
+    case "fair":
+      return "mdi:weather-partly-cloudy";
+    case "poor":
+      return "mdi:weather-cloudy";
+    case "impossible":
+      return "mdi:weather-rainy";
+    default:
+      return "mdi:help-circle-outline";
+  }
+};
+
+/**
+ * Get observing quality emoji (deprecated - use getObservingQualityIcon instead)
  */
 export const getObservingQualityEmoji = (quality: string): string => {
   switch (quality) {
@@ -198,7 +218,21 @@ export const getMoonPhaseInfo = (
 };
 
 /**
- * Get precipitation type emoji based on probability
+ * Get precipitation type icon name for Iconify
+ */
+export const getPrecipitationIcon = (
+  probability: number | null,
+  temperature: number | null,
+): string => {
+  if (probability === null || temperature === null || probability === 0) return "";
+  if (temperature < 0) return "mdi:weather-snowy";
+  if (probability < 30) return "mdi:weather-partly-rainy";
+  if (probability < 70) return "mdi:weather-rainy";
+  return "mdi:weather-lightning-rainy";
+};
+
+/**
+ * Get precipitation type emoji based on probability (deprecated - use getPrecipitationIcon instead)
  */
 export const getPrecipitationEmoji = (
   probability: number | null,
@@ -511,7 +545,38 @@ export const formatSunMoonTime = (timeString: string | null | undefined): string
 };
 
 /**
- * Get moon phase emoji based on phase name
+ * Get moon phase icon name for Iconify
+ */
+export const getMoonPhaseIcon = (phaseName: string | null): string => {
+  if (!phaseName) return 'mdi:moon-waning-crescent';
+
+  switch (phaseName.toLowerCase()) {
+    case 'new':
+    case 'new moon':
+      return 'mdi:moon-new';
+    case 'waxing crescent':
+      return 'mdi:moon-waxing-crescent';
+    case 'first quarter':
+      return 'mdi:moon-first-quarter';
+    case 'waxing gibbous':
+      return 'mdi:moon-waxing-gibbous';
+    case 'full':
+    case 'full moon':
+      return 'mdi:moon-full';
+    case 'waning gibbous':
+      return 'mdi:moon-waning-gibbous';
+    case 'last quarter':
+    case 'third quarter':
+      return 'mdi:moon-last-quarter';
+    case 'waning crescent':
+      return 'mdi:moon-waning-crescent';
+    default:
+      return 'mdi:moon-waning-crescent';
+  }
+};
+
+/**
+ * Get moon phase emoji based on phase name (deprecated - use getMoonPhaseIcon instead)
  */
 export const getMoonPhaseEmoji = (phaseName: string | null): string => {
   if (!phaseName) return '🌙';

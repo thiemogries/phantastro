@@ -1,6 +1,7 @@
 import React from "react";
+import { Icon } from "@iconify/react";
 import { Location } from "../types/weather";
-import { getMoonPhaseEmoji } from "../utils/weatherUtils";
+import { getMoonPhaseIcon } from "../utils/weatherUtils";
 
 interface DayData {
   date: string;
@@ -29,19 +30,19 @@ const formatDayHeader = (
     day: "numeric",
   });
 
-  // Get moon phase emoji if available
-  const moonPhaseEmoji = sunMoon?.moonPhaseName
-    ? getMoonPhaseEmoji(sunMoon.moonPhaseName)
+  // Get moon phase icon if available
+  const moonPhaseIcon = sunMoon?.moonPhaseName
+    ? getMoonPhaseIcon(sunMoon.moonPhaseName)
     : "";
 
-  return { dayName, dayDate, moonPhaseEmoji };
+  return { dayName, dayDate, moonPhaseIcon };
 };
 
 const DayHeaders: React.FC<DayHeadersProps> = ({ groupedByDay, location }) => {
   return (
     <div className="grid-header">
       {groupedByDay.map(({ date, sunMoon }) => {
-        const { dayName, dayDate, moonPhaseEmoji } = formatDayHeader(
+        const { dayName, dayDate, moonPhaseIcon } = formatDayHeader(
           date,
           location,
           sunMoon,
@@ -53,7 +54,7 @@ const DayHeaders: React.FC<DayHeadersProps> = ({ groupedByDay, location }) => {
                 <div className="day-name">{dayName}</div>
                 <div className="day-date">{dayDate}</div>
               </div>
-              {moonPhaseEmoji && (
+              {moonPhaseIcon && (
                 <div className="moon-phase-container">
                   <div
                     className="moon-phase-indicator"
@@ -71,7 +72,7 @@ const DayHeaders: React.FC<DayHeadersProps> = ({ groupedByDay, location }) => {
                         : "Moon phase"
                     }
                   >
-                    {moonPhaseEmoji}
+                    <Icon icon={moonPhaseIcon} width="16" height="16" />
                   </div>
                   {sunMoon?.moonIlluminatedFraction !== null &&
                     sunMoon?.moonIlluminatedFraction !== undefined && (

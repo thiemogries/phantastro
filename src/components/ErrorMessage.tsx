@@ -1,4 +1,5 @@
 import React from 'react';
+import { Icon } from '@iconify/react';
 import './ErrorMessage.css';
 
 interface ErrorMessageProps {
@@ -16,16 +17,18 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
 }) => {
   const getIcon = () => {
     switch (type) {
-      case 'warning': return '⚠️';
-      case 'info': return 'ℹ️';
-      default: return '❌';
+      case 'warning': return 'mdi:alert';
+      case 'info': return 'mdi:information';
+      default: return 'mdi:close-circle';
     }
   };
 
   return (
     <div className={`error-message ${type} ${className || ''}`}>
       <div className="error-content">
-        <div className="error-icon">{getIcon()}</div>
+        <div className="error-icon">
+          <Icon icon={getIcon()} width="24" height="24" />
+        </div>
         <div className="error-text">
           <h4>Oops! Something went wrong</h4>
           <p>{message}</p>
@@ -37,7 +40,8 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
           onClick={onRetry}
           aria-label="Retry operation"
         >
-          🔄 Try Again
+          <Icon icon="mdi:refresh" width="16" height="16" style={{ marginRight: "4px" }} />
+          Try Again
         </button>
       )}
     </div>

@@ -18,7 +18,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
   const [locations, setLocations] = useLocationsStorage();
 
   const handleLocationSelect = (location: LocationSearchResult) => {
-    console.log("📍 WeatherApp: Location selected:", location);
+    console.log("[WeatherApp] Location selected:", location);
 
     // Check if location already exists
     const locationExists = locations.some(

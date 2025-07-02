@@ -1,4 +1,5 @@
 import React from "react";
+import { Icon } from "@iconify/react";
 import { Location } from "../types/weather";
 
 interface LocationHeaderProps {
@@ -40,7 +41,7 @@ const LocationHeader: React.FC<LocationHeaderProps> = ({
             aria-label={`Remove ${location.name}`}
             title={`Remove ${location.name}`}
           >
-            ✕
+            <Icon icon="mdi:close" width="16" height="16" />
           </button>
         )}
       </div>

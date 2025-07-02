@@ -55,4 +55,4 @@ This app is hosted on GitHub Pages at [https://phantastro.pages.dev](https://pha
 
 ---
 
-**Clear skies and happy observing!** 🌌⭐🔭
+**Clear skies and happy observing!**

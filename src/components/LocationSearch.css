@@ -263,3 +263,17 @@
   color: rgba(124, 58, 237, 1);
   text-decoration: underline;
 }
+
+/* Spinning animation for loading icon */
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

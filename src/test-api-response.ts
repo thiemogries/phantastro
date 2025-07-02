@@ -273,19 +273,19 @@ export function validateCloudDataIntegration(): void {
       visibility: hour.visibility
     }));
 
-    console.log('⏰ First 5 hours cloud data:', hoursWithCloudData);
+    console.log('[CLOUD DATA] First 5 hours cloud data:', hoursWithCloudData);
 
     // Check if observing quality calculation uses cloud data
     const dailyQuality = result.dailyForecast[0];
-    console.log('📅 Daily forecast quality (should use cloud data):', {
+    console.log('[DAILY FORECAST] Daily forecast quality (should use cloud data):', {
       cloudCoverAvg: dailyQuality.cloudCoverAvg,
       observingQuality: dailyQuality.observingQuality
     });
 
-    console.log('✅ Cloud data integration validation completed');
+    console.log('[SUCCESS] Cloud data integration validation completed');
 
   } catch (error) {
-    console.error('❌ Cloud data validation failed:', error);
+    console.error('[ERROR] Cloud data validation failed:', error);
   }
 }
 

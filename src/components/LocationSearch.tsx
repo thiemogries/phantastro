@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { Icon } from "@iconify/react";
 import { LocationSearchResult } from "../types/weather";
 import { useLocationSearch } from "../hooks/useWeatherData";
 import "./LocationSearch.css";
@@ -155,7 +156,13 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
           aria-autocomplete="list"
         />
         <div className="search-icon">
-          {loading ? <div className="search-spinner">⏳</div> : <span>🔍</span>}
+          {loading ? (
+            <div className="search-spinner">
+              <Icon icon="mdi:loading" className="spinning" width="16" height="16" />
+            </div>
+          ) : (
+            <Icon icon="mdi:magnify" width="16" height="16" />
+          )}
         </div>
       </div>
 
@@ -212,7 +219,9 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
             </>
           ) : (
             <div className="no-results">
-              <div className="no-results-icon">🌍</div>
+              <div className="no-results-icon">
+                <Icon icon="mdi:earth" width="32" height="32" />
+              </div>
               <div className="no-results-text">
                 No locations found for "{query}"
               </div>
