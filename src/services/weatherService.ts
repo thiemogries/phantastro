@@ -10,37 +10,49 @@ import {
 } from '../types/weather';
 
 class WeatherService {
-  private apiKey: string;
   private baseUrl: string;
   private requestCounter = 0;
   private currentLocationSearchController: AbortController | null = null;
 
   constructor() {
-    this.apiKey = process.env.REACT_APP_METEOBLUE_API_KEY || "";
     this.baseUrl =
       process.env.REACT_APP_METEOBLUE_BASE_URL ||
       "https://my.meteoblue.com/packages";
+  }
 
-    if (!this.apiKey || this.apiKey === "your_meteoblue_api_key_here") {
-      console.warn(
-        "Meteoblue API key not configured. Data will show as 'Not available'. " +
-        "Get your free API key from https://www.meteoblue.com/en/weather-api"
-      );
+  /**
+   * Get API key from localStorage
+   */
+  private getApiKey(): string | null {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const apiKey = window.localStorage.getItem('phantastro-api-key');
+        if (apiKey && apiKey.trim() !== '') {
+          // Clean the API key: trim whitespace and remove any surrounding quotes
+          const cleanedKey = apiKey.trim().replace(/^["']|["']$/g, '');
+          console.log('🔑 WeatherService: Retrieved API key (first 8 chars):', cleanedKey.substring(0, 8) + '...');
+          return cleanedKey;
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to read API key from localStorage:', error);
     }
+    return null;
   }
 
   /**
    * Validate API key and check service availability (for manual testing only)
    */
   async validateApiKey(): Promise<boolean> {
-    if (!this.apiKey || this.apiKey === "your_meteoblue_api_key_here") {
+    const apiKey = this.getApiKey();
+    if (!apiKey) {
       return false;
     }
 
     try {
       // Simple API test with minimal parameters using only basic package
       const params = {
-        apikey: this.apiKey,
+        apikey: apiKey,
         lat: 53.5511, // Hamburg coordinates for test
         lon: 9.9937,
         format: "json",
@@ -273,12 +285,13 @@ class WeatherService {
    * Fetch basic weather data from Meteoblue
    */
   async fetchBasicWeatherData(lat: number, lon: number): Promise<any> {
-    if (!this.apiKey || this.apiKey === "your_meteoblue_api_key_here") {
+    const apiKey = this.getApiKey();
+    if (!apiKey) {
       throw new Error("No API key configured");
     }
 
     const params = {
-      apikey: this.apiKey,
+      apikey: apiKey,
       lat,
       lon,
       format: "json",
@@ -313,12 +326,13 @@ class WeatherService {
    * cloud layers affect visibility differently.
    */
   async fetchCloudData(lat: number, lon: number): Promise<any> {
-    if (!this.apiKey || this.apiKey === "your_meteoblue_api_key_here") {
+    const apiKey = this.getApiKey();
+    if (!apiKey) {
       throw new Error("No API key configured");
     }
 
     const params = {
-      apikey: this.apiKey,
+      apikey: apiKey,
       lat,
       lon,
       format: "json",
@@ -358,12 +372,13 @@ class WeatherService {
    * - zenithangle: Solar zenith angle for twilight estimates
    */
   async fetchMoonlightData(lat: number, lon: number): Promise<any> {
-    if (!this.apiKey || this.apiKey === "your_meteoblue_api_key_here") {
+    const apiKey = this.getApiKey();
+    if (!apiKey) {
       throw new Error("No API key configured");
     }
 
     const params = {
-      apikey: this.apiKey,
+      apikey: apiKey,
       lat,
       lon,
       format: "json",
@@ -409,12 +424,13 @@ class WeatherService {
    * - moonage: Days since new moon
    */
   async fetchSunMoonData(lat: number, lon: number): Promise<any> {
-    if (!this.apiKey || this.apiKey === "your_meteoblue_api_key_here") {
+    const apiKey = this.getApiKey();
+    if (!apiKey) {
       throw new Error("No API key configured");
     }
 
     const params = {
-      apikey: this.apiKey,
+      apikey: apiKey,
       lat,
       lon,
       format: "json"

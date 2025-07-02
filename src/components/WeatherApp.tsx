@@ -4,9 +4,11 @@ import {
   WeatherQueryParams,
 } from "../hooks/useWeatherData";
 import { useLocationsStorage } from "../hooks/useLocationsStorage";
+import { useApiKey } from "../contexts/ApiKeyContext";
 import LocationSearch from "./LocationSearch";
 import WeeklyOverview from "./WeeklyOverview";
 import LoadingSpinner from "./LoadingSpinner";
+import ApiKeyLogin from "./ApiKeyLogin";
 import "./WeatherApp.css";
 
 interface WeatherAppProps {
@@ -14,20 +16,16 @@ interface WeatherAppProps {
 }
 
 const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
+  const { apiKey, clearApiKey } = useApiKey();
   const [locations, setLocations] = useLocationsStorage();
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Initialize with default location only if no locations are stored
   React.useEffect(() => {
     if (locations.length === 0) {
-      const defaultLat = parseFloat(
-        process.env.REACT_APP_DEFAULT_LAT || "53.5511",
-      );
-      const defaultLon = parseFloat(
-        process.env.REACT_APP_DEFAULT_LON || "9.9937",
-      );
-      const defaultName =
-        process.env.REACT_APP_DEFAULT_LOCATION || "Hamburg, Germany";
+      const defaultLat = 53.5511; // Hamburg, Germany
+      const defaultLon = 9.9937;
+      const defaultName = "Hamburg, Germany";
 
       console.log("🏠 WeatherApp: No stored locations found, loading default location:", {
         defaultLat,
@@ -80,6 +78,15 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
     window.location.reload();
   };
 
+  const handleChangeApiKey = () => {
+    clearApiKey();
+  };
+
+  // Show login page if no API key is present
+  if (!apiKey) {
+    return <ApiKeyLogin />;
+  }
+
   return (
     <div className={`weather-app ${className || ""}`}>
       {/* Header */}
@@ -96,6 +103,14 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
             aria-label="Refresh weather data"
           >
             🔄
+          </button>
+          <button
+            className="settings-button"
+            onClick={handleChangeApiKey}
+            aria-label="Change API key"
+            title="Change API key"
+          >
+            ⚙️
           </button>
         </div>
       </header>
@@ -169,14 +184,9 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
             <button
               className="get-started-button"
               onClick={() => {
-                const defaultLat = parseFloat(
-                  process.env.REACT_APP_DEFAULT_LAT || "53.5511",
-                );
-                const defaultLon = parseFloat(
-                  process.env.REACT_APP_DEFAULT_LON || "9.9937",
-                );
-                const defaultName =
-                  process.env.REACT_APP_DEFAULT_LOCATION || "Hamburg, Germany";
+                const defaultLat = 53.5511; // Hamburg, Germany
+                const defaultLon = 9.9937;
+                const defaultName = "Hamburg, Germany";
                 setLocations([{
                   lat: defaultLat,
                   lon: defaultLon,

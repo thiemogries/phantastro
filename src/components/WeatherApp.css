@@ -55,7 +55,8 @@
   min-width: 300px; /* Minimum width to ensure usability */
 }
 
-.refresh-button {
+.refresh-button,
+.settings-button {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
@@ -67,14 +68,16 @@
   backdrop-filter: blur(10px);
 }
 
-.refresh-button:hover {
+.refresh-button:hover,
+.settings-button:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-.refresh-button:focus {
+.refresh-button:focus,
+.settings-button:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3);
 }
