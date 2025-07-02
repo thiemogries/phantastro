@@ -75,13 +75,14 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   };
 
   const handleInputFocus = () => {
-    if (results.length > 0) {
+    // Only show dropdown if there's a meaningful query and results
+    if (debouncedQuery.trim().length >= 3 && results.length > 0) {
       setIsOpen(true);
     }
   };
 
   const handleLocationSelect = (location: LocationSearchResult) => {
-    setQuery(location.name);
+    setQuery(""); // Clear the form input
     setIsOpen(false);
     setSelectedIndex(-1);
     setKeyboardNavigation(false);
