@@ -2,11 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useApiKey } from '../contexts/ApiKeyContext';
 import './SettingsMenu.css';
 
-interface SettingsMenuProps {
-  onRefresh?: () => void;
-}
-
-const SettingsMenu: React.FC<SettingsMenuProps> = ({ onRefresh }) => {
+const SettingsMenu: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { clearApiKey } = useApiKey();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -60,10 +56,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ onRefresh }) => {
     setIsOpen(false);
   };
 
-  const handleRefreshClick = () => {
-    onRefresh?.();
-    setIsOpen(false);
-  };
+
 
   return (
     <div className="settings-menu">
@@ -75,28 +68,18 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ onRefresh }) => {
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        ⋯
+        ⋮
       </button>
       
       {isOpen && (
         <div ref={menuRef} className="settings-dropdown" role="menu">
-          {onRefresh && (
-            <button
-              className="settings-menu-item"
-              onClick={handleRefreshClick}
-              role="menuitem"
-            >
-              <span className="menu-icon">🔄</span>
-              Refresh Data
-            </button>
-          )}
           <button
             className="settings-menu-item"
             onClick={handleClearApiKey}
             role="menuitem"
           >
             <span className="menu-icon">🔑</span>
-            Change API Key
+            Clear API Key
           </button>
         </div>
       )}

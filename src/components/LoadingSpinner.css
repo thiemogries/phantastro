@@ -16,17 +16,14 @@
 }
 
 .spinner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  animation: rotate 3s linear infinite;
-  filter: drop-shadow(0 0 10px rgba(124, 58, 237, 0.3));
-}
-
-.spinner-ring {
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.spinner-ring {
   width: 100%;
   height: 100%;
   border: 3px solid rgba(124, 58, 237, 0.2);
@@ -40,37 +37,41 @@
 .star {
   position: absolute;
   font-size: 1.2rem;
-  animation: twinkle 1.5s ease-in-out infinite alternate;
   z-index: 10;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  transform-origin: 40px 40px; /* Center of the 80px container */
 }
 
 .star-1 {
-  top: 15%;
-  left: 50%;
+  top: 10px;
+  left: 40px;
   transform: translate(-50%, -50%);
-  animation-delay: 0s;
+  animation: rotate 3s linear infinite, twinkle 1.5s ease-in-out infinite alternate;
+  animation-delay: 0s, 0s;
 }
 
 .star-2 {
-  top: 50%;
-  right: 15%;
+  top: 40px;
+  right: 10px;
   transform: translate(50%, -50%);
-  animation-delay: 0.3s;
+  animation: rotate 3s linear infinite, twinkle 1.5s ease-in-out infinite alternate;
+  animation-delay: 0s, 0.3s;
 }
 
 .star-3 {
-  bottom: 15%;
-  left: 50%;
+  bottom: 10px;
+  left: 40px;
   transform: translate(-50%, 50%);
-  animation-delay: 0.6s;
+  animation: rotate 3s linear infinite, twinkle 1.5s ease-in-out infinite alternate;
+  animation-delay: 0s, 0.6s;
 }
 
 .star-4 {
-  top: 50%;
-  left: 15%;
+  top: 40px;
+  left: 10px;
   transform: translate(-50%, -50%);
-  animation-delay: 0.9s;
+  animation: rotate 3s linear infinite, twinkle 1.5s ease-in-out infinite alternate;
+  animation-delay: 0s, 0.9s;
 }
 
 @keyframes rotate {
@@ -94,16 +95,15 @@
 @keyframes twinkle {
   0% {
     opacity: 0.4;
-    transform: scale(0.8);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
   }
   50% {
     opacity: 1;
-    transform: scale(1.3);
     text-shadow: 0 0 15px rgba(255, 255, 255, 1), 0 0 25px rgba(124, 58, 237, 0.6);
   }
   100% {
     opacity: 0.4;
-    transform: scale(0.8);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
   }
 }
 
@@ -119,6 +119,7 @@
 
 .loading-spinner.small .star {
   font-size: 0.8rem;
+  transform-origin: 20px 20px; /* Center of the 40px container */
 }
 
 .loading-spinner.large {
@@ -132,6 +133,7 @@
 
 .loading-spinner.large .star {
   font-size: 1.8rem;
+  transform-origin: 60px 60px; /* Center of the 120px container */
 }
 
 /* Message styling */

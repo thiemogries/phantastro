@@ -67,7 +67,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
           {locations.length > 0 && (
             <LocationSearch onLocationSelect={handleLocationSelect} />
           )}
-          <SettingsMenu onRefresh={locations.length > 0 ? handleRefresh : undefined} />
+          <SettingsMenu />
         </div>
       </header>
 

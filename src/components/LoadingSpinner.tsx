@@ -16,12 +16,12 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     <div className={`loading-spinner ${size} ${className || ''}`}>
       <div className="spinner-container">
         <div className="spinner">
-          <div className="star star-1">⭐</div>
-          <div className="star star-2">✨</div>
-          <div className="star star-3">🌟</div>
-          <div className="star star-4">💫</div>
+          <div className="spinner-ring"></div>
         </div>
-        <div className="spinner-ring"></div>
+        <div className="star star-1">⭐</div>
+        <div className="star star-2">✨</div>
+        <div className="star star-3">🌟</div>
+        <div className="star star-4">💫</div>
       </div>
       {message && <div className="spinner-message">{message}</div>}
     </div>
