@@ -84,10 +84,19 @@
         );
     background-repeat: repeat;
     background-size: 200px 100px;
-    animation: twinkle 15s infinite linear;
+    animation: earth-rotation 15s infinite linear;
     pointer-events: none;
     z-index: 0;
     opacity: 0.6;
+}
+
+@keyframes earth-rotation {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-200px);
+    }
 }
 
 /* Responsive design */

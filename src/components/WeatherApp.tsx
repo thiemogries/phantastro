@@ -40,14 +40,6 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
     setLocations(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleRefresh = () => {
-    console.log("🔄 WeatherApp: Refreshing weather data for all locations");
-    // Refresh will be handled by individual WeeklyOverview components
-    window.location.reload();
-  };
-
-
-
   // Show login page if no API key is present
   if (!apiKey) {
     return <ApiKeyLogin />;
