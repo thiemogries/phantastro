@@ -66,14 +66,18 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
           <p>Astronomical Weather Forecast</p>
         </div>
         <div className="weather-app__controls">
-          <LocationSearch onLocationSelect={handleLocationSelect} />
-          <button
-            className="refresh-button"
-            onClick={handleRefresh}
-            aria-label="Refresh weather data"
-          >
-            🔄
-          </button>
+          {locations.length > 0 && (
+            <LocationSearch onLocationSelect={handleLocationSelect} />
+          )}
+          {locations.length > 0 && (
+            <button
+              className="refresh-button"
+              onClick={handleRefresh}
+              aria-label="Refresh weather data"
+            >
+              🔄
+            </button>
+          )}
           <button
             className="settings-button"
             onClick={handleChangeApiKey}
@@ -104,9 +108,15 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
       {locations.length === 0 && (
         <div className="weather-app__welcome">
           <div className="welcome-content">
-            <p className="get-started-text">
-              Use the search bar above to add your first location and start observing!
-            </p>
+            <div className="get-started-block">
+              <h3 className="get-started-title">Get Started</h3>
+              <p className="get-started-text">
+                Search for your location to discover perfect stargazing conditions
+              </p>
+              <div className="search-container">
+                <LocationSearch onLocationSelect={handleLocationSelect} />
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -217,16 +217,34 @@
 
 
 
-.get-started-text {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1.1rem;
-  text-align: center;
-  margin-top: 2rem;
-  padding: 15px 30px;
+.get-started-block {
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.get-started-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: white;
+}
+
+.get-started-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
   line-height: 1.5;
+  margin: 0 0 2rem 0;
+}
+
+.search-container {
+  display: flex;
+  justify-content: center;
 }
 
 /* Data Notice */
