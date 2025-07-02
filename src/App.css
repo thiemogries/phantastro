@@ -90,15 +90,6 @@
     opacity: 0.6;
 }
 
-@keyframes twinkle {
-    from {
-        transform: translateX(0);
-    }
-    to {
-        transform: translateX(-200px);
-    }
-}
-
 /* Responsive design */
 @media (max-width: 768px) {
     .App {

@@ -10,6 +10,7 @@ import WeeklyOverview from "./WeeklyOverview";
 import ApiKeyLogin from "./ApiKeyLogin";
 import SettingsMenu from "./SettingsMenu";
 import "./WeatherApp.css";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface WeatherAppProps {
   className?: string;
@@ -85,6 +86,8 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
           </div>
         </div>
       )}
+
+      <LoadingSpinner />
 
       {/* Getting Started - show when no locations */}
       {locations.length === 0 && (

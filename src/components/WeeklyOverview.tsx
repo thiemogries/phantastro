@@ -21,15 +21,6 @@ interface WeeklyOverviewProps {
   onRemove?: () => void; // Optional remove callback
 }
 
-
-
-
-
-
-
-
-
-
 const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   location,
   className,
