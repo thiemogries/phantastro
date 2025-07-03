@@ -102,16 +102,14 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
 
       {/* Weather Content - Multiple Locations */}
       {locations.length > 0 && (
-        <div className="weather-app__content">
-          <div className="locations-container">
-            {locations.map((location, index) => (
-              <WeeklyOverview
-                key={`${location.lat}-${location.lon}`}
-                location={location}
-                onRemove={() => handleLocationRemove(index)}
-              />
-            ))}
-          </div>
+        <div className="locations-container">
+          {locations.map((location, index) => (
+            <WeeklyOverview
+              key={`${location.lat}-${location.lon}`}
+              location={location}
+              onRemove={() => handleLocationRemove(index)}
+            />
+          ))}
         </div>
       )}
 
