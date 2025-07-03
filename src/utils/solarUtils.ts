@@ -42,9 +42,7 @@ function calculateEquationOfTime(dayOfYear: number): number {
   const B = (2 * Math.PI * (dayOfYear - 81)) / 365;
 
   // Equation of time in minutes
-  const E = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
-
-  return E;
+  return 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
 }
 
 /**

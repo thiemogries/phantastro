@@ -9,7 +9,6 @@ import WeeklyOverview from "./WeeklyOverview";
 import ApiKeyLogin from "./ApiKeyLogin";
 import SettingsMenu from "./SettingsMenu";
 import StarField from "./StarField";
-import ConstellationLines from "./ConstellationLines";
 import "./WeatherApp.css";
 
 interface WeatherAppProps {
