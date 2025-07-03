@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {LocationSearchResult} from "../types/weather";
 import {WeatherQueryParams,} from "../hooks/useWeatherData";
 import {useLocationsStorage} from "../hooks/useLocationsStorage";
 import {useApiKey} from "../contexts/ApiKeyContext";
-import {getTimeBasedRotation} from "../utils/astronomicalUtils";
 import LocationSearch from "./LocationSearch";
 import WeeklyOverview from "./WeeklyOverview";
 import ApiKeyLogin from "./ApiKeyLogin";
@@ -18,26 +17,6 @@ interface WeatherAppProps {
 const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
   const { apiKey } = useApiKey();
   const [locations, setLocations] = useLocationsStorage();
-  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
-  const [starRotation, setStarRotation] = useState(() => getTimeBasedRotation());
-
-  // Update window size for star field
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Update star rotation based on current time - one full rotation per minute
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setStarRotation(getTimeBasedRotation());
-    }, 50);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleLocationSelect = (location: LocationSearchResult) => {
     console.log("[WeatherApp] Location selected:", location);
@@ -71,18 +50,9 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
     <div className={`weather-app ${className || ""}`}>
       {/* Star Field Background */}
       <StarField
-        width={windowSize.width}
-        height={windowSize.height}
         animate={false}
-        rotation={starRotation}
+        useTimeBasedRotation={true}
       />
-      {/*<ConstellationLines*/}
-      {/*  width={windowSize.width}*/}
-      {/*  height={windowSize.height}*/}
-      {/*  rotation={starRotation}*/}
-      {/*  opacity={0.3}*/}
-      {/*  show={true}*/}
-      {/*/>*/}
 
       <div className="weather-app__content">
         {/* Header */}
