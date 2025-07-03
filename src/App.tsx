@@ -5,11 +5,6 @@ import { ApiKeyProvider } from "./contexts/ApiKeyContext";
 import WeatherApp from "./components/WeatherApp";
 import "./App.css";
 
-// Import API test functions in development mode
-if (process.env.NODE_ENV === 'development') {
-  import('./test-api-response');
-}
-
 // Create a client instance with optimized settings to prevent flickering
 const queryClient = new QueryClient({
   defaultOptions: {

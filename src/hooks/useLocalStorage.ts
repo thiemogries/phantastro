@@ -26,9 +26,7 @@ export function useLocalStorage<T>(
         return initialValue;
       }
 
-      const parsed = JSON.parse(item);
-      console.log(`📦 useLocalStorage: Loaded ${key} from localStorage:`, parsed);
-      return parsed;
+      return JSON.parse(item);
     } catch (error) {
       // If error also return initialValue
       console.warn(`Error reading localStorage key "${key}":`, error);

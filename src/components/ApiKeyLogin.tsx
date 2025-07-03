@@ -13,7 +13,6 @@ const ApiKeyLogin: React.FC = () => {
     try {
       // Clean the API key before validation
       const cleanedKey = apiKey.trim().replace(/^["']|["']$/g, '');
-      console.log('🔍 Validating API key (first 8 chars):', cleanedKey.substring(0, 8) + '...');
 
       // Simple validation request to Meteoblue API
       const params = new URLSearchParams({
@@ -28,7 +27,6 @@ const ApiKeyLogin: React.FC = () => {
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
       const url = `https://my.meteoblue.com/packages/basic-1h?${params}`;
-      console.log('🌐 Making validation request to:', url.replace(cleanedKey, cleanedKey.substring(0, 8) + '...'));
 
       const response = await fetch(url, {
         method: 'GET',
