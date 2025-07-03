@@ -53,7 +53,8 @@ const ConstellationLines: React.FC<ConstellationLinesProps> = ({
               width,
               height,
               rotation, // Use the same rotation as stars
-              degreesToRadians(45) // Center on 45 degrees north (same as stars)
+              degreesToRadians(45), // Center on 45 degrees north (same as stars)
+              0 // Rotation center at top of page (same as stars)
             );
 
             if (screenPos.visible) {

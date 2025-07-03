@@ -38,7 +38,8 @@ export function celestialToScreen(
   width: number,
   height: number,
   rotation: number = 0, // Rotation angle in radians
-  centerDec: number = Math.PI / 4 // Center Dec (45 degrees north)
+  centerDec: number = Math.PI / 4, // Center Dec (45 degrees north)
+  rotationCenterY: number = 0 // Y position of rotation center (0 = top, height/2 = center)
 ): ScreenCoordinate {
   // Only show stars above a certain declination (northern hemisphere focus)
   const minDeclination = -Math.PI / 6; // -30 degrees and above
@@ -65,19 +66,22 @@ export function celestialToScreen(
 
   // Stereographic projection formula
   const r = 2 * Math.tan(poleDist / 2);
-  const scale = Math.min(width, height) * 0.25;
+  // Increase scale to ensure stars fill the full height when rotating around top
+  const scale = Math.min(width, height) * 0.4; // Increased scale for better coverage
 
   // Fix mirroring by flipping the X coordinate
   const projX = -r * Math.cos(rotatedRa) * scale; // Negative to fix mirroring
   const projY = r * Math.sin(rotatedRa) * scale;
 
+  // Keep rotation center at the specified Y position (top of page when rotationCenterY = 0)
   const screenX = width / 2 + projX;
-  const screenY = height / 2 - projY; // Flip Y for screen coordinates
+  const screenY = rotationCenterY - projY; // Pure rotation around the specified Y position
 
-  // Check if the star is visible on screen
-  const margin = 100;
-  const visible = screenX >= -margin && screenX <= width + margin &&
-                  screenY >= -margin && screenY <= height + margin;
+  // Check if the star is visible on screen with larger margin for rotation around top
+  const marginX = 300;
+  const marginY = height; // Allow stars well above and below the screen for rotation
+  const visible = screenX >= -marginX && screenX <= width + marginX &&
+                  screenY >= -marginY && screenY <= height + marginY;
 
   return {
     x: screenX,

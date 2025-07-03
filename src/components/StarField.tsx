@@ -74,7 +74,8 @@ const StarField: React.FC<StarFieldProps> = ({
         width,
         height,
         currentRotation, // Pass rotation as separate parameter
-        degreesToRadians(45) // Center on 45 degrees north
+        degreesToRadians(45), // Center on 45 degrees north
+        0 // Rotation center at top of page
       );
 
       if (screenPos.visible) {
