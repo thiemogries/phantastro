@@ -7,8 +7,7 @@ import {
   getCurrentSiderealTime,
   degreesToRadians
 } from '../utils/astronomicalUtils';
-import { brightStars } from '../data/processStarData';
-import type { Star } from '../utils/astronomicalUtils';
+import starsToRender from "../data/processStarData";
 
 interface StarFieldProps {
   width: number;
@@ -27,9 +26,6 @@ const StarField: React.FC<StarFieldProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
-
-  // Use the comprehensive star catalog
-  const starsToRender: Star[] = brightStars;
 
   const drawStar = (
     ctx: CanvasRenderingContext2D, 

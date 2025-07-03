@@ -76,13 +76,13 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
         animate={false}
         rotation={starRotation}
       />
-      <ConstellationLines
-        width={windowSize.width}
-        height={windowSize.height}
-        rotation={starRotation}
-        opacity={0.3}
-        show={true}
-      />
+      {/*<ConstellationLines*/}
+      {/*  width={windowSize.width}*/}
+      {/*  height={windowSize.height}*/}
+      {/*  rotation={starRotation}*/}
+      {/*  opacity={0.3}*/}
+      {/*  show={true}*/}
+      {/*/>*/}
 
       {/* Header */}
       <header className="weather-app__header">
