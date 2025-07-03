@@ -84,7 +84,8 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
       {/*  show={true}*/}
       {/*/>*/}
 
-      {/* Header */}
+      <div className="weather-app__content">
+        {/* Header */}
       <header className="weather-app__header">
         <div className="weather-app__title">
           <h1>Phantastro</h1>
@@ -129,6 +130,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

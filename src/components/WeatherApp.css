@@ -3,10 +3,16 @@
 .weather-app {
   position: relative;
   z-index: 1;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.weather-app__content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  min-height: 100vh;
+  position: relative;
+  z-index: 2;
 }
 
 /* Header */
@@ -308,7 +314,7 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .weather-app {
+  .weather-app__content {
     padding: 15px;
   }
 
@@ -330,7 +336,7 @@
 }
 
 @media (max-width: 480px) {
-  .weather-app {
+  .weather-app__content {
     padding: 10px;
   }
 
