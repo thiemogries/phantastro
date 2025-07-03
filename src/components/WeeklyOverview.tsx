@@ -92,7 +92,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
         <LocationHeader
           location={mockLocation}
           lastUpdated="Loading weather data..."
-          isFetching={true}
+          isFetching={false}
           onRemove={onRemove}
         />
         <div className="loading-container">
