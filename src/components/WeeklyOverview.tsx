@@ -84,6 +84,16 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
       <div className={`weekly-overview ${className || ""}`}>
         <div className="overview-header">
           <h3>{location.locationName}</h3>
+          <div className="header-controls">
+            <div className="location-details">
+              <p className="coordinates">
+                {location.lat.toFixed(4)}°, {location.lon.toFixed(4)}°
+              </p>
+              <p className="last-updated">
+                Loading weather data...
+              </p>
+            </div>
+          </div>
         </div>
         <div className="loading-container">
           <LoadingSpinner size="medium" />
@@ -99,6 +109,16 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
       <div className={`weekly-overview ${className || ""}`}>
         <div className="overview-header">
           <h3>{location.locationName}</h3>
+          <div className="header-controls">
+            <div className="location-details">
+              <p className="coordinates">
+                {location.lat.toFixed(4)}°, {location.lon.toFixed(4)}°
+              </p>
+              <p className="last-updated">
+                Error loading data
+              </p>
+            </div>
+          </div>
         </div>
         <ErrorMessage
           message={(queryError as Error).message}
@@ -114,6 +134,16 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
       <div className={`weekly-overview ${className || ""}`}>
         <div className="overview-header">
           <h3>{location.locationName}</h3>
+          <div className="header-controls">
+            <div className="location-details">
+              <p className="coordinates">
+                {location.lat.toFixed(4)}°, {location.lon.toFixed(4)}°
+              </p>
+              <p className="last-updated">
+                No data available
+              </p>
+            </div>
+          </div>
         </div>
         <div className="no-data-message">
           <div className="no-data-icon">📡</div>

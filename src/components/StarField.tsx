@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, {useCallback, useEffect, useRef} from 'react';
 import { 
   celestialToScreen, 
   magnitudeToSize, 
@@ -53,7 +53,7 @@ const StarField: React.FC<StarFieldProps> = ({
     ctx.restore();
   };
 
-  const drawStarField = () => {
+  const drawStarField = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -86,14 +86,14 @@ const StarField: React.FC<StarFieldProps> = ({
         drawStar(ctx, screenPos.x, screenPos.y, size, color, opacity);
       }
     });
-  };
+  }, [animate, height, rotation, width]);
 
-  const animate_frame = (): void => {
+  const animate_frame = useCallback((): void => {
     if (animate) {
       drawStarField();
       animationRef.current = requestAnimationFrame(animate_frame);
     }
-  };
+  }, [animationRef, animate, drawStarField]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -119,11 +119,11 @@ const StarField: React.FC<StarFieldProps> = ({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [width, height, animate]);
+  }, [width, height, animate, animate_frame, drawStarField]);
 
   useEffect(() => {
     drawStarField();
-  }, [rotation, showConstellations, width, height]);
+  }, [rotation, showConstellations, width, height, drawStarField]);
 
   return (
     <canvas
