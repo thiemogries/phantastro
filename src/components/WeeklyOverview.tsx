@@ -80,21 +80,21 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
   // Handle loading state
   if (isLoading && !forecast) {
+    const mockLocation = {
+      name: location.locationName || 'Unknown Location',
+      country: '',
+      lat: location.lat,
+      lon: location.lon
+    };
+
     return (
       <div className={`weekly-overview ${className || ""}`}>
-        <div className="overview-header">
-          <h3>{location.locationName}</h3>
-          <div className="header-controls">
-            <div className="location-details">
-              <p className="coordinates">
-                {location.lat.toFixed(4)}°, {location.lon.toFixed(4)}°
-              </p>
-              <p className="last-updated">
-                Loading weather data...
-              </p>
-            </div>
-          </div>
-        </div>
+        <LocationHeader
+          location={mockLocation}
+          lastUpdated="Loading weather data..."
+          isFetching={true}
+          onRemove={onRemove}
+        />
         <div className="loading-container">
           <LoadingSpinner size="medium" />
           <p>Loading weather data...</p>
@@ -105,21 +105,21 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
   // Handle error state
   if (queryError && !forecast) {
+    const mockLocation = {
+      name: location.locationName || 'Unknown Location',
+      country: '',
+      lat: location.lat,
+      lon: location.lon
+    };
+
     return (
       <div className={`weekly-overview ${className || ""}`}>
-        <div className="overview-header">
-          <h3>{location.locationName}</h3>
-          <div className="header-controls">
-            <div className="location-details">
-              <p className="coordinates">
-                {location.lat.toFixed(4)}°, {location.lon.toFixed(4)}°
-              </p>
-              <p className="last-updated">
-                Error loading data
-              </p>
-            </div>
-          </div>
-        </div>
+        <LocationHeader
+          location={mockLocation}
+          lastUpdated="Error loading data"
+          isFetching={false}
+          onRemove={onRemove}
+        />
         <ErrorMessage
           message={(queryError as Error).message}
           onRetry={() => window.location.reload()}
@@ -130,21 +130,21 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
   // Handle no data state
   if (!forecast) {
+    const mockLocation = {
+      name: location.locationName || 'Unknown Location',
+      country: '',
+      lat: location.lat,
+      lon: location.lon
+    };
+
     return (
       <div className={`weekly-overview ${className || ""}`}>
-        <div className="overview-header">
-          <h3>{location.locationName}</h3>
-          <div className="header-controls">
-            <div className="location-details">
-              <p className="coordinates">
-                {location.lat.toFixed(4)}°, {location.lon.toFixed(4)}°
-              </p>
-              <p className="last-updated">
-                No data available
-              </p>
-            </div>
-          </div>
-        </div>
+        <LocationHeader
+          location={mockLocation}
+          lastUpdated="No data available"
+          isFetching={false}
+          onRemove={onRemove}
+        />
         <div className="no-data-message">
           <div className="no-data-icon">📡</div>
           <div className="no-data-text">
