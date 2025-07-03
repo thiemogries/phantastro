@@ -3,6 +3,8 @@
  * Converts between celestial coordinates (RA/Dec) and screen coordinates
  */
 
+const ROTATION_SPEED = 300; // One full rotation every five minutes
+
 export interface Star {
   id: number;
   name: string;
@@ -145,6 +147,18 @@ export function getCurrentSiderealTime(): number {
   const hours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
   // Simplified: rotate based on time of day
   return (hours / 24) * 2 * Math.PI;
+}
+
+// Using ROTATION_SPEED constant defined at top of file
+
+/**
+ * Get rotation based on current time with one full rotation per minute
+ * Returns rotation in radians - continuous rotation without jumps
+ */
+export function getTimeBasedRotation(): number {
+  const now = new Date();
+  const totalSeconds = now.getTime() / 1000; // Total seconds since epoch
+  return ((totalSeconds % ROTATION_SPEED) / ROTATION_SPEED) * 2 * Math.PI;
 }
 
 /**

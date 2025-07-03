@@ -3,6 +3,7 @@ import {LocationSearchResult} from "../types/weather";
 import {WeatherQueryParams,} from "../hooks/useWeatherData";
 import {useLocationsStorage} from "../hooks/useLocationsStorage";
 import {useApiKey} from "../contexts/ApiKeyContext";
+import {getTimeBasedRotation} from "../utils/astronomicalUtils";
 import LocationSearch from "./LocationSearch";
 import WeeklyOverview from "./WeeklyOverview";
 import ApiKeyLogin from "./ApiKeyLogin";
@@ -19,7 +20,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
   const { apiKey } = useApiKey();
   const [locations, setLocations] = useLocationsStorage();
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
-  const [starRotation, setStarRotation] = useState(0);
+  const [starRotation, setStarRotation] = useState(() => getTimeBasedRotation());
 
   // Update window size for star field
   useEffect(() => {
@@ -31,10 +32,10 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Sync star rotation for constellation alignment
+  // Update star rotation based on current time - one full rotation per minute
   useEffect(() => {
     const interval = setInterval(() => {
-      setStarRotation(prev => prev + 0.001);
+      setStarRotation(getTimeBasedRotation());
     }, 50);
     return () => clearInterval(interval);
   }, []);
