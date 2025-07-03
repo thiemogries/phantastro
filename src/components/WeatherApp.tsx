@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {LocationSearchResult} from "../types/weather";
 import {WeatherQueryParams,} from "../hooks/useWeatherData";
 import {useLocationsStorage} from "../hooks/useLocationsStorage";
@@ -7,6 +7,8 @@ import LocationSearch from "./LocationSearch";
 import WeeklyOverview from "./WeeklyOverview";
 import ApiKeyLogin from "./ApiKeyLogin";
 import SettingsMenu from "./SettingsMenu";
+import StarField from "./StarField";
+import ConstellationLines from "./ConstellationLines";
 import "./WeatherApp.css";
 
 interface WeatherAppProps {
@@ -16,6 +18,26 @@ interface WeatherAppProps {
 const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
   const { apiKey } = useApiKey();
   const [locations, setLocations] = useLocationsStorage();
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+  const [starRotation, setStarRotation] = useState(0);
+
+  // Update window size for star field
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Sync star rotation for constellation alignment
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStarRotation(prev => prev + 0.001);
+    }, 50);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLocationSelect = (location: LocationSearchResult) => {
     console.log("[WeatherApp] Location selected:", location);
@@ -47,6 +69,21 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
 
   return (
     <div className={`weather-app ${className || ""}`}>
+      {/* Star Field Background */}
+      <StarField
+        width={windowSize.width}
+        height={windowSize.height}
+        animate={false}
+        rotation={starRotation}
+      />
+      <ConstellationLines
+        width={windowSize.width}
+        height={windowSize.height}
+        rotation={starRotation}
+        opacity={0.3}
+        show={true}
+      />
+
       {/* Header */}
       <header className="weather-app__header">
         <div className="weather-app__title">
