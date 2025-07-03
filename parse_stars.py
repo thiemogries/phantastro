@@ -166,12 +166,12 @@ def parse_stars_file(filename):
             
             # Create star object
             star = {
-                "i": int(star_id),
-                "n": identifier.replace('*', '').replace('HD', 'HD ').strip(),
-                "ra_deg": round(ra_deg, 6),
-                "dec_deg": round(dec_deg, 6),
-                "N": round(v_magnitude, 2),
-                "K": color
+                "id": int(star_id),
+                "name": identifier.replace('*', '').replace('HD', 'HD ').strip(),
+                "ra": (round(ra_deg, 6) * math.pi) / 180,
+                "dec": (round(dec_deg, 6) * math.pi) / 180,
+                "magnitude": round(v_magnitude, 2),
+                "color": color
             }
             
             stars.append(star)
@@ -191,15 +191,15 @@ def main():
     print(f"Parsed {len(stars)} stars")
     
     # Sort by magnitude (brightest first)
-    stars.sort(key=lambda x: x['N'])
+    stars.sort(key=lambda x: x['magnitude'])
     
     # Create the output structure
     output = {
         "description": "Star catalog parsed from SIMBAD data",
         "total_stars": len(stars),
         "magnitude_range": {
-            "min": min(star['N'] for star in stars),
-            "max": max(star['N'] for star in stars)
+            "min": min(star['magnitude'] for star in stars),
+            "max": max(star['magnitude'] for star in stars)
         },
         "stars": stars
     }
@@ -214,7 +214,7 @@ def main():
     # Print some statistics
     magnitude_counts = {}
     for star in stars:
-        mag_range = int(star['N'])
+        mag_range = int(star['magnitude'])
         magnitude_counts[mag_range] = magnitude_counts.get(mag_range, 0) + 1
     
     print("\nMagnitude distribution:")

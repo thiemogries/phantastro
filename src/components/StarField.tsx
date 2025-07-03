@@ -7,7 +7,7 @@ import {
   getCurrentSiderealTime,
   degreesToRadians
 } from '../utils/astronomicalUtils';
-import starsToRender from "../data/processStarData";
+import starCatalog from "../data/stars_catalog.json";
 
 interface StarFieldProps {
   width: number;
@@ -67,7 +67,7 @@ const StarField: React.FC<StarFieldProps> = ({
     const currentRotation = animate ? getCurrentSiderealTime() : rotation;
 
     // Draw stars
-    starsToRender.forEach(star => {
+    starCatalog.stars.forEach(star => {
       const screenPos = celestialToScreen(
         star.ra,
         star.dec,
