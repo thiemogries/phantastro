@@ -75,7 +75,7 @@ const SettingsMenu: React.FC = () => {
       {isOpen && (
         <div ref={menuRef} className="settings-dropdown" role="menu">
           <button
-            className="settings-menu-item"
+            className="settings-menu-item clear-api-key-button"
             onClick={handleClearApiKey}
             role="menuitem"
           >

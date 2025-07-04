@@ -101,6 +101,28 @@
   box-shadow: 0 1px 4px rgba(124, 58, 237, 0.3);
 }
 
+/* Clear API Key button - destructive action styling */
+.clear-api-key-button:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+.clear-api-key-button:focus {
+  outline: none;
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3);
+}
+
+.clear-api-key-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(239, 68, 68, 0.3);
+}
+
 .menu-icon {
   display: flex;
   align-items: center;
