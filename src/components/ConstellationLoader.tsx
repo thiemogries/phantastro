@@ -92,14 +92,19 @@ const ConstellationLoader: React.FC<ConstellationLoaderProps> = ({
   className
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [fromIndex, setFromIndex] = useState(0);
-  const [toIndex, setToIndex] = useState(1);
+
+  // Initialize with random constellation indices
+  const [fromIndex, setFromIndex] = useState(() => Math.floor(Math.random() * CONSTELLATIONS.length));
+  const [toIndex, setToIndex] = useState(() => {
+    const from = Math.floor(Math.random() * CONSTELLATIONS.length);
+    return (from + 1) % CONSTELLATIONS.length;
+  });
   const [progress, setProgress] = useState(0);
 
   // Size configurations
   const sizeConfig = {
     small: { width: 120, height: 120, starSize: 1.5 },
-    medium: { width: 180, height: 180, starSize: 2.0 },
+    medium: { width: 170, height: 170, starSize: 2.0 },
     large: { width: 240, height: 240, starSize: 2.5 }
   };
 

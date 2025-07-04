@@ -3,13 +3,12 @@
 .weekly-overview {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 16px;
-    padding: 20px;
-    padding-bottom: 0;
+    padding: 20px 20px 0;
     border: 1px solid rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(2px);
     overflow-y: visible;
     position: relative;
-    min-height: 226px;
+    min-height: 220px;
 }
 
 .overview-header {
