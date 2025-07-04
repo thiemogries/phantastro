@@ -1,8 +1,8 @@
-import React from "react";
-import { Icon } from "@iconify/react";
-import { Location, HourlyForecast } from "../types/weather";
-import { getMoonPhaseIcon } from "../utils/weatherUtils";
-import { calculateSunriseSunset } from "../utils/solarUtils";
+import React from 'react';
+import { Icon } from '@iconify/react';
+import { Location, HourlyForecast } from '../types/weather';
+import { getMoonPhaseIcon } from '../utils/weatherUtils';
+import { calculateSunriseSunset } from '../utils/solarUtils';
 
 interface DayData {
   date: string;
@@ -25,13 +25,21 @@ const calculateClearNightHours = (
 
   try {
     // Calculate sunset for current day and sunrise for next day
-    const currentDate = new Date(dayData.date + "T12:00:00");
+    const currentDate = new Date(`${dayData.date}T12:00:00`);
     const nextDate = nextDayData
-      ? new Date(nextDayData.date + "T12:00:00")
+      ? new Date(`${nextDayData.date}T12:00:00`)
       : new Date(currentDate.getTime() + 24 * 60 * 60 * 1000);
 
-    const currentSun = calculateSunriseSunset(location.lat, location.lon, currentDate);
-    const nextSun = calculateSunriseSunset(location.lat, location.lon, nextDate);
+    const currentSun = calculateSunriseSunset(
+      location.lat,
+      location.lon,
+      currentDate
+    );
+    const nextSun = calculateSunriseSunset(
+      location.lat,
+      location.lon,
+      nextDate
+    );
 
     if (!currentSun.sunset || !nextSun.sunrise) return 0;
 
@@ -69,7 +77,7 @@ const calculateClearNightHours = (
         hour.cloudCover.totalCloudCover < 5 &&
         hour.precipitation.precipitation === 0 &&
         hour.visibility >= 15 &&
-        hour.windSpeed < 5,
+        hour.windSpeed < 5
     ).length;
 
     return clearHours / nightHours.length; // Return ratio (0-1)
@@ -83,16 +91,16 @@ const calculateClearNightHours = (
 const formatDayHeader = (
   dateStr: string,
   location?: Location,
-  sunMoon?: any,
+  sunMoon?: any
 ) => {
   // For dates like "2025-06-23", create a date that represents the location's timezone
   // We'll use the first hour of the day from our hourly data to get the correct timezone context
-  const date = new Date(dateStr + "T12:00:00"); // Use noon to avoid timezone edge cases
+  const date = new Date(`${dateStr}T12:00:00`); // Use noon to avoid timezone edge cases
 
-  const dayName = date.toLocaleDateString([], { weekday: "short" });
+  const dayName = date.toLocaleDateString([], { weekday: 'short' });
   const dayDate = date.toLocaleDateString([], {
-    month: "short",
-    day: "numeric",
+    month: 'short',
+    day: 'numeric',
   });
 
   // Get moon phase icon if available
@@ -102,7 +110,7 @@ const formatDayHeader = (
         sunMoon.moonIlluminatedFraction,
         sunMoon.moonAge
       )
-    : "";
+    : '';
 
   return { dayName, dayDate, moonPhaseIcon };
 };
@@ -115,15 +123,19 @@ const DayHeaders: React.FC<DayHeadersProps> = ({ groupedByDay, location }) => {
         const { dayName, dayDate, moonPhaseIcon } = formatDayHeader(
           date,
           location,
-          sunMoon,
+          sunMoon
         );
 
         // Calculate clear night hours ratio for background opacity
         const nextDayData = groupedByDay[index + 1];
-        const clearNightRatio = calculateClearNightHours(dayData, nextDayData, location);
+        const clearNightRatio = calculateClearNightHours(
+          dayData,
+          nextDayData,
+          location
+        );
 
         // Calculate background opacity: minimum 0.01, maximum 0.2
-        const backgroundOpacity = 0.01 + (clearNightRatio * (0.2 - 0.01));
+        const backgroundOpacity = 0.01 + clearNightRatio * (0.2 - 0.01);
 
         return (
           <div
@@ -147,13 +159,13 @@ const DayHeaders: React.FC<DayHeadersProps> = ({ groupedByDay, location }) => {
                         ? `${sunMoon.moonPhaseName}${
                             sunMoon.moonIlluminatedFraction !== null
                               ? ` (${Math.round(sunMoon.moonIlluminatedFraction)}% illuminated)`
-                              : ""
+                              : ''
                           }${
                             sunMoon.moonAge !== null
                               ? ` - ${Math.round(sunMoon.moonAge)} days old`
-                              : ""
+                              : ''
                           }`
-                        : "Moon phase"
+                        : 'Moon phase'
                     }
                   >
                     <Icon icon={moonPhaseIcon} width="16" height="16" />
@@ -170,7 +182,7 @@ const DayHeaders: React.FC<DayHeadersProps> = ({ groupedByDay, location }) => {
             {location?.timezone && (
               <div
                 className="timezone-indicator"
-                style={{ fontSize: "0.6rem", opacity: 0.7 }}
+                style={{ fontSize: '0.6rem', opacity: 0.7 }}
               >
                 {location.timezone}
               </div>

@@ -1,19 +1,18 @@
-import React from "react";
-import { HourlyForecast } from "../types/weather";
-import { useWeatherData, WeatherQueryParams } from "../hooks/useWeatherData";
+import React from 'react';
+import { HourlyForecast } from '../types/weather';
+import { useWeatherData, WeatherQueryParams } from '../hooks/useWeatherData';
 
+import TwilightTimeline from './TwilightTimeline';
+import MoonTimeline from './MoonTimeline';
+import ConstellationLoader from './ConstellationLoader';
+import ErrorMessage from './ErrorMessage';
+import WeatherSummary from './WeatherSummary';
+import HourGrid from './HourGrid';
+import HourTooltips from './HourTooltips';
+import LocationHeader from './LocationHeader';
+import DayHeaders from './DayHeaders';
 
-import TwilightTimeline from "./TwilightTimeline";
-import MoonTimeline from "./MoonTimeline";
-import ConstellationLoader from "./ConstellationLoader";
-import ErrorMessage from "./ErrorMessage";
-import WeatherSummary from "./WeatherSummary";
-import HourGrid from "./HourGrid";
-import HourTooltips from "./HourTooltips";
-import LocationHeader from "./LocationHeader";
-import DayHeaders from "./DayHeaders";
-
-import "./WeeklyOverview.css";
+import './WeeklyOverview.css';
 
 interface WeeklyOverviewProps {
   location: WeatherQueryParams; // Location parameters for data fetching
@@ -44,9 +43,9 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
     const dailyData = forecast.dailyForecast;
 
     const days: { [key: string]: HourlyForecast[] } = {};
-    hourlyData.slice(0, 168).forEach((hour) => {
+    hourlyData.slice(0, 168).forEach(hour => {
       // 7 days * 24 hours = 168
-      const date = hour.time.split("T")[0];
+      const date = hour.time.split('T')[0];
       if (!days[date]) days[date] = [];
       days[date].push(hour);
     });
@@ -56,7 +55,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
       .map(([date, hours]) => ({
         date,
         hours: hours.slice(0, 24), // Ensure max 24 hours per day
-        sunMoon: dailyData?.find((day) => day.date === date)?.sunMoon,
+        sunMoon: dailyData?.find(day => day.date === date)?.sunMoon,
       }));
 
     // Pad with empty days if we have fewer than 7 days
@@ -65,8 +64,8 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
       const nextDate = lastDate
         ? new Date(new Date(lastDate).getTime() + 24 * 60 * 60 * 1000)
             .toISOString()
-            .split("T")[0]
-        : new Date().toISOString().split("T")[0];
+            .split('T')[0]
+        : new Date().toISOString().split('T')[0];
 
       result.push({
         date: nextDate,
@@ -81,15 +80,15 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   // Handle loading state
   if (isLoading && !forecast) {
     return (
-      <div className={`weekly-overview ${className || ""}`}>
+      <div className={`weekly-overview ${className || ''}`}>
         <LocationHeader
-          location={{...location, name: location.name || 'Unknown Location'}}
+          location={{ ...location, name: location.name || 'Unknown Location' }}
           lastUpdated="Loading weather data..."
           isFetching={false}
           onRemove={onRemove}
         />
         <div className="loading-container">
-          <ConstellationLoader size="medium"/>
+          <ConstellationLoader size="medium" />
         </div>
       </div>
     );
@@ -98,9 +97,9 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   // Handle error state
   if (queryError && !forecast) {
     return (
-      <div className={`weekly-overview ${className || ""}`}>
+      <div className={`weekly-overview ${className || ''}`}>
         <LocationHeader
-          location={{...location, name: location.name || 'Unknown Location'}}
+          location={{ ...location, name: location.name || 'Unknown Location' }}
           lastUpdated="Error loading data"
           isFetching={false}
           onRemove={onRemove}
@@ -116,7 +115,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   // Handle no data state
   if (!forecast) {
     return (
-      <div className={`weekly-overview ${className || ""}`}>
+      <div className={`weekly-overview ${className || ''}`}>
         <LocationHeader
           location={location}
           lastUpdated="No data available"
@@ -138,7 +137,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
   if (groupedByDay.length === 0) {
     return (
-      <div className={`weekly-overview ${className || ""}`}>
+      <div className={`weekly-overview ${className || ''}`}>
         <div className="no-data-compact">
           <span className="no-data-icon">📊</span>
           <span>7-day hourly overview not available</span>
@@ -148,7 +147,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   }
 
   return (
-    <div className={`weekly-overview ${className || ""}`}>
+    <div className={`weekly-overview ${className || ''}`}>
       <LocationHeader
         location={forecast.location}
         lastUpdated={lastUpdated}
@@ -164,16 +163,19 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
         <HourGrid groupedByDay={groupedByDay} />
 
         {/* Tooltips for all hour columns - rendered in portal to break out of container */}
-        <HourTooltips groupedByDay={groupedByDay} location={forecast.location} />
+        <HourTooltips
+          groupedByDay={groupedByDay}
+          location={forecast.location}
+        />
 
         {/* Twilight timeline row */}
         <div className="grid-row sun-row">
           <div className="continuous-timeline">
             <TwilightTimeline
-              dates={groupedByDay.map((day) => day.date)}
+              dates={groupedByDay.map(day => day.date)}
               latitude={location.lat}
               longitude={location.lon}
-              sunMoonData={groupedByDay.map((day) => ({
+              sunMoonData={groupedByDay.map(day => ({
                 date: day.date,
                 sunrise: day.sunMoon?.sunrise,
                 sunset: day.sunMoon?.sunset,
@@ -186,8 +188,8 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
         <div className="grid-row moon-row">
           <div className="continuous-timeline">
             <MoonTimeline
-              dates={groupedByDay.map((day) => day.date)}
-              sunMoonData={groupedByDay.map((day) => ({
+              dates={groupedByDay.map(day => day.date)}
+              sunMoonData={groupedByDay.map(day => ({
                 date: day.date,
                 moonrise: day.sunMoon?.moonrise,
                 moonset: day.sunMoon?.moonset,

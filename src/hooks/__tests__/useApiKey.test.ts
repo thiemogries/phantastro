@@ -70,7 +70,9 @@ describe('useApiKey', () => {
 
     act(() => {
       const { setApiKey } = result.current;
-      expect(() => setApiKey('your_meteoblue_api_key_here')).toThrow('Invalid API key format');
+      expect(() => setApiKey('your_meteoblue_api_key_here')).toThrow(
+        'Invalid API key format'
+      );
     });
 
     const { apiKey } = result.current;

@@ -2,45 +2,47 @@
  * Get cloud coverage description and color or show unavailable info
  */
 export const getCloudCoverageInfo = (
-  percentage: number | null,
+  percentage: number | null
 ): { description: string; color: string; emoji: string } => {
   if (percentage === null || percentage === undefined) {
-    return { description: "Not available", color: "#6b7280", emoji: "❓" };
+    return { description: 'Not available', color: '#6b7280', emoji: '❓' };
   }
   if (percentage < 10)
-    return { description: "Clear skies", color: "#ffffff", emoji: "🌌" };
+    return { description: 'Clear skies', color: '#ffffff', emoji: '🌌' };
   if (percentage < 25)
-    return { description: "Mostly clear", color: "#ffffff", emoji: "🌙" };
+    return { description: 'Mostly clear', color: '#ffffff', emoji: '🌙' };
   if (percentage < 50)
-    return { description: "Partly cloudy", color: "#ffffff", emoji: "⛅" };
+    return { description: 'Partly cloudy', color: '#ffffff', emoji: '⛅' };
   if (percentage < 75)
-    return { description: "Mostly cloudy", color: "#ffffff", emoji: "☁️" };
+    return { description: 'Mostly cloudy', color: '#ffffff', emoji: '☁️' };
   if (percentage < 90)
-    return { description: "Overcast", color: "#ffffff", emoji: "☁️" };
-  return { description: "Heavy overcast", color: "#ffffff", emoji: "☁️" };
+    return { description: 'Overcast', color: '#ffffff', emoji: '☁️' };
+  return { description: 'Heavy overcast', color: '#ffffff', emoji: '☁️' };
 };
 
 /**
  * Get rain state based on precipitation probability
  */
-export const getRainState = (probability: number | null): {
+export const getRainState = (
+  probability: number | null
+): {
   hasRain: boolean;
   intensity: number;
   description: string;
 } => {
   if (probability === null || probability === 0) {
-    return { hasRain: false, intensity: 0, description: "No rain" };
+    return { hasRain: false, intensity: 0, description: 'No rain' };
   }
   if (probability < 30) {
-    return { hasRain: true, intensity: 0.3, description: "Light chance" };
+    return { hasRain: true, intensity: 0.3, description: 'Light chance' };
   }
   if (probability < 50) {
-    return { hasRain: true, intensity: 0.5, description: "Moderate chance" };
+    return { hasRain: true, intensity: 0.5, description: 'Moderate chance' };
   }
   if (probability < 70) {
-    return { hasRain: true, intensity: 0.7, description: "High chance" };
+    return { hasRain: true, intensity: 0.7, description: 'High chance' };
   }
-  return { hasRain: true, intensity: 1.0, description: "Very high chance" };
+  return { hasRain: true, intensity: 1.0, description: 'Very high chance' };
 };
 
 /**
@@ -135,7 +137,9 @@ export const getMoonPhaseIconByAge = (moonAge: number): string => {
  * Get precise moon phase icon based on illuminated fraction (0-100%)
  * Uses Weather Icons' 28-phase moon cycle for accurate representation
  */
-export const getMoonPhaseIconByIllumination = (illuminatedFraction: number): string => {
+export const getMoonPhaseIconByIllumination = (
+  illuminatedFraction: number
+): string => {
   // Normalize to 0-100 range (API typically returns percentage)
   const percentage = Math.max(0, Math.min(100, illuminatedFraction));
 

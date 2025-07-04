@@ -41,7 +41,9 @@ function validateLocations(locations: any): WeatherQueryParams[] {
   });
 
   if (validLocations.length !== locations.length) {
-    console.warn(`Filtered out ${locations.length - validLocations.length} invalid locations`);
+    console.warn(
+      `Filtered out ${locations.length - validLocations.length} invalid locations`
+    );
   }
 
   return validLocations;
@@ -53,13 +55,16 @@ function validateLocations(locations: any): WeatherQueryParams[] {
  */
 export function useLocationsStorage(): [
   WeatherQueryParams[],
-  (locations: WeatherQueryParams[] | ((prev: WeatherQueryParams[]) => WeatherQueryParams[])) => void,
-  () => void
+  (
+    locations:
+      | WeatherQueryParams[]
+      | ((prev: WeatherQueryParams[]) => WeatherQueryParams[])
+  ) => void,
+  () => void,
 ] {
-  const [storedLocations, setStoredLocations] = useLocalStorage<WeatherQueryParams[]>(
-    LOCATIONS_STORAGE_KEY,
-    []
-  );
+  const [storedLocations, setStoredLocations] = useLocalStorage<
+    WeatherQueryParams[]
+  >(LOCATIONS_STORAGE_KEY, []);
 
   // Validate stored locations on every access
   const validatedLocations = validateLocations(storedLocations);
@@ -69,16 +74,22 @@ export function useLocationsStorage(): [
     setStoredLocations(validatedLocations);
   }
 
-  const setLocations = useCallback((
-    locations: WeatherQueryParams[] | ((prev: WeatherQueryParams[]) => WeatherQueryParams[])
-  ) => {
-    const newLocations = typeof locations === 'function' 
-      ? locations(validatedLocations) 
-      : locations;
-    
-    const validatedNewLocations = validateLocations(newLocations);
-    setStoredLocations(validatedNewLocations);
-  }, [validatedLocations, setStoredLocations]);
+  const setLocations = useCallback(
+    (
+      locations:
+        | WeatherQueryParams[]
+        | ((prev: WeatherQueryParams[]) => WeatherQueryParams[])
+    ) => {
+      const newLocations =
+        typeof locations === 'function'
+          ? locations(validatedLocations)
+          : locations;
+
+      const validatedNewLocations = validateLocations(newLocations);
+      setStoredLocations(validatedNewLocations);
+    },
+    [validatedLocations, setStoredLocations]
+  );
 
   const clearLocations = useCallback(() => {
     console.log('🗑️ useLocationsStorage: Clearing all stored locations');

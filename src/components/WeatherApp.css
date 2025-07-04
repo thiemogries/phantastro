@@ -121,10 +121,6 @@
   max-width: 600px;
 }
 
-
-
-
-
 .get-started-block {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -275,7 +271,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
@@ -303,14 +300,22 @@
   }
 }
 
-.weather-app__content[data-initial-load="true"] > * {
+.weather-app__content[data-initial-load='true'] > * {
   animation: stableFadeIn 0.4s ease-out backwards;
 }
 
-.weather-app__content[data-initial-load="true"] > *:nth-child(1) { animation-delay: 0.05s; }
-.weather-app__content[data-initial-load="true"] > *:nth-child(2) { animation-delay: 0.1s; }
-.weather-app__content[data-initial-load="true"] > *:nth-child(3) { animation-delay: 0.15s; }
-.weather-app__content[data-initial-load="true"] > *:nth-child(4) { animation-delay: 0.2s; }
+.weather-app__content[data-initial-load='true'] > *:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.weather-app__content[data-initial-load='true'] > *:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.weather-app__content[data-initial-load='true'] > *:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.weather-app__content[data-initial-load='true'] > *:nth-child(4) {
+  animation-delay: 0.2s;
+}
 
 /* Reduced motion support - disable animations */
 @media (prefers-reduced-motion: reduce) {

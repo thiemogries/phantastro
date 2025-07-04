@@ -1,10 +1,10 @@
-import React from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { ApiKeyProvider } from "./contexts/ApiKeyContext";
-import WeatherApp from "./components/WeatherApp";
-import { preloadIcons } from "./utils/iconPreloader";
-import "./App.css";
+import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { ApiKeyProvider } from './contexts/ApiKeyContext';
+import WeatherApp from './components/WeatherApp';
+import { preloadIcons } from './utils/iconPreloader';
+import './App.css';
 
 // Preload all commonly used icons from bundled packages
 // This ensures icons are available immediately without network requests

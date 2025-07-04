@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Icon } from "@iconify/react";
-import { LocationSearchResult } from "../types/weather";
-import { useLocationSearch } from "../hooks/useWeatherData";
-import "./LocationSearch.css";
+import React, { useState, useRef, useEffect } from 'react';
+import { Icon } from '@iconify/react';
+import { LocationSearchResult } from '../types/weather';
+import { useLocationSearch } from '../hooks/useWeatherData';
+import './LocationSearch.css';
 
 interface LocationSearchProps {
   onLocationSelect: (location: LocationSearchResult) => void;
@@ -12,11 +12,11 @@ interface LocationSearchProps {
 
 const LocationSearch: React.FC<LocationSearchProps> = ({
   onLocationSelect,
-  placeholder = "Search for a location...",
+  placeholder = 'Search for a location...',
   className,
 }) => {
-  const [query, setQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [keyboardNavigation, setKeyboardNavigation] = useState(false);
@@ -34,7 +34,11 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   }, [query]);
 
   // Use TanStack Query for location search with automatic caching and cancellation
-  const { data: results = [], isLoading: loading, error } = useLocationSearch(debouncedQuery);
+  const {
+    data: results = [],
+    isLoading: loading,
+    error,
+  } = useLocationSearch(debouncedQuery);
 
   // Update dropdown visibility when results change
   useEffect(() => {
@@ -49,7 +53,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   // Handle search errors
   useEffect(() => {
     if (error) {
-      console.error("Location search failed:", error);
+      console.error('Location search failed:', error);
       setIsOpen(false);
     }
   }, [error]);
@@ -67,8 +71,8 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,7 +87,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   };
 
   const handleLocationSelect = (location: LocationSearchResult) => {
-    setQuery(""); // Clear the form input
+    setQuery(''); // Clear the form input
     setIsOpen(false);
     setSelectedIndex(-1);
     setKeyboardNavigation(false);
@@ -106,25 +110,23 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     if (!isOpen) return;
 
     switch (e.key) {
-      case "ArrowDown":
+      case 'ArrowDown':
         e.preventDefault();
         setKeyboardNavigation(true);
-        setSelectedIndex((prev) =>
-          prev < results.length - 1 ? prev + 1 : prev,
-        );
+        setSelectedIndex(prev => (prev < results.length - 1 ? prev + 1 : prev));
         break;
-      case "ArrowUp":
+      case 'ArrowUp':
         e.preventDefault();
         setKeyboardNavigation(true);
-        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+        setSelectedIndex(prev => (prev > 0 ? prev - 1 : -1));
         break;
-      case "Enter":
+      case 'Enter':
         e.preventDefault();
         if (selectedIndex >= 0 && selectedIndex < results.length) {
           handleLocationSelect(results[selectedIndex]);
         }
         break;
-      case "Escape":
+      case 'Escape':
         setIsOpen(false);
         setSelectedIndex(-1);
         setKeyboardNavigation(false);
@@ -134,13 +136,13 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   };
 
   const getElevationText = (elevation?: number): string => {
-    if (!elevation || elevation <= 0) return "";
+    if (!elevation || elevation <= 0) return '';
     if (elevation < 1000) return `${elevation}m`;
     return `${(elevation / 1000).toFixed(1)}km`;
   };
 
   return (
-    <div className={`location-search ${className || ""}`}>
+    <div className={`location-search ${className || ''}`}>
       <div className="search-input-container">
         <input
           ref={inputRef}
@@ -158,7 +160,12 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
         <div className="search-icon">
           {loading ? (
             <div className="search-spinner">
-              <Icon icon="mdi:loading" className="spinning" width="16" height="16" />
+              <Icon
+                icon="mdi:loading"
+                className="spinning"
+                width="16"
+                height="16"
+              />
             </div>
           ) : (
             <Icon icon="mdi:magnify" width="16" height="16" />
@@ -179,7 +186,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
                 {results.map((location, index) => (
                   <li
                     key={`${location.lat}-${location.lon}`}
-                    className={`search-result ${index === selectedIndex && keyboardNavigation ? "keyboard-selected" : ""}`}
+                    className={`search-result ${index === selectedIndex && keyboardNavigation ? 'keyboard-selected' : ''}`}
                     onClick={() => handleLocationSelect(location)}
                     onMouseEnter={() => handleMouseEnter(index)}
                     onMouseLeave={handleMouseLeave}
@@ -190,7 +197,9 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
                       <div className="result-name">{location.name}</div>
                       <div className="result-details">
                         <div className="result-left">
-                          <span className="result-country">{location.country}</span>
+                          <span className="result-country">
+                            {location.country}
+                          </span>
                           {location.elevation && (
                             <span className="result-elevation">
                               • {getElevationText(location.elevation)}
@@ -206,7 +215,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
                 ))}
               </ul>
               <div className="search-attribution">
-                Search powered by{" "}
+                Search powered by{' '}
                 <a
                   href="https://nominatim.openstreetmap.org/"
                   target="_blank"
@@ -232,8 +241,6 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
           )}
         </div>
       )}
-
-
     </div>
   );
 };

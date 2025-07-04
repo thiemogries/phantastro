@@ -33,7 +33,9 @@
 
 .search-input:focus {
   border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3), 0 4px 15px rgba(124, 58, 237, 0.2);
+  box-shadow:
+    0 0 0 3px rgba(124, 58, 237, 0.3),
+    0 4px 15px rgba(124, 58, 237, 0.2);
   background: rgba(255, 255, 255, 0.15);
 }
 
@@ -51,8 +53,12 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Dropdown */
@@ -62,13 +68,20 @@
   left: 0;
   right: 0;
   z-index: 10000; /* Very high z-index to ensure it appears above all other content */
-  background: rgba(26, 26, 46, 0.98); /* Slightly more opaque for better visibility */
+  background: rgba(
+    26,
+    26,
+    46,
+    0.98
+  ); /* Slightly more opaque for better visibility */
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
   margin-top: 5px;
   max-height: 300px;
   backdrop-filter: blur(20px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(124, 58, 237, 0.2); /* Enhanced shadow for better visibility */
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(124, 58, 237, 0.2); /* Enhanced shadow for better visibility */
   display: flex;
   flex-direction: column;
 }

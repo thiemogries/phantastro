@@ -9,9 +9,11 @@ const API_KEY_STORAGE_KEY = 'phantastro-api-key';
  */
 function isValidApiKeyFormat(apiKey: string): boolean {
   // Basic validation: non-empty string with reasonable length
-  return apiKey.trim().length > 0 &&
-         apiKey.trim().length >= 10 && // Minimum reasonable length
-         apiKey.trim() !== 'your_meteoblue_api_key_here';
+  return (
+    apiKey.trim().length > 0 &&
+    apiKey.trim().length >= 10 && // Minimum reasonable length
+    apiKey.trim() !== 'your_meteoblue_api_key_here'
+  );
 }
 
 interface ApiKeyContextType {
@@ -37,17 +39,22 @@ export const ApiKeyProvider: React.FC<ApiKeyProviderProps> = ({ children }) => {
   const isValidKey = storedApiKey ? isValidApiKeyFormat(storedApiKey) : false;
   const validApiKey = isValidKey ? storedApiKey : null;
 
-  const setApiKey = useCallback((apiKey: string) => {
-    // Clean the API key: trim whitespace and remove any surrounding quotes
-    const cleanedKey = apiKey.trim().replace(/^["']|["']$/g, '');
-    if (isValidApiKeyFormat(cleanedKey)) {
-      console.log('🔑 ApiKeyContext: Setting valid API key');
-      setStoredApiKey(cleanedKey);
-    } else {
-      console.warn('🔑 ApiKeyContext: Invalid API key format provided');
-      throw new Error('Invalid API key format. Please check your key and try again.');
-    }
-  }, [setStoredApiKey]);
+  const setApiKey = useCallback(
+    (apiKey: string) => {
+      // Clean the API key: trim whitespace and remove any surrounding quotes
+      const cleanedKey = apiKey.trim().replace(/^["']|["']$/g, '');
+      if (isValidApiKeyFormat(cleanedKey)) {
+        console.log('🔑 ApiKeyContext: Setting valid API key');
+        setStoredApiKey(cleanedKey);
+      } else {
+        console.warn('🔑 ApiKeyContext: Invalid API key format provided');
+        throw new Error(
+          'Invalid API key format. Please check your key and try again.'
+        );
+      }
+    },
+    [setStoredApiKey]
+  );
 
   const clearApiKey = useCallback(() => {
     console.log('🗑️ ApiKeyContext: Clearing stored API key');
@@ -62,9 +69,7 @@ export const ApiKeyProvider: React.FC<ApiKeyProviderProps> = ({ children }) => {
   };
 
   return (
-    <ApiKeyContext.Provider value={value}>
-      {children}
-    </ApiKeyContext.Provider>
+    <ApiKeyContext.Provider value={value}>{children}</ApiKeyContext.Provider>
   );
 };
 

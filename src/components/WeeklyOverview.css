@@ -1,514 +1,514 @@
 /* WeeklyOverview.css - Column-based grid layout styling */
 
 .weekly-overview {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    padding: 20px 20px 0;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(2px);
-    overflow-y: visible;
-    position: relative;
-    min-height: 220px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 20px 20px 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(2px);
+  overflow-y: visible;
+  position: relative;
+  min-height: 220px;
 }
 
 .overview-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    gap: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 16px;
 }
 
 .header-controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .overview-header h3 {
-    margin: 0;
-    font-size: 1.2rem;
-    color: white;
-    line-height: 1.2;
-    flex-shrink: 0;
-    font-weight: 300;
+  margin: 0;
+  font-size: 1.2rem;
+  color: white;
+  line-height: 1.2;
+  flex-shrink: 0;
+  font-weight: 300;
 }
 
 .location-details {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 2px;
-    text-align: right;
-    min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: right;
+  min-width: 0;
 }
 
 .location-details .coordinates {
-    margin: 0;
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.7);
-    font-family: monospace;
-    line-height: 1.1;
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: monospace;
+  line-height: 1.1;
 }
 
 .location-details .last-updated {
-    margin: 0;
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.5);
-    line-height: 1.1;
-    white-space: nowrap;
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .updating-indicator {
-    color: rgba(124, 58, 237, 0.8);
-    font-weight: 500;
+  color: rgba(124, 58, 237, 0.8);
+  font-weight: 500;
 }
 
 /* Loading container for individual locations */
 .loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .loading-container p {
-    margin-top: 15px;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.9rem;
+  margin-top: 15px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
 }
 
 /* Remove button styles - subtle and less attention-grabbing */
 .remove-location-button {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 6px;
-    padding: 6px 8px;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    min-width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    opacity: 0.7;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0.7;
 }
 
 .remove-location-button:hover {
-    background: rgba(239, 68, 68, 0.15);
-    border-color: rgba(239, 68, 68, 0.3);
-    color: #ef4444;
-    opacity: 1;
-    transform: scale(1.02);
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  opacity: 1;
+  transform: scale(1.02);
 }
 
 .remove-location-button:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3);
-    opacity: 1;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3);
+  opacity: 1;
 }
 
 .remove-location-button:active {
-    transform: scale(0.98);
+  transform: scale(0.98);
 }
 
 /* No data state */
 .no-data-compact {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 20px;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
 }
 
 .no-data-compact .no-data-icon {
-    font-size: 1.5rem;
-    opacity: 0.6;
+  font-size: 1.5rem;
+  opacity: 0.6;
 }
 
 /* Grid Layout */
 .weekly-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    margin-bottom: 16px;
-    border-radius: 8px;
-    overflow-y: visible;
-    background: rgba(255, 255, 255, 0.02);
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  overflow-y: visible;
+  background: rgba(255, 255, 255, 0.02);
+  width: 100%;
 }
 
 /* Header row with day names */
 .grid-header {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
 }
 
 .day-header {
-    padding: 8px 4px;
-    text-align: center;
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
-    position: relative;
-    /*background: rgba(255, 255, 255, 0.05);*/
+  padding: 8px 4px;
+  text-align: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  /*background: rgba(255, 255, 255, 0.05);*/
 }
 
 .day-header:last-child {
-    border-right: none;
+  border-right: none;
 }
 
 .day-info-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
-    padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0 8px;
 }
 
 .day-text {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
 }
 
 .day-name {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: white;
 }
 
 .day-date {
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.6);
-    margin-top: 2px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 2px;
 }
 
 .moon-phase-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1px;
-    opacity: 0.7;
-    margin-top: 1px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  opacity: 0.7;
+  margin-top: 1px;
 }
 
 .moon-phase-indicator {
-    font-size: 0.5rem;
-    opacity: 0.3;
+  font-size: 0.5rem;
+  opacity: 0.3;
 }
 
 .moon-illumination {
-    font-size: 0.4rem;
-    color: rgba(255, 255, 255, 0.6);
-    font-weight: 300;
-    line-height: 1;
+  font-size: 0.4rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 300;
+  line-height: 1;
 }
 
 /* Column-based grid structure */
 .grid-columns {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
 }
 
 /* Row labels column - removed */
 
 /* Day column container */
 .day-column {
-    display: grid;
-    grid-template-columns: repeat(24, minmax(1px, 8px));
-    gap: 1px;
+  display: grid;
+  grid-template-columns: repeat(24, minmax(1px, 8px));
+  gap: 1px;
 }
 
 /* Hour column - contains all cells for one hour vertically */
 .hour-column {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 /* Pure CSS hover effect - highlights entire column on hover */
 .hour-column:hover .hour-cell {
-    box-shadow:
-        inset 0 0 0 2px rgba(255, 255, 255, 0.6),
-        0 0 0 1px rgba(255, 255, 255, 0.4),
-        0 2px 8px rgba(255, 255, 255, 0.2);
-    z-index: 10;
-    position: relative;
-    transform: scale(1.05);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.4),
+    0 2px 8px rgba(255, 255, 255, 0.2);
+  z-index: 10;
+  position: relative;
+  transform: scale(1.05);
 }
 
 /* Enhanced hover animation */
 .hour-column {
-    transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
 
 .hour-column:hover {
-    filter: brightness(1.2);
+  filter: brightness(1.2);
 }
 
 /* Hour cells */
 .hour-cell {
-    height: 8px;
-     border-radius: 1px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    position: relative;
+  height: 8px;
+  border-radius: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
 }
 
 /* Specific cell types */
 .hour-cell.empty {
-    background: rgba(255, 255, 255, 0.05);
-    opacity: 0.3;
+  background: rgba(255, 255, 255, 0.05);
+  opacity: 0.3;
 }
 
 .cloud-cell {
-    /* border-radius: 3px; */
+  /* border-radius: 3px; */
 }
 
 .precip-cell {
-    /* border-radius: 3px; */
+  /* border-radius: 3px; */
 }
 
 .precip-cell.has-rain {
-    border: 1px solid rgba(59, 130, 246, 0.3);
+  border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 .windspeed-cell {
-    /* border-radius: 3px; */
+  /* border-radius: 3px; */
 }
 
 .visibility-cell {
-    /* border-radius: 3px; */
+  /* border-radius: 3px; */
 }
 
 /* Manual tooltip styles removed - using react-tooltip library */
 
 /* Tooltip positioning assistance */
 .hour-column {
-    position: relative;
+  position: relative;
 }
 
 /* Style tooltips for better appearance */
-.react-tooltip[id*="hour-"] {
-    max-width: 180px;
-    z-index: 10000 !important;
-    position: fixed !important;
+.react-tooltip[id*='hour-'] {
+  max-width: 180px;
+  z-index: 10000 !important;
+  position: fixed !important;
 }
 
 /* Ensure portal tooltips are above everything */
-body > .react-tooltip[id*="hour-"] {
-    z-index: 10000 !important;
+body > .react-tooltip[id*='hour-'] {
+  z-index: 10000 !important;
 }
 
 /* Grid rows for sun/moon timelines */
 .grid-row {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
 }
 
 .moon-row {
-    margin-top: 2px;
+  margin-top: 2px;
 }
 
 /* Continuous timeline container */
 .continuous-timeline {
-    position: relative;
-    height: 2px;
-    width: 100%;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 2px;
-    grid-column: 1 / -1; /* Span all columns */
+  position: relative;
+  height: 2px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  grid-column: 1 / -1; /* Span all columns */
 }
 
 .timeline-track {
-    position: relative;
-    height: 100%;
-    width: 100%;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 2px;
+  position: relative;
+  height: 100%;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
 }
 
 .moon-line {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    background: linear-gradient(to right, #6366f1, #4f46e5);
-    border-radius: 2px;
-    border: 1px solid rgba(99, 102, 241, 0.6);
-    box-shadow: 0 1px 2px rgba(99, 102, 241, 0.4);
-    cursor: pointer;
-    transition: all 0.2s ease;
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(to right, #6366f1, #4f46e5);
+  border-radius: 2px;
+  border: 1px solid rgba(99, 102, 241, 0.6);
+  box-shadow: 0 1px 2px rgba(99, 102, 241, 0.4);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .moon-line:hover {
-    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.6);
-    transform: scaleY(1.5);
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.6);
+  transform: scaleY(1.5);
 }
 
 /* Twilight segments */
 .twilight-segment {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border-radius: 2px;
+  position: absolute;
+  top: 0;
+  height: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 2px;
 }
 
 .twilight-segment:hover {
-    transform: scaleY(1.5);
-    z-index: 10;
+  transform: scaleY(1.5);
+  z-index: 10;
 }
 
 /* Summary Row */
 .overview-summary {
-    display: flex;
-    justify-content: space-around;
-    gap: 16px;
-    padding: 12px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    margin-top: 12px;
+  display: flex;
+  justify-content: space-around;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 12px;
 }
 
 .summary-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 
 .summary-label {
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.6);
-    text-transform: uppercase;
-    /*noinspection CssNonIntegerLengthInPixels*/
-    letter-spacing: 0.5px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  /*noinspection CssNonIntegerLengthInPixels*/
+  letter-spacing: 0.5px;
 }
 
 .summary-value {
-    font-size: 0.9rem;
-    color: white;
-    font-weight: 600;
+  font-size: 0.9rem;
+  color: white;
+  font-weight: 600;
 }
 
 /* Responsive Design - Remove gaps and borders on smaller screens */
 @media (max-width: 768px) {
-    .weekly-overview {
-        padding: 8px;
-    }
+  .weekly-overview {
+    padding: 8px;
+  }
 
-    .weekly-grid {
-        border-radius: 0;
-    }
+  .weekly-grid {
+    border-radius: 0;
+  }
 
-    .grid-columns {
-        gap: 1px; /* Keep 1px gap between days */
-    }
+  .grid-columns {
+    gap: 1px; /* Keep 1px gap between days */
+  }
 
-    .grid-row {
-        gap: 1px; /* Keep 1px gap between days for sun/moon rows */
-    }
+  .grid-row {
+    gap: 1px; /* Keep 1px gap between days for sun/moon rows */
+  }
 
-    .day-column {
-        gap: 0; /* Remove gaps within each day */
-    }
+  .day-column {
+    gap: 0; /* Remove gaps within each day */
+  }
 
-    .hour-column {
-        gap: 0; /* Remove gaps within each hour */
-    }
+  .hour-column {
+    gap: 0; /* Remove gaps within each hour */
+  }
 
-    .hour-cell {
-        border: none;
-    }
+  .hour-cell {
+    border: none;
+  }
 }
 
 @media (max-width: 480px) {
-    .weekly-overview {
-        border: none;
-        border-radius: 0;
-        padding: 4px;
-    }
+  .weekly-overview {
+    border: none;
+    border-radius: 0;
+    padding: 4px;
+  }
 
-    .weekly-grid {
-        border-radius: 0;
-        margin-bottom: 8px;
-    }
+  .weekly-grid {
+    border-radius: 0;
+    margin-bottom: 8px;
+  }
 
-    .overview-header {
-        margin-bottom: 8px;
-    }
+  .overview-header {
+    margin-bottom: 8px;
+  }
 
-    .overview-header h3 {
-        font-size: 1rem;
-    }
+  .overview-header h3 {
+    font-size: 1rem;
+  }
 
-    .day-info-container {
-        gap: 3px;
-        flex-direction: column;
-    }
+  .day-info-container {
+    gap: 3px;
+    flex-direction: column;
+  }
 
-    .day-text {
-        order: 1;
-    }
+  .day-text {
+    order: 1;
+  }
 
-    .moon-phase-container {
-        order: 2;
-        flex-direction: row;
-        gap: 2px;
-    }
+  .moon-phase-container {
+    order: 2;
+    flex-direction: row;
+    gap: 2px;
+  }
 
-    .day-name {
-        font-size: 0.7rem;
-    }
+  .day-name {
+    font-size: 0.7rem;
+  }
 
-    .day-date {
-        font-size: 0.6rem;
-    }
+  .day-date {
+    font-size: 0.6rem;
+  }
 
-    .moon-phase-indicator {
-        font-size: 1rem;
-    }
+  .moon-phase-indicator {
+    font-size: 1rem;
+  }
 
-    .moon-illumination {
-        font-size: 0.5rem;
-        align-self: center;
-    }
+  .moon-illumination {
+    font-size: 0.5rem;
+    align-self: center;
+  }
 
-    .day-column {
-        grid-template-columns: repeat(24, minmax(1px, 4px));
-    }
+  .day-column {
+    grid-template-columns: repeat(24, minmax(1px, 4px));
+  }
 
-    .overview-summary {
-        gap: 6px;
-        padding: 6px 0;
-        margin-top: 6px;
-    }
+  .overview-summary {
+    gap: 6px;
+    padding: 6px 0;
+    margin-top: 6px;
+  }
 
-    .summary-label {
-        font-size: 0.7rem;
-    }
+  .summary-label {
+    font-size: 0.7rem;
+  }
 
-    .summary-value {
-        font-size: 0.8rem;
-    }
+  .summary-value {
+    font-size: 0.8rem;
+  }
 }
 
 /* Animation */
 @keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

@@ -11,7 +11,7 @@ interface LoadingSpinnerProps {
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'medium',
   message,
-  className
+  className,
 }) => {
   return (
     <div className={`loading-spinner ${size} ${className || ''}`}>

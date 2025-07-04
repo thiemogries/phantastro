@@ -21,37 +21,37 @@ export interface WeatherDataPoint {
 // Cloud coverage data
 export interface CloudData {
   totalCloudCover: number | null; // 0-100%
-  lowCloudCover: number | null;   // 0-100%
-  midCloudCover: number | null;   // 0-100%
-  highCloudCover: number | null;  // 0-100%
+  lowCloudCover: number | null; // 0-100%
+  midCloudCover: number | null; // 0-100%
+  highCloudCover: number | null; // 0-100%
 }
 
 // Precipitation data
 export interface PrecipitationData {
-  precipitation: number | null;    // mm
+  precipitation: number | null; // mm
   precipitationProbability: number | null; // 0-100%
   precipitationType?: 'rain' | 'snow' | 'sleet' | 'none';
 }
 
 // Moonlight data
 export interface MoonlightData {
-  moonlightActual: number | null;        // 0-100% light w.r.t. full moon (actual conditions)
-  moonlightClearSky: number | null;      // 0-100% light w.r.t. full moon (clear sky)
+  moonlightActual: number | null; // 0-100% light w.r.t. full moon (actual conditions)
+  moonlightClearSky: number | null; // 0-100% light w.r.t. full moon (clear sky)
   nightSkyBrightnessActual: number | null; // lux (actual conditions)
   nightSkyBrightnessClearSky: number | null; // lux (clear sky)
-  zenithAngle: number | null;            // degrees (solar zenith angle)
+  zenithAngle: number | null; // degrees (solar zenith angle)
 }
 
 // Sun and Moon rise/set data
 export interface SunMoonData {
-  sunrise: string | null;               // "hh:mm" format
-  sunset: string | null;                // "hh:mm" format
-  moonrise: string | null;              // "hh:mm" format or "---" if no rise
-  moonset: string | null;               // "hh:mm" format or "---" if no set
-  moonPhaseAngle: number | null;        // degrees (0-360)
+  sunrise: string | null; // "hh:mm" format
+  sunset: string | null; // "hh:mm" format
+  moonrise: string | null; // "hh:mm" format or "---" if no rise
+  moonset: string | null; // "hh:mm" format or "---" if no set
+  moonPhaseAngle: number | null; // degrees (0-360)
   moonIlluminatedFraction: number | null; // percentage (0-100)
-  moonPhaseName: string | null;         // "new", "waxing crescent", etc.
-  moonAge: number | null;               // days since new moon
+  moonPhaseName: string | null; // "new", "waxing crescent", etc.
+  moonAge: number | null; // days since new moon
 }
 
 // Combined hourly forecast data

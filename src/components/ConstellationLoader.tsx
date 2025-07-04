@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import './ConstellationLoader.css';
 import constellationData from '../data/constellations.json';
 
@@ -23,10 +23,10 @@ interface Constellation {
 const convertCoordinate = (ra: number, dec: number) => {
   // Convert RA from degrees to 0-1 range
   // Flip horizontally since sky maps are typically viewed as mirror image
-  const x = 1 - (ra / 360);
+  const x = 1 - ra / 360;
 
   // Convert Dec from degrees to 0-1 range (flip Y for screen coordinates)
-  const y = 1 - ((dec + 90) / 180);
+  const y = 1 - (dec + 90) / 180;
 
   return { x, y };
 };
@@ -51,7 +51,7 @@ const centerConstellation = (stars: Star[], scale: number = 0.6): Star[] => {
   // Scale and center the constellation
   return stars.map(star => ({
     x: 0.5 + ((star.x - centerX) / maxDimension) * scale,
-    y: 0.5 + ((star.y - centerY) / maxDimension) * scale
+    y: 0.5 + ((star.y - centerY) / maxDimension) * scale,
   }));
 };
 
@@ -69,16 +69,17 @@ const parseConstellationData = () => {
     const centeredStars = centerConstellation(stars);
 
     constellations.push({
-      name: constellationInfo.name === 'Ursa Major' ? 'Big Dipper' : constellationInfo.name,
+      name:
+        constellationInfo.name === 'Ursa Major'
+          ? 'Big Dipper'
+          : constellationInfo.name,
       stars: centeredStars,
-      lines: constellationInfo.lines
+      lines: constellationInfo.lines,
     });
   });
 
   return constellations;
 };
-
-
 
 // Parse constellation data from JSON file
 const CONSTELLATIONS: Constellation[] = parseConstellationData();
@@ -89,12 +90,14 @@ const DEBUG_MODE = false;
 const ConstellationLoader: React.FC<ConstellationLoaderProps> = ({
   size = 'medium',
   message,
-  className
+  className,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Initialize with random constellation indices
-  const [fromIndex, setFromIndex] = useState(() => Math.floor(Math.random() * CONSTELLATIONS.length));
+  const [fromIndex, setFromIndex] = useState(() =>
+    Math.floor(Math.random() * CONSTELLATIONS.length)
+  );
   const [toIndex, setToIndex] = useState(() => {
     const from = Math.floor(Math.random() * CONSTELLATIONS.length);
     return (from + 1) % CONSTELLATIONS.length;
@@ -105,7 +108,7 @@ const ConstellationLoader: React.FC<ConstellationLoaderProps> = ({
   const sizeConfig = {
     small: { width: 120, height: 120, starSize: 1.5 },
     medium: { width: 170, height: 170, starSize: 2.0 },
-    large: { width: 240, height: 240, starSize: 2.5 }
+    large: { width: 240, height: 240, starSize: 2.5 },
   };
 
   const config = sizeConfig[size];
@@ -150,7 +153,13 @@ const ConstellationLoader: React.FC<ConstellationLoaderProps> = ({
       ctx.restore();
     };
 
-    const drawLineLocal = (x1: number, y1: number, x2: number, y2: number, opacity: number = 1) => {
+    const drawLineLocal = (
+      x1: number,
+      y1: number,
+      x2: number,
+      y2: number,
+      opacity: number = 1
+    ) => {
       if (opacity <= 0) return;
 
       ctx.save();
@@ -211,10 +220,11 @@ const ConstellationLoader: React.FC<ConstellationLoaderProps> = ({
     // Use progress directly for smooth transition throughout entire cycle
     const easedProgress = easeInOutCubicLocal(progress);
 
-
-
     // Get max number of stars to handle different constellation sizes
-    const maxStars = Math.max(fromConstellation.stars.length, toConstellation.stars.length);
+    const maxStars = Math.max(
+      fromConstellation.stars.length,
+      toConstellation.stars.length
+    );
 
     // Draw stars - always morphing from one constellation to the next
     for (let i = 0; i < maxStars; i++) {
@@ -223,8 +233,16 @@ const ConstellationLoader: React.FC<ConstellationLoaderProps> = ({
 
       if (fromStar && toStar) {
         // Star exists in both - morph position
-        const x = lerpLocal(fromStar.x * width, toStar.x * width, easedProgress);
-        const y = lerpLocal(fromStar.y * height, toStar.y * height, easedProgress);
+        const x = lerpLocal(
+          fromStar.x * width,
+          toStar.x * width,
+          easedProgress
+        );
+        const y = lerpLocal(
+          fromStar.y * height,
+          toStar.y * height,
+          easedProgress
+        );
         drawStarLocal(x, y, 1);
       } else if (fromStar && !toStar) {
         // Star disappearing
@@ -250,10 +268,18 @@ const ConstellationLoader: React.FC<ConstellationLoaderProps> = ({
           const toStar1 = toConstellation.stars[line[0]];
           const toStar2 = toConstellation.stars[line[1]];
 
-          const x1 = toStar1 ? lerpLocal(star1.x * width, toStar1.x * width, easedProgress) : star1.x * width;
-          const y1 = toStar1 ? lerpLocal(star1.y * height, toStar1.y * height, easedProgress) : star1.y * height;
-          const x2 = toStar2 ? lerpLocal(star2.x * width, toStar2.x * width, easedProgress) : star2.x * width;
-          const y2 = toStar2 ? lerpLocal(star2.y * height, toStar2.y * height, easedProgress) : star2.y * height;
+          const x1 = toStar1
+            ? lerpLocal(star1.x * width, toStar1.x * width, easedProgress)
+            : star1.x * width;
+          const y1 = toStar1
+            ? lerpLocal(star1.y * height, toStar1.y * height, easedProgress)
+            : star1.y * height;
+          const x2 = toStar2
+            ? lerpLocal(star2.x * width, toStar2.x * width, easedProgress)
+            : star2.x * width;
+          const y2 = toStar2
+            ? lerpLocal(star2.y * height, toStar2.y * height, easedProgress)
+            : star2.y * height;
 
           drawLineLocal(x1, y1, x2, y2, fromOpacity);
         }
@@ -270,10 +296,18 @@ const ConstellationLoader: React.FC<ConstellationLoaderProps> = ({
           const fromStar1 = fromConstellation.stars[line[0]];
           const fromStar2 = fromConstellation.stars[line[1]];
 
-          const x1 = fromStar1 ? lerpLocal(fromStar1.x * width, star1.x * width, easedProgress) : star1.x * width;
-          const y1 = fromStar1 ? lerpLocal(fromStar1.y * height, star1.y * height, easedProgress) : star1.y * height;
-          const x2 = fromStar2 ? lerpLocal(fromStar2.x * width, star2.x * width, easedProgress) : star2.x * width;
-          const y2 = fromStar2 ? lerpLocal(fromStar2.y * height, star2.y * height, easedProgress) : star2.y * height;
+          const x1 = fromStar1
+            ? lerpLocal(fromStar1.x * width, star1.x * width, easedProgress)
+            : star1.x * width;
+          const y1 = fromStar1
+            ? lerpLocal(fromStar1.y * height, star1.y * height, easedProgress)
+            : star1.y * height;
+          const x2 = fromStar2
+            ? lerpLocal(fromStar2.x * width, star2.x * width, easedProgress)
+            : star2.x * width;
+          const y2 = fromStar2
+            ? lerpLocal(fromStar2.y * height, star2.y * height, easedProgress)
+            : star2.y * height;
 
           drawLineLocal(x1, y1, x2, y2, toOpacity);
         }
@@ -314,7 +348,7 @@ const ConstellationLoader: React.FC<ConstellationLoaderProps> = ({
           style={{
             width: config.width,
             height: config.height,
-            display: 'block'
+            display: 'block',
           }}
         />
       </div>

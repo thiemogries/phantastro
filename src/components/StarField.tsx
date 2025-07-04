@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   celestialToScreen,
   magnitudeToSize,
@@ -6,9 +6,9 @@ import {
   starColorToCSS,
   getCurrentSiderealTime,
   getTimeBasedRotation,
-  degreesToRadians
+  degreesToRadians,
 } from '../utils/astronomicalUtils';
-import starCatalog from "../data/stars_catalog.json";
+import starCatalog from '../data/stars_catalog.json';
 
 interface StarFieldProps {
   width?: number;
@@ -60,7 +60,7 @@ const processedStars: ProcessedStar[] = starCatalog.stars.map(star => ({
   dec: star.dec,
   size: magnitudeToSize(star.magnitude, 0.8),
   opacity: magnitudeToOpacity(star.magnitude),
-  color: starColorToCSS(star.color)
+  color: starColorToCSS(star.color),
 }));
 
 const StarField: React.FC<StarFieldProps> = ({
@@ -68,7 +68,7 @@ const StarField: React.FC<StarFieldProps> = ({
   height: propHeight,
   animate = true,
   rotation = 0,
-  useTimeBasedRotation = false
+  useTimeBasedRotation = false,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
@@ -77,14 +77,20 @@ const StarField: React.FC<StarFieldProps> = ({
   // Internal window size state - used when width/height props are not provided
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
-    height: window.innerHeight
+    height: window.innerHeight,
   });
 
   // Use provided dimensions or fall back to window size
   const width = propWidth ?? windowSize.width;
   const height = propHeight ?? windowSize.height;
 
-  const propsRef = useRef({ width, height, animate, rotation, useTimeBasedRotation });
+  const propsRef = useRef({
+    width,
+    height,
+    animate,
+    rotation,
+    useTimeBasedRotation,
+  });
 
   // Update props ref when props change
   propsRef.current = { width, height, animate, rotation, useTimeBasedRotation };
@@ -102,7 +108,7 @@ const StarField: React.FC<StarFieldProps> = ({
       height: currentHeight,
       animate: currentAnimate,
       rotation: currentRotation,
-      useTimeBasedRotation: currentUseTimeBasedRotation
+      useTimeBasedRotation: currentUseTimeBasedRotation,
     } = propsRef.current;
 
     // Clear canvas completely
@@ -134,18 +140,28 @@ const StarField: React.FC<StarFieldProps> = ({
       );
 
       if (screenPos.visible) {
-        drawStar(ctx, screenPos.x, screenPos.y, star.size, star.color, star.opacity);
+        drawStar(
+          ctx,
+          screenPos.x,
+          screenPos.y,
+          star.size,
+          star.color,
+          star.opacity
+        );
       }
     });
   }, []); // No dependencies - uses refs instead
 
   // Optimized animation function with stable reference
-  const animate_frame = useCallback(function animateFrame(): void {
-    if (propsRef.current.animate) {
-      drawStarField();
-      animationRef.current = requestAnimationFrame(animateFrame);
-    }
-  }, [drawStarField]);
+  const animate_frame = useCallback(
+    function animateFrame(): void {
+      if (propsRef.current.animate) {
+        drawStarField();
+        animationRef.current = requestAnimationFrame(animateFrame);
+      }
+    },
+    [drawStarField]
+  );
 
   // Effect for window resize when using internal window size
   useEffect(() => {
@@ -233,7 +249,7 @@ const StarField: React.FC<StarFieldProps> = ({
         width: '100%',
         height: '100%',
         pointerEvents: 'none',
-        zIndex: -1
+        zIndex: -1,
       }}
     />
   );

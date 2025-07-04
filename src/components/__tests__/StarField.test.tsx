@@ -10,14 +10,14 @@ describe('StarField Component', () => {
   test('creates canvas element with correct dimensions', () => {
     const { container } = render(<StarField width={800} height={600} />);
     const canvas = container.querySelector('canvas');
-    
+
     expect(canvas).toBeInTheDocument();
     expect(canvas).toHaveStyle({
       position: 'absolute',
       top: '0',
       left: '0',
       width: '100%',
-      height: '100%'
+      height: '100%',
     });
   });
 

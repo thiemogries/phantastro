@@ -1,5 +1,5 @@
 export interface TwilightData {
-  twilight: "civil" | "nautical" | "astronomical";
+  twilight: 'civil' | 'nautical' | 'astronomical';
   dawn: Date | null;
   dusk: Date | null;
 }
@@ -15,8 +15,8 @@ function calculateSolarDeclination(dayOfYear: number): number {
     0.39795 *
       Math.cos(
         0.2163108 +
-          2 * Math.atan(0.9671396 * Math.tan(0.0086 * (dayOfYear - 186))),
-      ),
+          2 * Math.atan(0.9671396 * Math.tan(0.0086 * (dayOfYear - 186)))
+      )
   );
   return P * (180 / Math.PI); // Convert from radians to degrees
 }
@@ -47,13 +47,13 @@ function calculateSolarTime(
   longitude: number,
   date: Date,
   targetElevation: number,
-  isRising: boolean,
+  isRising: boolean
 ): Date | null {
   // Get day of year
   const startOfYear = new Date(date.getFullYear(), 0, 1);
   const dayOfYear =
     Math.floor(
-      (date.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000),
+      (date.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000)
     ) + 1;
 
   const declination = calculateSolarDeclination(dayOfYear);
@@ -125,7 +125,7 @@ export function calculateTwilightForDate(
   latitude: number,
   longitude: number,
   date: Date,
-  twilightType: "civil" | "nautical" | "astronomical",
+  twilightType: 'civil' | 'nautical' | 'astronomical'
 ): TwilightData {
   // Twilight definitions (solar elevation angles):
   const angles = {
@@ -142,7 +142,7 @@ export function calculateTwilightForDate(
     longitude,
     date,
     targetAngle,
-    false,
+    false
   );
 
   return {
@@ -164,13 +164,13 @@ export function calculateTwilightTimes(
   latitude: number,
   longitude: number,
   from: Date,
-  to: Date,
+  to: Date
 ): TwilightData[] {
   const results: TwilightData[] = [];
-  const twilightTypes: ("civil" | "nautical" | "astronomical")[] = [
-    "civil",
-    "nautical",
-    "astronomical",
+  const twilightTypes: ('civil' | 'nautical' | 'astronomical')[] = [
+    'civil',
+    'nautical',
+    'astronomical',
   ];
 
   // Iterate through each day in the date range
@@ -184,7 +184,7 @@ export function calculateTwilightTimes(
         latitude,
         longitude,
         currentDate,
-        twilightType,
+        twilightType
       );
       results.push(twilightData);
     }
@@ -206,7 +206,7 @@ export function calculateTwilightTimes(
 export function calculateSunriseSunset(
   latitude: number,
   longitude: number,
-  date: Date,
+  date: Date
 ): { sunrise: Date | null; sunset: Date | null } {
   // Standard sunrise/sunset is when the sun's center is at -0.833° elevation
   // This accounts for atmospheric refraction and the sun's angular diameter

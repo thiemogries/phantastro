@@ -20,7 +20,7 @@ export function useLocalStorage<T>(
 
       // Get from local storage by key
       const item = window.localStorage.getItem(key);
-      
+
       // Parse stored json or if none return initialValue
       if (item === null) {
         return initialValue;
@@ -36,23 +36,27 @@ export function useLocalStorage<T>(
 
   // Return a wrapped version of useState's setter function that ...
   // ... persists the new value to localStorage.
-  const setValue = useCallback((value: T | ((val: T) => T)) => {
-    try {
-      // Allow value to be a function so we have the same API as useState
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      
-      // Save state
-      setStoredValue(valueToStore);
-      
-      // Save to local storage
-      if (typeof window !== 'undefined' && window.localStorage) {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+  const setValue = useCallback(
+    (value: T | ((val: T) => T)) => {
+      try {
+        // Allow value to be a function so we have the same API as useState
+        const valueToStore =
+          value instanceof Function ? value(storedValue) : value;
+
+        // Save state
+        setStoredValue(valueToStore);
+
+        // Save to local storage
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        }
+      } catch (error) {
+        // A more advanced implementation would handle the error case
+        console.error(`Error setting localStorage key "${key}":`, error);
       }
-    } catch (error) {
-      // A more advanced implementation would handle the error case
-      console.error(`Error setting localStorage key "${key}":`, error);
-    }
-  }, [key, storedValue]);
+    },
+    [key, storedValue]
+  );
 
   // Listen for changes to localStorage from other tabs/windows
   useEffect(() => {
@@ -62,7 +66,10 @@ export function useLocalStorage<T>(
           const newValue = JSON.parse(e.newValue);
           setStoredValue(newValue);
         } catch (error) {
-          console.warn(`Error parsing external localStorage change for "${key}":`, error);
+          console.warn(
+            `Error parsing external localStorage change for "${key}":`,
+            error
+          );
         }
       }
     };

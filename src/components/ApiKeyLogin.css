@@ -1,6 +1,11 @@
 .api-key-login {
   min-height: 100vh;
-  background: linear-gradient(135deg, rgba(26, 26, 46, 0.8) 0%, rgba(22, 33, 62, 0.8) 50%, rgba(15, 52, 96, 0.8) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 46, 0.8) 0%,
+    rgba(22, 33, 62, 0.8) 50%,
+    rgba(15, 52, 96, 0.8) 100%
+  );
   display: flex;
   align-items: center;
   justify-content: center;
@@ -195,20 +200,20 @@
   .api-key-login {
     padding: 1rem;
   }
-  
+
   .api-key-login__container {
     padding: 2rem;
   }
-  
+
   .api-key-login__header h1 {
     font-size: 2rem;
   }
-  
+
   .step {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .step-number {
     align-self: flex-start;
   }

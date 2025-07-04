@@ -1,6 +1,6 @@
-import React from "react";
-import { Icon } from "@iconify/react";
-import { Location } from "../types/weather";
+import React from 'react';
+import { Icon } from '@iconify/react';
+import { Location } from '../types/weather';
 
 interface LocationHeaderProps {
   location?: Partial<Location>;
@@ -19,7 +19,7 @@ const LocationHeader: React.FC<LocationHeaderProps> = ({
     <div className="overview-header">
       <h3>
         {location?.name ?? 'Unknown Location'}
-        {location?.country ? `, ${location.country}` : ""}
+        {location?.country ? `, ${location.country}` : ''}
       </h3>
       <div className="header-controls">
         <div className="location-details">
@@ -36,9 +36,11 @@ const LocationHeader: React.FC<LocationHeaderProps> = ({
                 // Valid date - show formatted timestamp
                 return (
                   <>
-                    Last updated:{" "}
+                    Last updated:{' '}
                     {date.toLocaleTimeString([], { hour12: false })}
-                    {isFetching && <span className="updating-indicator"> • Updating...</span>}
+                    {isFetching && (
+                      <span className="updating-indicator"> • Updating...</span>
+                    )}
                   </>
                 );
               } else {

@@ -39,7 +39,12 @@ const ApiKeyLogin: React.FC = () => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ API validation failed with status:', response.status, 'Response:', errorText);
+        console.error(
+          '❌ API validation failed with status:',
+          response.status,
+          'Response:',
+          errorText
+        );
       }
 
       return response.ok;
@@ -51,7 +56,7 @@ const ApiKeyLogin: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!inputValue.trim()) {
       setError('Please enter your API key');
       return;
@@ -79,7 +84,9 @@ const ApiKeyLogin: React.FC = () => {
         clearApiKey();
       }
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Invalid API key format');
+      setError(
+        error instanceof Error ? error.message : 'Invalid API key format'
+      );
     } finally {
       setIsValidating(false);
     }
@@ -88,10 +95,7 @@ const ApiKeyLogin: React.FC = () => {
   return (
     <div className="api-key-login">
       {/* Star Field Background */}
-      <StarField
-        animate={false}
-        useTimeBasedRotation={true}
-      />
+      <StarField animate={false} useTimeBasedRotation={true} />
 
       <div className="api-key-login__container">
         <div className="api-key-login__header">
@@ -101,7 +105,8 @@ const ApiKeyLogin: React.FC = () => {
 
         <div className="api-key-login__content">
           <p>
-            To get started, you'll need a free Meteoblue API key for weather data.
+            To get started, you'll need a free Meteoblue API key for weather
+            data.
           </p>
 
           <div className="api-key-login__steps">
@@ -111,9 +116,9 @@ const ApiKeyLogin: React.FC = () => {
                 <strong>Get your free API key</strong>
                 <p>
                   Visit{' '}
-                  <a 
-                    href="https://www.meteoblue.com/en/weather-api" 
-                    target="_blank" 
+                  <a
+                    href="https://www.meteoblue.com/en/weather-api"
+                    target="_blank"
                     rel="noopener noreferrer"
                   >
                     meteoblue.com/weather-api
@@ -145,7 +150,7 @@ const ApiKeyLogin: React.FC = () => {
                 id="apiKey"
                 type="text"
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={e => setInputValue(e.target.value)}
                 placeholder="Enter your Meteoblue API key"
                 disabled={isValidating}
                 className={error ? 'error' : ''}
@@ -153,8 +158,8 @@ const ApiKeyLogin: React.FC = () => {
               {error && <div className="error-message">{error}</div>}
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={isValidating || !inputValue.trim()}
               className="submit-button"
             >
@@ -172,12 +177,12 @@ const ApiKeyLogin: React.FC = () => {
           <div className="api-key-login__info">
             <h3>Why do I need an API key?</h3>
             <p>
-              Phantastro uses real-time weather data from Meteoblue to provide 
-              accurate astronomical forecasts. The API key ensures you get 
+              Phantastro uses real-time weather data from Meteoblue to provide
+              accurate astronomical forecasts. The API key ensures you get
               reliable, up-to-date weather information for your observations.
             </p>
             <p>
-              <strong>Your API key is stored locally</strong> in your browser 
+              <strong>Your API key is stored locally</strong> in your browser
               and never sent to our servers.
             </p>
           </div>

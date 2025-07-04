@@ -57,8 +57,6 @@ const SettingsMenu: React.FC = () => {
     setIsOpen(false);
   };
 
-
-
   return (
     <div className="settings-menu">
       <button
@@ -71,7 +69,7 @@ const SettingsMenu: React.FC = () => {
       >
         <Icon icon="mdi:dots-vertical" width="20" height="20" />
       </button>
-      
+
       {isOpen && (
         <div ref={menuRef} className="settings-dropdown" role="menu">
           <button

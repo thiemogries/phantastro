@@ -13,13 +13,16 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
   message,
   onRetry,
   className,
-  type = 'error'
+  type = 'error',
 }) => {
   const getIcon = () => {
     switch (type) {
-      case 'warning': return 'mdi:alert';
-      case 'info': return 'mdi:information';
-      default: return 'mdi:close-circle';
+      case 'warning':
+        return 'mdi:alert';
+      case 'info':
+        return 'mdi:information';
+      default:
+        return 'mdi:close-circle';
     }
   };
 
@@ -40,7 +43,12 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
           onClick={onRetry}
           aria-label="Retry operation"
         >
-          <Icon icon="mdi:refresh" width="16" height="16" style={{ marginRight: "4px" }} />
+          <Icon
+            icon="mdi:refresh"
+            width="16"
+            height="16"
+            style={{ marginRight: '4px' }}
+          />
           Try Again
         </button>
       )}

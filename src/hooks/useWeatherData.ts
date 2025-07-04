@@ -1,5 +1,9 @@
-import {useQuery} from '@tanstack/react-query';
-import {Location, LocationSearchResult, WeatherForecast} from '../types/weather';
+import { useQuery } from '@tanstack/react-query';
+import {
+  Location,
+  LocationSearchResult,
+  WeatherForecast,
+} from '../types/weather';
 import weatherService from '../services/weatherService';
 
 export interface WeatherQueryParams {
@@ -9,10 +13,14 @@ export interface WeatherQueryParams {
 }
 
 export const WEATHER_QUERY_KEYS = {
-  weather: (lat: number, lon: number) => ['weather', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
-  basicWeather: (lat: number, lon: number) => ['basicWeather', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
-  cloudData: (lat: number, lon: number) => ['cloudData', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
-  sunMoonData: (lat: number, lon: number) => ['sunMoonData', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
+  weather: (lat: number, lon: number) =>
+    ['weather', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
+  basicWeather: (lat: number, lon: number) =>
+    ['basicWeather', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
+  cloudData: (lat: number, lon: number) =>
+    ['cloudData', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
+  sunMoonData: (lat: number, lon: number) =>
+    ['sunMoonData', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
   locations: (query: string) => ['locations', query] as const,
 } as const;
 
@@ -21,7 +29,9 @@ export const WEATHER_QUERY_KEYS = {
  */
 export const useWeatherData = (params: WeatherQueryParams | null) => {
   return useQuery<WeatherForecast>({
-    queryKey: params ? WEATHER_QUERY_KEYS.weather(params.lat, params.lon) : ['weather', 'disabled'],
+    queryKey: params
+      ? WEATHER_QUERY_KEYS.weather(params.lat, params.lon)
+      : ['weather', 'disabled'],
     queryFn: async (): Promise<WeatherForecast> => {
       if (!params) throw new Error('No location parameters provided');
 
@@ -29,13 +39,16 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
       const [basicData, cloudData, sunMoonData] = await Promise.allSettled([
         weatherService.fetchBasicWeatherData(params.lat, params.lon),
         weatherService.fetchCloudData(params.lat, params.lon),
-        weatherService.fetchSunMoonData(params.lat, params.lon)
+        weatherService.fetchSunMoonData(params.lat, params.lon),
       ]);
 
       // Extract successful results or null for failed ones
-      const basicWeatherData = basicData.status === 'fulfilled' ? basicData.value : null;
-      const cloudWeatherData = cloudData.status === 'fulfilled' ? cloudData.value : null;
-      const sunMoonWeatherData = sunMoonData.status === 'fulfilled' ? sunMoonData.value : null;
+      const basicWeatherData =
+        basicData.status === 'fulfilled' ? basicData.value : null;
+      const cloudWeatherData =
+        cloudData.status === 'fulfilled' ? cloudData.value : null;
+      const sunMoonWeatherData =
+        sunMoonData.status === 'fulfilled' ? sunMoonData.value : null;
 
       if (!basicWeatherData) {
         throw new Error('Basic weather data not available');
@@ -44,7 +57,8 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
       const location: Location = {
         lat: params.lat,
         lon: params.lon,
-        name: params.name || `${params.lat.toFixed(2)}, ${params.lon.toFixed(2)}`
+        name:
+          params.name || `${params.lat.toFixed(2)}, ${params.lon.toFixed(2)}`,
       };
 
       return weatherService.transformMeteoblueData(
@@ -84,7 +98,11 @@ export const useLocationSearch = (query: string) => {
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: (failureCount, error: any) => {
       // Don't retry on aborted requests or network errors
-      if (error.name === 'AbortError' || error.code === 'ERR_CANCELED' || error.code === 'ECONNABORTED') {
+      if (
+        error.name === 'AbortError' ||
+        error.code === 'ERR_CANCELED' ||
+        error.code === 'ECONNABORTED'
+      ) {
         return false;
       }
       return failureCount < 1; // Only retry once for other errors

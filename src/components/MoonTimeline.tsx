@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface MoonTimelineProps {
   dates: string[]; // Array of dates in YYYY-MM-DD format for the week
@@ -22,9 +22,9 @@ interface MoonSegment {
 
 const MoonTimeline: React.FC<MoonTimelineProps> = ({ dates, sunMoonData }) => {
   const parseTimeToHour = (timeStr: string | null | undefined): number => {
-    if (!timeStr || timeStr === "---" || timeStr === "----") return -1;
-    if (timeStr === "24:00") return 24;
-    const [hours, minutes] = timeStr.split(":").map(Number);
+    if (!timeStr || timeStr === '---' || timeStr === '----') return -1;
+    if (timeStr === '24:00') return 24;
+    const [hours, minutes] = timeStr.split(':').map(Number);
     return hours + minutes / 60;
   };
 
@@ -159,19 +159,31 @@ const MoonTimeline: React.FC<MoonTimelineProps> = ({ dates, sunMoonData }) => {
       // If no rise/set events for this day, check if we should assume all-day visibility
       if (moonriseHour === -1 && moonsetHour === -1) {
         // Check if adjacent days have moon events, suggesting continuation
-        const prevDay = dayIndex > 0 ? sunMoonData.find(d => d.date === dates[dayIndex - 1]) : null;
-        const nextDay = dayIndex < dates.length - 1 ? sunMoonData.find(d => d.date === dates[dayIndex + 1]) : null;
+        const prevDay =
+          dayIndex > 0
+            ? sunMoonData.find(d => d.date === dates[dayIndex - 1])
+            : null;
+        const nextDay =
+          dayIndex < dates.length - 1
+            ? sunMoonData.find(d => d.date === dates[dayIndex + 1])
+            : null;
 
-        const prevHasEvents = prevDay && (
-          parseTimeToHour(prevDay.moonrise) !== -1 || parseTimeToHour(prevDay.moonset) !== -1
-        );
-        const nextHasEvents = nextDay && (
-          parseTimeToHour(nextDay.moonrise) !== -1 || parseTimeToHour(nextDay.moonset) !== -1
-        );
+        const prevHasEvents =
+          prevDay &&
+          (parseTimeToHour(prevDay.moonrise) !== -1 ||
+            parseTimeToHour(prevDay.moonset) !== -1);
+        const nextHasEvents =
+          nextDay &&
+          (parseTimeToHour(nextDay.moonrise) !== -1 ||
+            parseTimeToHour(nextDay.moonset) !== -1);
 
         // If this day is between days with moon events, assume all-day visibility
-        if ((prevHasEvents || nextHasEvents) &&
-            !segments.some(seg => seg.startDay <= dayIndex && seg.endDay >= dayIndex)) {
+        if (
+          (prevHasEvents || nextHasEvents) &&
+          !segments.some(
+            seg => seg.startDay <= dayIndex && seg.endDay >= dayIndex
+          )
+        ) {
           segments.push({
             startDay: dayIndex,
             startHour: 0,
@@ -186,26 +198,30 @@ const MoonTimeline: React.FC<MoonTimelineProps> = ({ dates, sunMoonData }) => {
       }
     });
 
-    return segments.sort((a, b) => (a.startDay * 24 + a.startHour) - (b.startDay * 24 + b.startHour));
+    return segments.sort(
+      (a, b) => a.startDay * 24 + a.startHour - (b.startDay * 24 + b.startHour)
+    );
   };
 
   const getTooltipText = (segment: MoonSegment): string => {
     const formatHour = (hour: number): string => {
       const h = Math.floor(hour);
       const m = Math.floor((hour % 1) * 60);
-      return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+      return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
     };
 
     const startTime = formatHour(segment.startHour);
     const endTime = formatHour(segment.endHour);
 
-    const durationText = segment.totalHours >= 24
-      ? `${Math.floor(segment.totalHours / 24)}d ${(segment.totalHours % 24).toFixed(1)}h`
-      : `${segment.totalHours.toFixed(1)}h`;
+    const durationText =
+      segment.totalHours >= 24
+        ? `${Math.floor(segment.totalHours / 24)}d ${(segment.totalHours % 24).toFixed(1)}h`
+        : `${segment.totalHours.toFixed(1)}h`;
 
-    const dayText = segment.startDay === segment.endDay
-      ? `Day ${segment.startDay + 1}`
-      : `Days ${segment.startDay + 1}-${segment.endDay + 1}`;
+    const dayText =
+      segment.startDay === segment.endDay
+        ? `Day ${segment.startDay + 1}`
+        : `Days ${segment.startDay + 1}-${segment.endDay + 1}`;
 
     let riseSetText = '';
     if (segment.moonrise === 'all day' && segment.moonset === 'all day') {
@@ -226,8 +242,10 @@ const MoonTimeline: React.FC<MoonTimelineProps> = ({ dates, sunMoonData }) => {
       {segments.map((segment, index) => {
         // Calculate position and width across the entire week
         const totalWeekHours = dates.length * 24;
-        const startPosition = ((segment.startDay * 24 + segment.startHour) / totalWeekHours) * 100;
-        const endPosition = ((segment.endDay * 24 + segment.endHour) / totalWeekHours) * 100;
+        const startPosition =
+          ((segment.startDay * 24 + segment.startHour) / totalWeekHours) * 100;
+        const endPosition =
+          ((segment.endDay * 24 + segment.endHour) / totalWeekHours) * 100;
         const segmentWidth = endPosition - startPosition;
         const minWidth = 0.1; // Minimum width for visibility
         const actualWidth = Math.max(segmentWidth, minWidth);
@@ -239,26 +257,28 @@ const MoonTimeline: React.FC<MoonTimelineProps> = ({ dates, sunMoonData }) => {
             style={{
               left: `${startPosition}%`,
               width: `${actualWidth}%`,
-              display: "block",
-              position: "absolute",
+              display: 'block',
+              position: 'absolute',
               top: 0,
-              height: "100%",
-              background: "linear-gradient(to right, #6366f1, #4f46e5)",
-              borderRadius: "2px",
-              border: "1px solid rgba(99, 102, 241, 0.6)",
-              boxShadow: "0 1px 2px rgba(99, 102, 241, 0.4)",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
+              height: '100%',
+              background: 'linear-gradient(to right, #6366f1, #4f46e5)',
+              borderRadius: '2px',
+              border: '1px solid rgba(99, 102, 241, 0.6)',
+              boxShadow: '0 1px 2px rgba(99, 102, 241, 0.4)',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
               zIndex: index,
             }}
             title={getTooltipText(segment)}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = "0 2px 4px rgba(99, 102, 241, 0.6)";
-              e.currentTarget.style.transform = "scaleY(1.5)";
+            onMouseEnter={e => {
+              e.currentTarget.style.boxShadow =
+                '0 2px 4px rgba(99, 102, 241, 0.6)';
+              e.currentTarget.style.transform = 'scaleY(1.5)';
             }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = "0 1px 2px rgba(99, 102, 241, 0.4)";
-              e.currentTarget.style.transform = "scaleY(1)";
+            onMouseLeave={e => {
+              e.currentTarget.style.boxShadow =
+                '0 1px 2px rgba(99, 102, 241, 0.4)';
+              e.currentTarget.style.transform = 'scaleY(1)';
             }}
           />
         );

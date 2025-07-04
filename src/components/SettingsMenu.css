@@ -33,7 +33,7 @@
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3);
 }
 
-.settings-button[aria-expanded="true"] {
+.settings-button[aria-expanded='true'] {
   background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.4);
 }
@@ -141,7 +141,7 @@
     right: -8px;
     min-width: 160px;
   }
-  
+
   .settings-menu-item {
     padding: 14px 16px;
     font-size: 1rem;

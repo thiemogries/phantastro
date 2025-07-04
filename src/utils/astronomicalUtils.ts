@@ -34,7 +34,7 @@ export function celestialToScreen(
   width: number,
   height: number,
   rotation: number = 0, // Rotation angle in radians
-  centerDec: number = Math.PI / 4, // Center Dec (45 degrees north)
+  _centerDec: number = Math.PI / 4, // Center Dec (45 degrees north)
   rotationCenterY: number = 0 // Y position of rotation center (0 = top, height/2 = center)
 ): ScreenCoordinate {
   // Only show stars above a certain declination (northern hemisphere focus)
@@ -56,7 +56,7 @@ export function celestialToScreen(
     return {
       x: width / 2,
       y: height / 2,
-      visible: true
+      visible: true,
     };
   }
 
@@ -76,13 +76,16 @@ export function celestialToScreen(
   // Check if the star is visible on screen with larger margin for rotation around top
   const marginX = 300;
   const marginY = height; // Allow stars well above and below the screen for rotation
-  const visible = screenX >= -marginX && screenX <= width + marginX &&
-                  screenY >= -marginY && screenY <= height + marginY;
+  const visible =
+    screenX >= -marginX &&
+    screenX <= width + marginX &&
+    screenY >= -marginY &&
+    screenY <= height + marginY;
 
   return {
     x: screenX,
     y: screenY,
-    visible
+    visible,
   };
 }
 
@@ -90,14 +93,17 @@ export function celestialToScreen(
  * Convert degrees to radians
  */
 export function degreesToRadians(degrees: number): number {
-  return degrees * Math.PI / 180;
+  return (degrees * Math.PI) / 180;
 }
 
 /**
  * Calculate star size based on magnitude
  * Brighter stars (lower magnitude) appear larger
  */
-export function magnitudeToSize(magnitude: number, baseSize: number = 1): number {
+export function magnitudeToSize(
+  magnitude: number,
+  baseSize: number = 1
+): number {
   // Magnitude scale is logarithmic, brighter stars have lower magnitude
   // Typical range: -1.5 (very bright) to 6 (faintest visible)
   // Much smaller sizes for realistic appearance
@@ -118,7 +124,11 @@ export function magnitudeToOpacity(magnitude: number): number {
 /**
  * Convert star color from 0-1 RGB to CSS color string
  */
-export function starColorToCSS(color: { r: number; g: number; b: number }): string {
+export function starColorToCSS(color: {
+  r: number;
+  g: number;
+  b: number;
+}): string {
   const r = Math.round(color.r * 255);
   const g = Math.round(color.g * 255);
   const b = Math.round(color.b * 255);
@@ -131,7 +141,8 @@ export function starColorToCSS(color: { r: number; g: number; b: number }): stri
  */
 export function getCurrentSiderealTime(): number {
   const now = new Date();
-  const hours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
+  const hours =
+    now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
   // Simplified: rotate based on time of day
   return (hours / 24) * 2 * Math.PI;
 }

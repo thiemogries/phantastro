@@ -12,8 +12,8 @@
       },
       {
         "name": "Merak",
-        "designation": "β UMa", 
-        "ra": 165.460,
+        "designation": "β UMa",
+        "ra": 165.46,
         "dec": 56.382,
         "magnitude": 2.4
       },
@@ -35,7 +35,7 @@
         "name": "Alioth",
         "designation": "ε UMa",
         "ra": 193.507,
-        "dec": 55.960,
+        "dec": 55.96,
         "magnitude": 1.8
       },
       {
@@ -85,7 +85,7 @@
         "name": "Bellatrix",
         "designation": "γ Ori",
         "ra": 81.283,
-        "dec": 6.350,
+        "dec": 6.35,
         "magnitude": 1.6
       },
       {
@@ -105,7 +105,7 @@
       {
         "name": "Alnitak",
         "designation": "ζ Ori",
-        "ra": 85.190,
+        "ra": 85.19,
         "dec": -1.943,
         "magnitude": 1.8
       },
@@ -113,7 +113,7 @@
         "name": "Saiph",
         "designation": "κ Ori",
         "ra": 86.939,
-        "dec": -9.670,
+        "dec": -9.67,
         "magnitude": 2.1
       }
     ],
@@ -143,7 +143,7 @@
         "name": "Caph",
         "designation": "β Cas",
         "ra": 2.295,
-        "dec": 59.150,
+        "dec": 59.15,
         "magnitude": 2.3
       },
       {
@@ -164,7 +164,7 @@
         "name": "Segin",
         "designation": "ε Cas",
         "ra": 28.599,
-        "dec": 63.670,
+        "dec": 63.67,
         "magnitude": 3.4
       }
     ],
@@ -231,8 +231,8 @@
       {
         "name": "Chertan",
         "designation": "θ Leo",
-        "ra": 168.560,
-        "dec": 15.430,
+        "ra": 168.56,
+        "dec": 15.43,
         "magnitude": 3.3
       }
     ],

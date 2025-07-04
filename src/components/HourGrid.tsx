@@ -1,6 +1,6 @@
-import React from "react";
-import { HourlyForecast } from "../types/weather";
-import { getCloudCoverageInfo, getRainState } from "../utils/weatherUtils";
+import React from 'react';
+import { HourlyForecast } from '../types/weather';
+import { getCloudCoverageInfo, getRainState } from '../utils/weatherUtils';
 
 interface DayData {
   date: string;
@@ -15,16 +15,16 @@ interface HourGridProps {
 const HourGrid: React.FC<HourGridProps> = ({ groupedByDay }) => {
   // Helper function to get visibility color
   const getVisibilityColor = (vis: number): string => {
-    if (vis >= 20) return "#22c55e";
-    else if (vis >= 10) return "#f59e0b";
-    else return "#ef4444";
+    if (vis >= 20) return '#22c55e';
+    else if (vis >= 10) return '#f59e0b';
+    else return '#ef4444';
   };
 
   // Helper function to get windspeed color and opacity
   const getWindspeedStyle = (windSpeed: number | null) => {
     if (windSpeed === null || windSpeed === undefined) {
       return {
-        backgroundColor: "#6b7280",
+        backgroundColor: '#6b7280',
         opacity: 0.3,
       };
     }
@@ -34,7 +34,7 @@ const HourGrid: React.FC<HourGridProps> = ({ groupedByDay }) => {
     const opacity = Math.min(1.0, Math.max(0.2, 0.2 + (windSpeed / 10) * 0.8));
 
     return {
-      backgroundColor: "#008080", // Petrol color
+      backgroundColor: '#008080', // Petrol color
       opacity,
     };
   };
@@ -66,7 +66,7 @@ const HourGrid: React.FC<HourGridProps> = ({ groupedByDay }) => {
                       hour
                         ? {
                             backgroundColor: getCloudCoverageInfo(
-                              hour.cloudCover.totalCloudCover,
+                              hour.cloudCover.totalCloudCover
                             ).color,
                             opacity:
                               hour.cloudCover.totalCloudCover !== null
@@ -74,7 +74,7 @@ const HourGrid: React.FC<HourGridProps> = ({ groupedByDay }) => {
                                 : 0.1,
                           }
                         : {
-                            background: "rgba(255, 255, 255, 0.05)",
+                            background: 'rgba(255, 255, 255, 0.05)',
                             opacity: 0.3,
                           }
                     }
@@ -82,24 +82,24 @@ const HourGrid: React.FC<HourGridProps> = ({ groupedByDay }) => {
 
                   {/* Precipitation cell */}
                   <div
-                    className={`hour-cell precip-cell ${hour && getRainState(hour.precipitation.precipitationProbability).hasRain ? "has-rain" : ""}`}
+                    className={`hour-cell precip-cell ${hour && getRainState(hour.precipitation.precipitationProbability).hasRain ? 'has-rain' : ''}`}
                     style={
                       hour
                         ? (() => {
                             const rainState = getRainState(
-                              hour.precipitation.precipitationProbability,
+                              hour.precipitation.precipitationProbability
                             );
                             return {
                               backgroundColor: rainState.hasRain
-                                ? "#3b82f6"
-                                : "transparent",
+                                ? '#3b82f6'
+                                : 'transparent',
                               opacity: rainState.hasRain
                                 ? Math.max(0.3, rainState.intensity)
                                 : 0.1,
                             };
                           })()
                         : {
-                            background: "rgba(255, 255, 255, 0.05)",
+                            background: 'rgba(255, 255, 255, 0.05)',
                             opacity: 0.3,
                           }
                     }
@@ -112,7 +112,7 @@ const HourGrid: React.FC<HourGridProps> = ({ groupedByDay }) => {
                       hour
                         ? getWindspeedStyle(hour.windSpeed)
                         : {
-                            background: "rgba(255, 255, 255, 0.05)",
+                            background: 'rgba(255, 255, 255, 0.05)',
                             opacity: 0.3,
                           }
                     }
@@ -126,16 +126,15 @@ const HourGrid: React.FC<HourGridProps> = ({ groupedByDay }) => {
                         ? (() => {
                             const visibility = hour.visibility;
                             const hasVisibility =
-                              visibility !== null &&
-                              visibility !== undefined;
+                              visibility !== null && visibility !== undefined;
 
                             const visibilityColor = hasVisibility
                               ? getVisibilityColor(visibility)
-                              : "#6b7280";
+                              : '#6b7280';
                             const opacity = hasVisibility
                               ? Math.min(
                                   1.0,
-                                  Math.max(0.5, 0.5 + visibility / 40),
+                                  Math.max(0.5, 0.5 + visibility / 40)
                                 )
                               : 0.3;
 
@@ -145,13 +144,11 @@ const HourGrid: React.FC<HourGridProps> = ({ groupedByDay }) => {
                             };
                           })()
                         : {
-                            background: "rgba(255, 255, 255, 0.05)",
+                            background: 'rgba(255, 255, 255, 0.05)',
                             opacity: 0.3,
                           }
                     }
                   ></div>
-
-
                 </div>
               );
             })}

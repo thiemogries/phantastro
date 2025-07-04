@@ -1,11 +1,11 @@
-import React from "react";
-import { createPortal } from "react-dom";
-import { Tooltip } from "react-tooltip";
-import { HourlyForecast, Location } from "../types/weather";
+import React from 'react';
+import { createPortal } from 'react-dom';
+import { Tooltip } from 'react-tooltip';
+import { HourlyForecast, Location } from '../types/weather';
 import {
   calculateTwilightForDate,
   calculateSunriseSunset,
-} from "../utils/solarUtils";
+} from '../utils/solarUtils';
 
 interface DayData {
   date: string;
@@ -22,7 +22,7 @@ interface HourTooltipsProps {
 const formatTime = (timeStr: string) => {
   // Handle null/undefined input
   if (!timeStr) {
-    return "--:--";
+    return '--:--';
   }
 
   // Extract time directly from ISO string to avoid timezone conversion
@@ -37,51 +37,51 @@ const formatTime = (timeStr: string) => {
   try {
     const date = new Date(timeStr);
     if (isNaN(date.getTime())) {
-      return "--:--";
+      return '--:--';
     }
     return date.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
+      hour: '2-digit',
+      minute: '2-digit',
       hour12: false,
     });
   } catch (error) {
-    return "--:--";
+    return '--:--';
   }
 };
 
 const getVisibilityQuality = (vis: number | null | undefined) => {
-  if (vis === null || vis === undefined) return "N/A";
-  if (vis >= 20) return "Good";
-  if (vis >= 10) return "Moderate";
-  return "Poor";
+  if (vis === null || vis === undefined) return 'N/A';
+  if (vis >= 20) return 'Good';
+  if (vis >= 10) return 'Moderate';
+  return 'Poor';
 };
 
 const getCloudDescription = (clouds: number | null | undefined) => {
-  if (clouds === null || clouds === undefined) return "N/A";
-  if (clouds >= 75) return "Overcast";
-  if (clouds >= 50) return "Mostly Cloudy";
-  if (clouds >= 25) return "Partly Cloudy";
-  return "Clear";
+  if (clouds === null || clouds === undefined) return 'N/A';
+  if (clouds >= 75) return 'Overcast';
+  if (clouds >= 50) return 'Mostly Cloudy';
+  if (clouds >= 25) return 'Partly Cloudy';
+  return 'Clear';
 };
 
 const getRainDescription = (
   precipitation: number | null | undefined,
-  probability: number | null | undefined,
+  probability: number | null | undefined
 ) => {
   if (
     (precipitation === null || precipitation === undefined) &&
     (probability === null || probability === undefined)
   )
-    return "N/A";
+    return 'N/A';
   if (precipitation && precipitation > 0) {
-    if (precipitation >= 2.5) return "Heavy Rain";
-    if (precipitation >= 0.5) return "Moderate Rain";
-    return "Light Rain";
+    if (precipitation >= 2.5) return 'Heavy Rain';
+    if (precipitation >= 0.5) return 'Moderate Rain';
+    return 'Light Rain';
   }
-  if (probability && probability > 60) return "High Chance";
-  if (probability && probability > 30) return "Moderate Chance";
-  if (probability && probability > 0) return "Low Chance";
-  return "No Rain";
+  if (probability && probability > 60) return 'High Chance';
+  if (probability && probability > 30) return 'Moderate Chance';
+  if (probability && probability > 0) return 'Low Chance';
+  return 'No Rain';
 };
 
 // Helper function to format solar, twilight and moon data for tooltips
@@ -89,24 +89,24 @@ const getSolarTwilightAndMoonData = (
   date: string,
   hourTime: string,
   location: Location,
-  groupedByDay: any[],
+  groupedByDay: any[]
 ) => {
   const formatTimeOnly = (timeStr: string | null | undefined) => {
-    if (!timeStr || timeStr === "---" || timeStr === "----") return "N/A";
-    if (timeStr === "24:00") return "00:00";
+    if (!timeStr || timeStr === '---' || timeStr === '----') return 'N/A';
+    if (timeStr === '24:00') return '00:00';
     return timeStr;
   };
 
   const formatTwilightTime = (date: Date | null) => {
-    if (!date) return "N/A";
+    if (!date) return 'N/A';
     try {
       return date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
+        hour: '2-digit',
+        minute: '2-digit',
         hour12: false,
       });
     } catch {
-      return "N/A";
+      return 'N/A';
     }
   };
 
@@ -114,25 +114,25 @@ const getSolarTwilightAndMoonData = (
   const currentHour = new Date(hourTime);
   if (isNaN(currentHour.getTime())) {
     return {
-      sun: { rise: "N/A", set: "N/A" },
+      sun: { rise: 'N/A', set: 'N/A' },
       twilight: {
-        civilDusk: "N/A",
-        nauticalDusk: "N/A",
-        astronomicalDusk: "N/A",
-        astronomicalDawn: "N/A",
-        nauticalDawn: "N/A",
-        civilDawn: "N/A",
+        civilDusk: 'N/A',
+        nauticalDusk: 'N/A',
+        astronomicalDusk: 'N/A',
+        astronomicalDawn: 'N/A',
+        nauticalDawn: 'N/A',
+        civilDawn: 'N/A',
       },
-      moon: { rise: "N/A", set: "N/A" },
+      moon: { rise: 'N/A', set: 'N/A' },
       dayLabels: {
-        startDay: "",
-        endDay: "",
+        startDay: '',
+        endDay: '',
       },
     };
   }
 
   // Find the current day and next day data
-  const currentDayIndex = groupedByDay.findIndex((day) => day.date === date);
+  const currentDayIndex = groupedByDay.findIndex(day => day.date === date);
   const currentDayData = groupedByDay[currentDayIndex];
   const nextDayData =
     currentDayIndex < groupedByDay.length - 1
@@ -143,19 +143,19 @@ const getSolarTwilightAndMoonData = (
 
   // Helper to get sunrise time for a day
   const getSunriseTime = (dayData: any) => {
-    if (!dayData?.sunMoon?.sunrise || dayData.sunMoon.sunrise === "N/A") {
+    if (!dayData?.sunMoon?.sunrise || dayData.sunMoon.sunrise === 'N/A') {
       try {
-        const targetDate = new Date(dayData.date + "T12:00:00");
+        const targetDate = new Date(`${dayData.date}T12:00:00`);
         const calculatedSun = calculateSunriseSunset(
           location.lat,
           location.lon,
-          targetDate,
+          targetDate
         );
         return calculatedSun.sunrise
           ? formatTwilightTime(calculatedSun.sunrise)
-          : "N/A";
+          : 'N/A';
       } catch {
-        return "N/A";
+        return 'N/A';
       }
     }
     return formatTimeOnly(dayData.sunMoon.sunrise);
@@ -163,19 +163,19 @@ const getSolarTwilightAndMoonData = (
 
   // Helper to get sunset time for a day
   const getSunsetTime = (dayData: any) => {
-    if (!dayData?.sunMoon?.sunset || dayData.sunMoon.sunset === "N/A") {
+    if (!dayData?.sunMoon?.sunset || dayData.sunMoon.sunset === 'N/A') {
       try {
-        const targetDate = new Date(dayData.date + "T12:00:00");
+        const targetDate = new Date(`${dayData.date}T12:00:00`);
         const calculatedSun = calculateSunriseSunset(
           location.lat,
           location.lon,
-          targetDate,
+          targetDate
         );
         return calculatedSun.sunset
           ? formatTwilightTime(calculatedSun.sunset)
-          : "N/A";
+          : 'N/A';
       } catch {
-        return "N/A";
+        return 'N/A';
       }
     }
     return formatTimeOnly(dayData.sunMoon.sunset);
@@ -195,34 +195,34 @@ const getSolarTwilightAndMoonData = (
     cycleStartDay = prevDayData || currentDayData;
     cycleEndDay = currentDayData;
     startDayName = cycleStartDay
-      ? new Date(cycleStartDay.date + "T12:00:00").toLocaleDateString([], {
-          weekday: "short",
+      ? new Date(`${cycleStartDay.date}T12:00:00`).toLocaleDateString([], {
+          weekday: 'short',
         })
-      : "";
+      : '';
     endDayName = cycleEndDay
-      ? new Date(cycleEndDay.date + "T12:00:00").toLocaleDateString([], {
-          weekday: "short",
+      ? new Date(`${cycleEndDay.date}T12:00:00`).toLocaleDateString([], {
+          weekday: 'short',
         })
-      : "";
+      : '';
   } else {
     // We're in the current night's observing cycle
     cycleStartDay = currentDayData;
     cycleEndDay = nextDayData || currentDayData;
     startDayName = cycleStartDay
-      ? new Date(cycleStartDay.date + "T12:00:00").toLocaleDateString([], {
-          weekday: "short",
+      ? new Date(`${cycleStartDay.date}T12:00:00`).toLocaleDateString([], {
+          weekday: 'short',
         })
-      : "";
+      : '';
     endDayName = cycleEndDay
-      ? new Date(cycleEndDay.date + "T12:00:00").toLocaleDateString([], {
-          weekday: "short",
+      ? new Date(`${cycleEndDay.date}T12:00:00`).toLocaleDateString([], {
+          weekday: 'short',
         })
-      : "";
+      : '';
   }
 
   // Calculate twilight times for the cycle start day (evening twilight)
   const startDayTargetDate = cycleStartDay
-    ? new Date(cycleStartDay.date + "T12:00:00")
+    ? new Date(`${cycleStartDay.date}T12:00:00`)
     : null;
 
   let startDayTwilight;
@@ -233,19 +233,19 @@ const getSolarTwilightAndMoonData = (
             location.lat,
             location.lon,
             startDayTargetDate,
-            "civil",
+            'civil'
           ),
           nautical: calculateTwilightForDate(
             location.lat,
             location.lon,
             startDayTargetDate,
-            "nautical",
+            'nautical'
           ),
           astronomical: calculateTwilightForDate(
             location.lat,
             location.lon,
             startDayTargetDate,
-            "astronomical",
+            'astronomical'
           ),
         }
       : null;
@@ -255,7 +255,7 @@ const getSolarTwilightAndMoonData = (
 
   // Calculate twilight times for the cycle end day (morning twilight)
   const endDayTargetDate = cycleEndDay
-    ? new Date(cycleEndDay.date + "T12:00:00")
+    ? new Date(`${cycleEndDay.date}T12:00:00`)
     : null;
 
   let endDayTwilight;
@@ -266,19 +266,19 @@ const getSolarTwilightAndMoonData = (
             location.lat,
             location.lon,
             endDayTargetDate,
-            "civil",
+            'civil'
           ),
           nautical: calculateTwilightForDate(
             location.lat,
             location.lon,
             endDayTargetDate,
-            "nautical",
+            'nautical'
           ),
           astronomical: calculateTwilightForDate(
             location.lat,
             location.lon,
             endDayTargetDate,
-            "astronomical",
+            'astronomical'
           ),
         }
       : null;
@@ -287,14 +287,14 @@ const getSolarTwilightAndMoonData = (
   }
 
   // Get sunset from the start day and sunrise from end day
-  const cycleStartSunset = cycleStartDay ? getSunsetTime(cycleStartDay) : "N/A";
+  const cycleStartSunset = cycleStartDay ? getSunsetTime(cycleStartDay) : 'N/A';
 
   // Get moon rise/set for the current calendar day (not the cycle)
   const currentMoonRise = formatTimeOnly(currentDayData?.sunMoon?.moonrise);
   const currentMoonSet = formatTimeOnly(currentDayData?.sunMoon?.moonset);
 
   // Get next sunrise (from the end day of the cycle)
-  const nextSunrise = cycleEndDay ? getSunriseTime(cycleEndDay) : "N/A";
+  const nextSunrise = cycleEndDay ? getSunriseTime(cycleEndDay) : 'N/A';
 
   return {
     sun: {
@@ -305,22 +305,22 @@ const getSolarTwilightAndMoonData = (
     twilight: {
       civilDusk: startDayTwilight?.civil?.dusk
         ? formatTwilightTime(startDayTwilight?.civil.dusk)
-        : "N/A",
+        : 'N/A',
       nauticalDusk: startDayTwilight?.nautical?.dusk
         ? formatTwilightTime(startDayTwilight?.nautical.dusk)
-        : "N/A",
+        : 'N/A',
       astronomicalDusk: startDayTwilight?.astronomical?.dusk
         ? formatTwilightTime(startDayTwilight?.astronomical.dusk)
-        : "N/A",
+        : 'N/A',
       astronomicalDawn: endDayTwilight?.astronomical?.dawn
         ? formatTwilightTime(endDayTwilight?.astronomical.dawn)
-        : "N/A",
+        : 'N/A',
       nauticalDawn: endDayTwilight?.nautical?.dawn
         ? formatTwilightTime(endDayTwilight?.nautical.dawn)
-        : "N/A",
+        : 'N/A',
       civilDawn: endDayTwilight?.civil?.dawn
         ? formatTwilightTime(endDayTwilight?.civil.dawn)
-        : "N/A",
+        : 'N/A',
     },
     moon: {
       rise: currentMoonRise,
@@ -333,10 +333,13 @@ const getSolarTwilightAndMoonData = (
   };
 };
 
-const HourTooltips: React.FC<HourTooltipsProps> = ({ groupedByDay, location }) => {
+const HourTooltips: React.FC<HourTooltipsProps> = ({
+  groupedByDay,
+  location,
+}) => {
   return (
     <>
-      {typeof document !== "undefined" &&
+      {typeof document !== 'undefined' &&
         createPortal(
           groupedByDay.flatMap((day, dayIndex) =>
             day.hours
@@ -353,66 +356,64 @@ const HourTooltips: React.FC<HourTooltipsProps> = ({ groupedByDay, location }) =
                     delayHide={50}
                     noArrow
                     style={{
-                      backgroundColor: "rgba(0, 0, 0, 0.95)",
-                      color: "white",
-                      fontSize: "0.75rem",
-                      maxWidth: "240px",
+                      backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                      color: 'white',
+                      fontSize: '0.75rem',
+                      maxWidth: '240px',
                       zIndex: 1000,
-                      borderRadius: "8px",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.4)",
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
                     }}
                     border="1px solid rgba(255, 255, 255, 0.2)"
                   >
                     <div
                       style={{
-                        marginBottom: "8px",
-                        fontSize: "0.8rem",
-                        borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
-                        paddingBottom: "4px",
+                        marginBottom: '8px',
+                        fontSize: '0.8rem',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                        paddingBottom: '4px',
                       }}
                     >
                       <strong>{formatTime(hour.time)}</strong>
                       {location?.timezone && (
                         <span
                           style={{
-                            fontSize: "0.7rem",
+                            fontSize: '0.7rem',
                             opacity: 0.8,
-                            marginLeft: "4px",
+                            marginLeft: '4px',
                           }}
                         >
                           {location.timezone}
                         </span>
                       )}
                     </div>
-                    <div style={{ lineHeight: "1.4" }}>
-                      <div style={{ marginBottom: "2px" }}>
-                        ☁️ Clouds:{" "}
-                        {hour.cloudCover.totalCloudCover?.toFixed(0) ?? "N/A"}
-                        % (
-                        {getCloudDescription(hour.cloudCover.totalCloudCover)}
-                        )
+                    <div style={{ lineHeight: '1.4' }}>
+                      <div style={{ marginBottom: '2px' }}>
+                        ☁️ Clouds:{' '}
+                        {hour.cloudCover.totalCloudCover?.toFixed(0) ?? 'N/A'}%
+                        ({getCloudDescription(hour.cloudCover.totalCloudCover)})
                       </div>
-                      <div style={{ marginBottom: "2px" }}>
-                        🌧️ Rain:{" "}
+                      <div style={{ marginBottom: '2px' }}>
+                        🌧️ Rain:{' '}
                         {hour.precipitation.precipitationProbability?.toFixed(
-                          0,
-                        ) ?? "N/A"}
+                          0
+                        ) ?? 'N/A'}
                         % (
                         {getRainDescription(
                           hour.precipitation.precipitation,
-                          hour.precipitation.precipitationProbability,
+                          hour.precipitation.precipitationProbability
                         )}
                         )
                       </div>
-                      <div style={{ marginBottom: "2px" }}>
-                        💨 Wind: {hour.windSpeed?.toFixed(1) ?? "N/A"} m/s
+                      <div style={{ marginBottom: '2px' }}>
+                        💨 Wind: {hour.windSpeed?.toFixed(1) ?? 'N/A'} m/s
                       </div>
-                      <div style={{ marginBottom: "2px" }}>
-                        👁️ Visibility: {hour.visibility?.toFixed(1) ?? "N/A"}
+                      <div style={{ marginBottom: '2px' }}>
+                        👁️ Visibility: {hour.visibility?.toFixed(1) ?? 'N/A'}
                         km ({getVisibilityQuality(hour.visibility)})
                       </div>
                       {hour.temperature !== null && (
-                        <div style={{ marginBottom: "4px" }}>
+                        <div style={{ marginBottom: '4px' }}>
                           🌡️ Temp: {hour.temperature.toFixed(1)}°C
                         </div>
                       )}
@@ -423,44 +424,44 @@ const HourTooltips: React.FC<HourTooltipsProps> = ({ groupedByDay, location }) =
                           day.date,
                           hour.time,
                           location,
-                          groupedByDay,
+                          groupedByDay
                         );
 
                         return (
                           <div
                             style={{
-                              borderTop: "1px solid rgba(255, 255, 255, 0.2)",
-                              paddingTop: "4px",
-                              marginTop: "4px",
+                              borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+                              paddingTop: '4px',
+                              marginTop: '4px',
                             }}
                           >
                             <div
                               style={{
-                                fontSize: "0.75rem",
+                                fontSize: '0.75rem',
                                 opacity: 0.9,
-                                marginBottom: "3px",
-                                fontWeight: "bold",
+                                marginBottom: '3px',
+                                fontWeight: 'bold',
                               }}
                             >
                               Observing Cycle (
-                              {solarData.dayLabels?.startDay || ""} →{" "}
-                              {solarData.dayLabels?.endDay || ""})
+                              {solarData.dayLabels?.startDay || ''} →{' '}
+                              {solarData.dayLabels?.endDay || ''})
                             </div>
 
                             {/* Sun Rise/Set for current observing cycle */}
                             <div
                               style={{
-                                marginBottom: "2px",
-                                fontSize: "0.7rem",
+                                marginBottom: '2px',
+                                fontSize: '0.7rem',
                               }}
                             >
-                              ☀️ Sunrise: {solarData.sun.rise} | Sunset:{" "}
+                              ☀️ Sunrise: {solarData.sun.rise} | Sunset:{' '}
                               {solarData.sun.set}
                             </div>
                             <div
                               style={{
-                                marginBottom: "3px",
-                                fontSize: "0.7rem",
+                                marginBottom: '3px',
+                                fontSize: '0.7rem',
                               }}
                             >
                               ☀️ Next sunrise: {solarData.sun.nextRise}
@@ -469,88 +470,88 @@ const HourTooltips: React.FC<HourTooltipsProps> = ({ groupedByDay, location }) =
                             {/* Moon Rise/Set */}
                             <div
                               style={{
-                                marginBottom: "3px",
-                                fontSize: "0.7rem",
+                                marginBottom: '3px',
+                                fontSize: '0.7rem',
                               }}
                             >
-                              🌙 Moonrise: {solarData.moon.rise} | Moonset:{" "}
+                              🌙 Moonrise: {solarData.moon.rise} | Moonset:{' '}
                               {solarData.moon.set}
                             </div>
 
                             {/* Evening Twilight */}
                             <div
                               style={{
-                                fontSize: "0.65rem",
+                                fontSize: '0.65rem',
                                 opacity: 0.8,
-                                marginBottom: "1px",
+                                marginBottom: '1px',
                               }}
                             >
-                              {solarData.dayLabels?.startDay || ""} Evening:
+                              {solarData.dayLabels?.startDay || ''} Evening:
                             </div>
                             <div
                               style={{
-                                marginBottom: "1px",
-                                fontSize: "0.7rem",
-                                paddingLeft: "4px",
+                                marginBottom: '1px',
+                                fontSize: '0.7rem',
+                                paddingLeft: '4px',
                               }}
                             >
                               🌆 Civil dusk: {solarData.twilight.civilDusk}
                             </div>
                             <div
                               style={{
-                                marginBottom: "1px",
-                                fontSize: "0.7rem",
-                                paddingLeft: "4px",
+                                marginBottom: '1px',
+                                fontSize: '0.7rem',
+                                paddingLeft: '4px',
                               }}
                             >
-                              🌃 Nautical dusk:{" "}
+                              🌃 Nautical dusk:{' '}
                               {solarData.twilight.nauticalDusk}
                             </div>
                             <div
                               style={{
-                                marginBottom: "3px",
-                                fontSize: "0.7rem",
-                                paddingLeft: "4px",
+                                marginBottom: '3px',
+                                fontSize: '0.7rem',
+                                paddingLeft: '4px',
                               }}
                             >
-                              🌌 Astronomical dusk:{" "}
+                              🌌 Astronomical dusk:{' '}
                               {solarData.twilight.astronomicalDusk}
                             </div>
 
                             {/* Morning Twilight */}
                             <div
                               style={{
-                                fontSize: "0.65rem",
+                                fontSize: '0.65rem',
                                 opacity: 0.8,
-                                marginBottom: "1px",
+                                marginBottom: '1px',
                               }}
                             >
-                              {solarData.dayLabels?.endDay || ""} Morning:
+                              {solarData.dayLabels?.endDay || ''} Morning:
                             </div>
                             <div
                               style={{
-                                marginBottom: "1px",
-                                fontSize: "0.7rem",
-                                paddingLeft: "4px",
+                                marginBottom: '1px',
+                                fontSize: '0.7rem',
+                                paddingLeft: '4px',
                               }}
                             >
-                              🌌 Astronomical dawn:{" "}
+                              🌌 Astronomical dawn:{' '}
                               {solarData.twilight.astronomicalDawn}
                             </div>
                             <div
                               style={{
-                                marginBottom: "1px",
-                                fontSize: "0.7rem",
-                                paddingLeft: "4px",
+                                marginBottom: '1px',
+                                fontSize: '0.7rem',
+                                paddingLeft: '4px',
                               }}
                             >
-                              🌇 Nautical dawn:{" "}
+                              🌇 Nautical dawn:{' '}
                               {solarData.twilight.nauticalDawn}
                             </div>
                             <div
                               style={{
-                                fontSize: "0.7rem",
-                                paddingLeft: "4px",
+                                fontSize: '0.7rem',
+                                paddingLeft: '4px',
                               }}
                             >
                               🌅 Civil dawn: {solarData.twilight.civilDawn}
@@ -562,9 +563,9 @@ const HourTooltips: React.FC<HourTooltipsProps> = ({ groupedByDay, location }) =
                   </Tooltip>
                 );
               })
-              .filter(Boolean),
+              .filter(Boolean)
           ),
-          document.body,
+          document.body
         )}
     </>
   );

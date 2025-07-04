@@ -1,14 +1,14 @@
-import React from "react";
-import {LocationSearchResult} from "../types/weather";
-import {WeatherQueryParams,} from "../hooks/useWeatherData";
-import {useLocationsStorage} from "../hooks/useLocationsStorage";
-import {useApiKey} from "../contexts/ApiKeyContext";
-import LocationSearch from "./LocationSearch";
-import WeeklyOverview from "./WeeklyOverview";
-import ApiKeyLogin from "./ApiKeyLogin";
-import SettingsMenu from "./SettingsMenu";
-import StarField from "./StarField";
-import "./WeatherApp.css";
+import React from 'react';
+import { LocationSearchResult } from '../types/weather';
+import { WeatherQueryParams } from '../hooks/useWeatherData';
+import { useLocationsStorage } from '../hooks/useLocationsStorage';
+import { useApiKey } from '../contexts/ApiKeyContext';
+import LocationSearch from './LocationSearch';
+import WeeklyOverview from './WeeklyOverview';
+import ApiKeyLogin from './ApiKeyLogin';
+import SettingsMenu from './SettingsMenu';
+import StarField from './StarField';
+import './WeatherApp.css';
 
 interface WeatherAppProps {
   className?: string;
@@ -19,12 +19,13 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
   const [locations, setLocations] = useLocationsStorage();
 
   const handleLocationSelect = (location: LocationSearchResult) => {
-    console.log("[WeatherApp] Location selected:", location);
+    console.log('[WeatherApp] Location selected:', location);
 
     // Check if location already exists
     const locationExists = locations.some(
-      loc => Math.abs(loc.lat - location.lat) < 0.001 &&
-             Math.abs(loc.lon - location.lon) < 0.001
+      loc =>
+        Math.abs(loc.lat - location.lat) < 0.001 &&
+        Math.abs(loc.lon - location.lon) < 0.001
     );
 
     if (!locationExists) {
@@ -47,57 +48,55 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
   }
 
   return (
-    <div className={`weather-app ${className || ""}`}>
+    <div className={`weather-app ${className || ''}`}>
       {/* Star Field Background */}
-      <StarField
-        animate={false}
-        useTimeBasedRotation={true}
-      />
+      <StarField animate={false} useTimeBasedRotation={true} />
 
       <div className="weather-app__content">
         {/* Header */}
-      <header className="weather-app__header">
-        <div className="weather-app__title">
-          <h1>Phantastro</h1>
-          <p>Astronomical Weather Forecast</p>
-        </div>
-        <div className="weather-app__controls">
-          {locations.length > 0 && (
-            <LocationSearch onLocationSelect={handleLocationSelect} />
-          )}
-          <SettingsMenu />
-        </div>
-      </header>
+        <header className="weather-app__header">
+          <div className="weather-app__title">
+            <h1>Phantastro</h1>
+            <p>Astronomical Weather Forecast</p>
+          </div>
+          <div className="weather-app__controls">
+            {locations.length > 0 && (
+              <LocationSearch onLocationSelect={handleLocationSelect} />
+            )}
+            <SettingsMenu />
+          </div>
+        </header>
 
-      {/* Weather Content - Multiple Locations */}
-      {locations.length > 0 && (
-        <div className="locations-container">
-          {locations.map((location, index) => (
-            <WeeklyOverview
-              key={`${location.lat}-${location.lon}`}
-              location={location}
-              onRemove={() => handleLocationRemove(index)}
-            />
-          ))}
-        </div>
-      )}
+        {/* Weather Content - Multiple Locations */}
+        {locations.length > 0 && (
+          <div className="locations-container">
+            {locations.map((location, index) => (
+              <WeeklyOverview
+                key={`${location.lat}-${location.lon}`}
+                location={location}
+                onRemove={() => handleLocationRemove(index)}
+              />
+            ))}
+          </div>
+        )}
 
-      {/* Getting Started - show when no locations */}
-      {locations.length === 0 && (
-        <div className="weather-app__welcome">
-          <div className="welcome-content">
-            <div className="get-started-block">
-              <h3 className="get-started-title">Get Started</h3>
-              <p className="get-started-text">
-                Search for your location to discover perfect stargazing conditions
-              </p>
-              <div className="search-container">
-                <LocationSearch onLocationSelect={handleLocationSelect} />
+        {/* Getting Started - show when no locations */}
+        {locations.length === 0 && (
+          <div className="weather-app__welcome">
+            <div className="welcome-content">
+              <div className="get-started-block">
+                <h3 className="get-started-title">Get Started</h3>
+                <p className="get-started-text">
+                  Search for your location to discover perfect stargazing
+                  conditions
+                </p>
+                <div className="search-container">
+                  <LocationSearch onLocationSelect={handleLocationSelect} />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
     </div>
   );
