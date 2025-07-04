@@ -30,7 +30,10 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "parse-stars": "node src/data/parse_stars.js"
+    "parse-stars": "node src/data/parse_stars.js",
+    "generate-icons": "node scripts/generate-icons.js",
+    "calculate-constellation": "node scripts/calculate-constellation-coords.js",
+    "calculate-line-gaps": "node scripts/calculate-line-gaps.js"
   },
   "eslintConfig": {
     "extends": [
@@ -49,5 +52,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "sharp": "^0.34.2"
   }
 }

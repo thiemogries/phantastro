@@ -26,7 +26,7 @@
   <!-- Scaling and positioning the constellation to fit nicely in the circle -->
 
   <!-- Constellation lines -->
-  <g stroke="#32bff3" stroke-width="8" stroke-opacity="0." fill="none">
+  <g stroke="#32bff3" stroke-width="6" stroke-opacity="0.9" fill="none">
     <!-- Betelgeuse to Bellatrix -->
     <line x1="176" y1="88" x2="296" y2="105" />
     <!-- Bellatrix to Mintaka -->
