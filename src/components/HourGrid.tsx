@@ -151,28 +151,7 @@ const HourGrid: React.FC<HourGridProps> = ({ groupedByDay }) => {
                     }
                   ></div>
 
-                  {/* Moonlight cell */}
-                  <div
-                    className="hour-cell moonlight-cell"
-                    style={
-                      hour
-                        ? (() => {
-                            const moonlight =
-                              hour.moonlight?.moonlightClearSky;
-                            const hasMoonlight =
-                              moonlight !== null && moonlight !== undefined;
-                            const opacity =
-                              hasMoonlight && moonlight > 0
-                                ? Math.min(1, 0.2 + (moonlight / 10) * 0.8)
-                                : 0;
-                            return { backgroundColor: "#4338ca", opacity };
-                          })()
-                        : {
-                            background: "rgba(255, 255, 255, 0.05)",
-                            opacity: 0.3,
-                          }
-                    }
-                  ></div>
+
                 </div>
               );
             })}

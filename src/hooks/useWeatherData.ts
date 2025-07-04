@@ -12,7 +12,6 @@ export const WEATHER_QUERY_KEYS = {
   weather: (lat: number, lon: number) => ['weather', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
   basicWeather: (lat: number, lon: number) => ['basicWeather', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
   cloudData: (lat: number, lon: number) => ['cloudData', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
-  moonlightData: (lat: number, lon: number) => ['moonlightData', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
   sunMoonData: (lat: number, lon: number) => ['sunMoonData', { lat: lat.toFixed(4), lon: lon.toFixed(4) }] as const,
   locations: (query: string) => ['locations', query] as const,
 } as const;
@@ -27,17 +26,15 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
       if (!params) throw new Error('No location parameters provided');
 
       // Fetch all data in parallel to avoid race conditions
-      const [basicData, cloudData, moonlightData, sunMoonData] = await Promise.allSettled([
+      const [basicData, cloudData, sunMoonData] = await Promise.allSettled([
         weatherService.fetchBasicWeatherData(params.lat, params.lon),
         weatherService.fetchCloudData(params.lat, params.lon),
-        weatherService.fetchMoonlightData(params.lat, params.lon),
         weatherService.fetchSunMoonData(params.lat, params.lon)
       ]);
 
       // Extract successful results or null for failed ones
       const basicWeatherData = basicData.status === 'fulfilled' ? basicData.value : null;
       const cloudWeatherData = cloudData.status === 'fulfilled' ? cloudData.value : null;
-      const moonlightWeatherData = moonlightData.status === 'fulfilled' ? moonlightData.value : null;
       const sunMoonWeatherData = sunMoonData.status === 'fulfilled' ? sunMoonData.value : null;
 
       if (!basicWeatherData) {
@@ -54,7 +51,7 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
         basicWeatherData,
         location,
         cloudWeatherData,
-        moonlightWeatherData,
+        undefined, // No longer fetch moonlight data
         sunMoonWeatherData
       );
     },

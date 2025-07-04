@@ -284,12 +284,6 @@
     /* border-radius: 3px; */
 }
 
-.moonlight-cell {
-    /* border-radius: 3px; */
-    background-color: #4338ca;
-    border: 1px solid rgba(67, 56, 202, 0.3);
-}
-
 /* Manual tooltip styles removed - using react-tooltip library */
 
 /* Tooltip positioning assistance */
@@ -314,6 +308,9 @@ body > .react-tooltip[id*="hour-"] {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 1px;
+}
+
+.moon-row {
     margin-top: 2px;
 }
 
