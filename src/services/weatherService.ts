@@ -29,9 +29,7 @@ class WeatherService {
         const apiKey = window.localStorage.getItem('phantastro-api-key');
         if (apiKey && apiKey.trim() !== '') {
           // Clean the API key: trim whitespace and remove any surrounding quotes
-          const cleanedKey = apiKey.trim().replace(/^["']|["']$/g, '');
-          console.log('🔑 WeatherService: Retrieved API key (first 8 chars):', cleanedKey.substring(0, 8) + '...');
-          return cleanedKey;
+          return apiKey.trim().replace(/^["']|["']$/g, '');
         }
       }
     } catch (error) {

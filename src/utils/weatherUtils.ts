@@ -408,16 +408,6 @@ export const getUVIndexInfo = (
 };
 
 /**
- * Format moonlight percentage or show "Not available"
- */
-export const formatMoonlight = (moonlight: number | null): string => {
-  if (moonlight === null || moonlight === undefined) {
-    return "Not available";
-  }
-  return `${Math.round(moonlight)}%`;
-};
-
-/**
  * Get moonlight impact on astronomical observation
  */
 export const getMoonlightImpact = (
