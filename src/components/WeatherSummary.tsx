@@ -6,13 +6,19 @@ interface WeatherSummaryProps {
 }
 
 const WeatherSummary: React.FC<WeatherSummaryProps> = ({ hourlyForecast }) => {
-  // Calculate best hours (clear skies and low wind)
+  // Calculate best hours for astronomical observation
+  // Conditions: <5% clouds, 0% rain, ≥15km visibility, <5 m/s wind
   const bestHours = hourlyForecast.filter(
     (hour: HourlyForecast) =>
       hour.cloudCover.totalCloudCover !== null &&
       hour.windSpeed !== null &&
-      hour.cloudCover.totalCloudCover < 30 &&
-      hour.windSpeed < 10,
+      hour.visibility !== null &&
+      hour.visibility !== undefined &&
+      hour.precipitation.precipitation !== null &&
+      hour.cloudCover.totalCloudCover < 5 &&
+      hour.precipitation.precipitation === 0 &&
+      hour.visibility >= 15 &&
+      hour.windSpeed < 5,
   ).length;
 
   // Calculate average cloud coverage
@@ -28,12 +34,18 @@ const WeatherSummary: React.FC<WeatherSummaryProps> = ({ hourlyForecast }) => {
       )
     : null;
 
-  // Calculate clear periods (< 20% cloud cover)
-  const clearPeriods = hourlyForecast.filter(
-    (hour: HourlyForecast) =>
-      hour.cloudCover.totalCloudCover !== null &&
-      hour.cloudCover.totalCloudCover < 20,
-  ).length;
+  // Calculate average rain chance
+  const rainWithData = hourlyForecast.filter(
+    (h: HourlyForecast) => h.precipitation.precipitationProbability !== null
+  );
+  const avgRainChance = rainWithData.length > 0
+    ? Math.round(
+        rainWithData.reduce(
+          (sum: number, hour: HourlyForecast) => sum + (hour.precipitation.precipitationProbability || 0),
+          0
+        ) / rainWithData.length
+      )
+    : null;
 
   // Calculate average visibility
   const visibilityWithData = hourlyForecast.filter(
@@ -53,9 +65,9 @@ const WeatherSummary: React.FC<WeatherSummaryProps> = ({ hourlyForecast }) => {
   return (
     <div className="overview-summary">
       <div className="summary-item">
-        <span className="summary-label">Best Hours:</span>
+        <span className="summary-label">Good Hours:</span>
         <span className="summary-value">
-          {bestHours} clear hours
+          {bestHours} clear hour{bestHours === 1 ? "" : "s"}
         </span>
       </div>
       <div className="summary-item">
@@ -65,9 +77,9 @@ const WeatherSummary: React.FC<WeatherSummaryProps> = ({ hourlyForecast }) => {
         </span>
       </div>
       <div className="summary-item">
-        <span className="summary-label">Clear Periods:</span>
+        <span className="summary-label">Avg Rain Chance:</span>
         <span className="summary-value">
-          {clearPeriods}h total
+          {avgRainChance !== null ? `${avgRainChance}%` : "N/A"}
         </span>
       </div>
       <div className="summary-item">

@@ -405,11 +405,11 @@ const HourTooltips: React.FC<HourTooltipsProps> = ({ groupedByDay, location }) =
                         )
                       </div>
                       <div style={{ marginBottom: "2px" }}>
-                        👁️ Visibility: {hour.visibility?.toFixed(1) ?? "N/A"}
-                        km ({getVisibilityQuality(hour.visibility)})
+                        💨 Wind: {hour.windSpeed?.toFixed(1) ?? "N/A"} m/s
                       </div>
                       <div style={{ marginBottom: "2px" }}>
-                        💨 Wind: {hour.windSpeed?.toFixed(1) ?? "N/A"} m/s
+                        👁️ Visibility: {hour.visibility?.toFixed(1) ?? "N/A"}
+                        km ({getVisibilityQuality(hour.visibility)})
                       </div>
                       {hour.temperature !== null && (
                         <div style={{ marginBottom: "4px" }}>
