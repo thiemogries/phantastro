@@ -250,8 +250,8 @@
 
 /* Hour cells */
 .hour-cell {
-    height: 10px;
-    /* border-radius: 2px; */
+    height: 8px;
+     border-radius: 1px;
     cursor: pointer;
     transition: all 0.2s ease;
     border: 1px solid rgba(255, 255, 255, 0.05);
@@ -274,6 +274,10 @@
 
 .precip-cell.has-rain {
     border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.windspeed-cell {
+    /* border-radius: 3px; */
 }
 
 .visibility-cell {

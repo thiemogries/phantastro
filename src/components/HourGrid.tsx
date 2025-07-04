@@ -20,6 +20,25 @@ const HourGrid: React.FC<HourGridProps> = ({ groupedByDay }) => {
     else return "#ef4444";
   };
 
+  // Helper function to get windspeed color and opacity
+  const getWindspeedStyle = (windSpeed: number | null) => {
+    if (windSpeed === null || windSpeed === undefined) {
+      return {
+        backgroundColor: "#6b7280",
+        opacity: 0.3,
+      };
+    }
+
+    // Use petrol color with opacity based on wind speed
+    // Higher wind speeds get higher opacity (more visible)
+    const opacity = Math.min(1.0, Math.max(0.2, 0.2 + (windSpeed / 10) * 0.8));
+
+    return {
+      backgroundColor: "#008080", // Petrol color
+      opacity,
+    };
+  };
+
   return (
     <div className="grid-columns">
       {Array.from({ length: 7 }, (_, dayIndex) => {
@@ -79,6 +98,19 @@ const HourGrid: React.FC<HourGridProps> = ({ groupedByDay }) => {
                                 : 0.1,
                             };
                           })()
+                        : {
+                            background: "rgba(255, 255, 255, 0.05)",
+                            opacity: 0.3,
+                          }
+                    }
+                  ></div>
+
+                  {/* Windspeed cell */}
+                  <div
+                    className="hour-cell windspeed-cell"
+                    style={
+                      hour
+                        ? getWindspeedStyle(hour.windSpeed)
                         : {
                             background: "rgba(255, 255, 255, 0.05)",
                             opacity: 0.3,
