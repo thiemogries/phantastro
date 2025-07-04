@@ -1,0 +1,251 @@
+[
+  {
+    "name": "Ursa Major",
+    "description": "The Big Dipper asterism within Ursa Major",
+    "stars": [
+      {
+        "name": "Dubhe",
+        "designation": "α UMa",
+        "ra": 165.932,
+        "dec": 61.751,
+        "magnitude": 1.8
+      },
+      {
+        "name": "Merak",
+        "designation": "β UMa", 
+        "ra": 165.460,
+        "dec": 56.382,
+        "magnitude": 2.4
+      },
+      {
+        "name": "Phecda",
+        "designation": "γ UMa",
+        "ra": 178.458,
+        "dec": 53.695,
+        "magnitude": 2.4
+      },
+      {
+        "name": "Megrez",
+        "designation": "δ UMa",
+        "ra": 183.857,
+        "dec": 57.033,
+        "magnitude": 3.3
+      },
+      {
+        "name": "Alioth",
+        "designation": "ε UMa",
+        "ra": 193.507,
+        "dec": 55.960,
+        "magnitude": 1.8
+      },
+      {
+        "name": "Mizar",
+        "designation": "ζ UMa",
+        "ra": 200.981,
+        "dec": 54.925,
+        "magnitude": 2.1
+      },
+      {
+        "name": "Alkaid",
+        "designation": "η UMa",
+        "ra": 206.885,
+        "dec": 49.313,
+        "magnitude": 1.9
+      }
+    ],
+    "lines": [
+      [0, 1],
+      [1, 2],
+      [2, 3],
+      [3, 0],
+      [3, 4],
+      [4, 5],
+      [5, 6]
+    ]
+  },
+  {
+    "name": "Orion",
+    "description": "The Hunter constellation",
+    "stars": [
+      {
+        "name": "Betelgeuse",
+        "designation": "α Ori",
+        "ra": 88.793,
+        "dec": 7.407,
+        "magnitude": 0.5
+      },
+      {
+        "name": "Rigel",
+        "designation": "β Ori",
+        "ra": 78.634,
+        "dec": -8.202,
+        "magnitude": 0.1
+      },
+      {
+        "name": "Bellatrix",
+        "designation": "γ Ori",
+        "ra": 81.283,
+        "dec": 6.350,
+        "magnitude": 1.6
+      },
+      {
+        "name": "Mintaka",
+        "designation": "δ Ori",
+        "ra": 83.002,
+        "dec": -0.299,
+        "magnitude": 2.2
+      },
+      {
+        "name": "Alnilam",
+        "designation": "ε Ori",
+        "ra": 84.053,
+        "dec": -1.202,
+        "magnitude": 1.7
+      },
+      {
+        "name": "Alnitak",
+        "designation": "ζ Ori",
+        "ra": 85.190,
+        "dec": -1.943,
+        "magnitude": 1.8
+      },
+      {
+        "name": "Saiph",
+        "designation": "κ Ori",
+        "ra": 86.939,
+        "dec": -9.670,
+        "magnitude": 2.1
+      }
+    ],
+    "lines": [
+      [0, 2],
+      [2, 3],
+      [3, 4],
+      [4, 5],
+      [5, 6],
+      [6, 1],
+      [1, 3],
+      [0, 5]
+    ]
+  },
+  {
+    "name": "Cassiopeia",
+    "description": "The Queen, forming a distinctive W shape",
+    "stars": [
+      {
+        "name": "Schedar",
+        "designation": "α Cas",
+        "ra": 10.127,
+        "dec": 56.537,
+        "magnitude": 2.2
+      },
+      {
+        "name": "Caph",
+        "designation": "β Cas",
+        "ra": 2.295,
+        "dec": 59.150,
+        "magnitude": 2.3
+      },
+      {
+        "name": "Gamma Cas",
+        "designation": "γ Cas",
+        "ra": 14.177,
+        "dec": 60.717,
+        "magnitude": 2.5
+      },
+      {
+        "name": "Ruchbah",
+        "designation": "δ Cas",
+        "ra": 21.454,
+        "dec": 60.235,
+        "magnitude": 2.7
+      },
+      {
+        "name": "Segin",
+        "designation": "ε Cas",
+        "ra": 28.599,
+        "dec": 63.670,
+        "magnitude": 3.4
+      }
+    ],
+    "lines": [
+      [1, 0],
+      [0, 2],
+      [2, 3],
+      [3, 4]
+    ]
+  },
+  {
+    "name": "Leo",
+    "description": "The Lion constellation",
+    "stars": [
+      {
+        "name": "Regulus",
+        "designation": "α Leo",
+        "ra": 152.093,
+        "dec": 11.967,
+        "magnitude": 1.4
+      },
+      {
+        "name": "Denebola",
+        "designation": "β Leo",
+        "ra": 177.265,
+        "dec": 14.572,
+        "magnitude": 2.1
+      },
+      {
+        "name": "Algieba",
+        "designation": "γ Leo",
+        "ra": 154.993,
+        "dec": 19.842,
+        "magnitude": 2.6
+      },
+      {
+        "name": "Zosma",
+        "designation": "δ Leo",
+        "ra": 168.527,
+        "dec": 20.524,
+        "magnitude": 2.6
+      },
+      {
+        "name": "Algenubi",
+        "designation": "ε Leo",
+        "ra": 146.465,
+        "dec": 23.774,
+        "magnitude": 3.0
+      },
+      {
+        "name": "Adhafera",
+        "designation": "ζ Leo",
+        "ra": 154.173,
+        "dec": 23.417,
+        "magnitude": 3.4
+      },
+      {
+        "name": "Rasalas",
+        "designation": "μ Leo",
+        "ra": 148.191,
+        "dec": 26.007,
+        "magnitude": 3.9
+      },
+      {
+        "name": "Chertan",
+        "designation": "θ Leo",
+        "ra": 168.560,
+        "dec": 15.430,
+        "magnitude": 3.3
+      }
+    ],
+    "lines": [
+      [4, 6],
+      [6, 5],
+      [5, 2],
+      [2, 0],
+      [0, 7],
+      [7, 1],
+      [7, 3],
+      [3, 1],
+      [2, 3]
+    ]
+  }
+]

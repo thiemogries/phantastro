@@ -5,7 +5,7 @@ import { useWeatherData, WeatherQueryParams } from "../hooks/useWeatherData";
 
 import TwilightTimeline from "./TwilightTimeline";
 import MoonTimeline from "./MoonTimeline";
-import LoadingSpinner from "./LoadingSpinner";
+import ConstellationLoader from "./ConstellationLoader";
 import ErrorMessage from "./ErrorMessage";
 import WeatherSummary from "./WeatherSummary";
 import HourGrid from "./HourGrid";
@@ -96,8 +96,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           onRemove={onRemove}
         />
         <div className="loading-container">
-          <LoadingSpinner size="medium" />
-          <p>Loading weather data...</p>
+          <ConstellationLoader size="medium" message="Loading weather data..." />
         </div>
       </div>
     );
