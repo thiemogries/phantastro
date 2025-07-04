@@ -105,8 +105,6 @@ const ConstellationLoader: React.FC<ConstellationLoaderProps> = ({
 
   const config = sizeConfig[size];
 
-
-
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;

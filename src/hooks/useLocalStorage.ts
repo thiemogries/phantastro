@@ -47,7 +47,6 @@ export function useLocalStorage<T>(
       // Save to local storage
       if (typeof window !== 'undefined' && window.localStorage) {
         window.localStorage.setItem(key, JSON.stringify(valueToStore));
-        console.log(`💾 useLocalStorage: Saved ${key} to localStorage:`, valueToStore);
       }
     } catch (error) {
       // A more advanced implementation would handle the error case
@@ -61,7 +60,6 @@ export function useLocalStorage<T>(
       if (e.key === key && e.newValue !== null) {
         try {
           const newValue = JSON.parse(e.newValue);
-          console.log(`🔄 useLocalStorage: External change detected for ${key}:`, newValue);
           setStoredValue(newValue);
         } catch (error) {
           console.warn(`Error parsing external localStorage change for "${key}":`, error);
