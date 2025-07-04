@@ -149,7 +149,6 @@
 .grid-header {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    background: rgba(255, 255, 255, 0.05);
 }
 
 .day-header {
@@ -157,6 +156,11 @@
     text-align: center;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
     position: relative;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.day-header:last-child {
+    border-right: none;
 }
 
 .day-info-container {

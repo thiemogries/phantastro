@@ -47,6 +47,19 @@ const WeatherSummary: React.FC<WeatherSummaryProps> = ({ hourlyForecast }) => {
       )
     : null;
 
+  // Calculate average wind speed
+  const windWithData = hourlyForecast.filter(
+    (h: HourlyForecast) => h.windSpeed !== null
+  );
+  const avgWindSpeed = windWithData.length > 0
+    ? (
+        windWithData.reduce(
+          (sum: number, hour: HourlyForecast) => sum + (hour.windSpeed || 0),
+          0
+        ) / windWithData.length
+      ).toFixed(1)
+    : null;
+
   // Calculate average visibility
   const visibilityWithData = hourlyForecast.filter(
     (h: HourlyForecast) => h.visibility !== null
@@ -80,6 +93,12 @@ const WeatherSummary: React.FC<WeatherSummaryProps> = ({ hourlyForecast }) => {
         <span className="summary-label">Avg Rain Chance:</span>
         <span className="summary-value">
           {avgRainChance !== null ? `${avgRainChance}%` : "N/A"}
+        </span>
+      </div>
+      <div className="summary-item">
+        <span className="summary-label">Avg Wind Speed:</span>
+        <span className="summary-value">
+          {avgWindSpeed !== null ? `${avgWindSpeed} m/s` : "N/A"}
         </span>
       </div>
       <div className="summary-item">
