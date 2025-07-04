@@ -58,7 +58,7 @@
 }
 
 .step-number {
-  background: linear-gradient(45deg, #2196f3, #42a5f5);
+  background: linear-gradient(145deg, #4f46e5, #7c3aed);
   color: white;
   width: 2rem;
   height: 2rem;
@@ -121,7 +121,7 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #2196f3;
+  border-color: #4f46e5;
   background: rgba(255, 255, 255, 0.15);
 }
 
@@ -142,7 +142,7 @@
 .submit-button {
   width: 100%;
   padding: 1rem;
-  background: linear-gradient(45deg, #2196f3, #42a5f5);
+  background: linear-gradient(45deg, #4f46e5, #7c3aed);
   color: white;
   border: none;
   border-radius: 8px;
@@ -157,9 +157,9 @@
 }
 
 .submit-button:hover:not(:disabled) {
-  background: linear-gradient(45deg, #1976d2, #2196f3);
+  background: linear-gradient(45deg, #7c3aed, #c026d3);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(33, 150, 243, 0.3);
+  box-shadow: 0 8px 20px rgba(142, 36, 170, 0.3);
 }
 
 .submit-button:disabled {
