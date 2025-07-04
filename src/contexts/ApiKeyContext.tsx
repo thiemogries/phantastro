@@ -9,8 +9,7 @@ const API_KEY_STORAGE_KEY = 'phantastro-api-key';
  */
 function isValidApiKeyFormat(apiKey: string): boolean {
   // Basic validation: non-empty string with reasonable length
-  return typeof apiKey === 'string' && 
-         apiKey.trim().length > 0 && 
+  return apiKey.trim().length > 0 &&
          apiKey.trim().length >= 10 && // Minimum reasonable length
          apiKey.trim() !== 'your_meteoblue_api_key_here';
 }
@@ -76,5 +75,3 @@ export const useApiKey = (): ApiKeyContextType => {
   }
   return context;
 };
-
-export default ApiKeyContext;

@@ -19,7 +19,7 @@ interface HourTooltipsProps {
 }
 
 // Helper functions for tooltip content
-const formatTime = (timeStr: string, location?: Location) => {
+const formatTime = (timeStr: string) => {
   // Handle null/undefined input
   if (!timeStr) {
     return "--:--";
@@ -221,11 +221,11 @@ const getSolarTwilightAndMoonData = (
   }
 
   // Calculate twilight times for the cycle start day (evening twilight)
-  let startDayTwilight = null;
   const startDayTargetDate = cycleStartDay
     ? new Date(cycleStartDay.date + "T12:00:00")
     : null;
 
+  let startDayTwilight;
   try {
     startDayTwilight = startDayTargetDate
       ? {
@@ -254,11 +254,11 @@ const getSolarTwilightAndMoonData = (
   }
 
   // Calculate twilight times for the cycle end day (morning twilight)
-  let endDayTwilight = null;
   const endDayTargetDate = cycleEndDay
     ? new Date(cycleEndDay.date + "T12:00:00")
     : null;
 
+  let endDayTwilight;
   try {
     endDayTwilight = endDayTargetDate
       ? {
@@ -304,22 +304,22 @@ const getSolarTwilightAndMoonData = (
     },
     twilight: {
       civilDusk: startDayTwilight?.civil?.dusk
-        ? formatTwilightTime(startDayTwilight.civil.dusk)
+        ? formatTwilightTime(startDayTwilight?.civil.dusk)
         : "N/A",
       nauticalDusk: startDayTwilight?.nautical?.dusk
-        ? formatTwilightTime(startDayTwilight.nautical.dusk)
+        ? formatTwilightTime(startDayTwilight?.nautical.dusk)
         : "N/A",
       astronomicalDusk: startDayTwilight?.astronomical?.dusk
-        ? formatTwilightTime(startDayTwilight.astronomical.dusk)
+        ? formatTwilightTime(startDayTwilight?.astronomical.dusk)
         : "N/A",
       astronomicalDawn: endDayTwilight?.astronomical?.dawn
-        ? formatTwilightTime(endDayTwilight.astronomical.dawn)
+        ? formatTwilightTime(endDayTwilight?.astronomical.dawn)
         : "N/A",
       nauticalDawn: endDayTwilight?.nautical?.dawn
-        ? formatTwilightTime(endDayTwilight.nautical.dawn)
+        ? formatTwilightTime(endDayTwilight?.nautical.dawn)
         : "N/A",
       civilDawn: endDayTwilight?.civil?.dawn
-        ? formatTwilightTime(endDayTwilight.civil.dawn)
+        ? formatTwilightTime(endDayTwilight?.civil.dawn)
         : "N/A",
     },
     moon: {
@@ -371,7 +371,7 @@ const HourTooltips: React.FC<HourTooltipsProps> = ({ groupedByDay, location }) =
                         paddingBottom: "4px",
                       }}
                     >
-                      <strong>{formatTime(hour.time, location)}</strong>
+                      <strong>{formatTime(hour.time)}</strong>
                       {location?.timezone && (
                         <span
                           style={{

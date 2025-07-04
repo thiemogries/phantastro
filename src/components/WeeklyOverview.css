@@ -229,7 +229,6 @@
 }
 
 /* Pure CSS hover effect - highlights entire column on hover */
-.hour-column:hover .hour-label,
 .hour-column:hover .hour-cell {
     box-shadow:
         inset 0 0 0 2px rgba(255, 255, 255, 0.6),
@@ -250,25 +249,13 @@
 }
 
 /* Hour cells */
-.hour-cell,
-.hour-label {
+.hour-cell {
     height: 10px;
     /* border-radius: 2px; */
     cursor: pointer;
     transition: all 0.2s ease;
     border: 1px solid rgba(255, 255, 255, 0.05);
     position: relative;
-}
-
-/* Hour labels */
-.hour-label {
-    font-size: 0.6rem;
-    color: rgba(255, 255, 255, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.02);
-    height: 14px;
 }
 
 /* Specific cell types */
@@ -336,13 +323,6 @@ body > .react-tooltip[id*="hour-"] {
     grid-column: 1 / -1; /* Span all columns */
 }
 
-/* Timeline tracks for sun/moon lines */
-.day-timeline {
-    padding: 1px 0;
-    display: flex;
-    align-items: center;
-}
-
 .timeline-track {
     position: relative;
     height: 100%;
@@ -404,6 +384,7 @@ body > .react-tooltip[id*="hour-"] {
     font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.6);
     text-transform: uppercase;
+    /*noinspection CssNonIntegerLengthInPixels*/
     letter-spacing: 0.5px;
 }
 
@@ -439,8 +420,7 @@ body > .react-tooltip[id*="hour-"] {
         gap: 0; /* Remove gaps within each hour */
     }
 
-    .hour-cell,
-    .hour-label {
+    .hour-cell {
         border: none;
     }
 }
@@ -501,15 +481,6 @@ body > .react-tooltip[id*="hour-"] {
         grid-template-columns: repeat(24, minmax(1px, 4px));
     }
 
-    .hour-label {
-        font-size: 0.4rem;
-        height: 8px;
-    }
-
-    .hour-cell {
-        height: 6px;
-    }
-
     .overview-summary {
         gap: 6px;
         padding: 6px 0;
@@ -535,30 +506,4 @@ body > .react-tooltip[id*="hour-"] {
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-.day-section {
-    animation: slideInUp 0.5s ease-out;
-}
-
-.day-section:nth-child(1) {
-    animation-delay: 0.1s;
-}
-.day-section:nth-child(2) {
-    animation-delay: 0.2s;
-}
-.day-section:nth-child(3) {
-    animation-delay: 0.3s;
-}
-.day-section:nth-child(4) {
-    animation-delay: 0.4s;
-}
-.day-section:nth-child(5) {
-    animation-delay: 0.5s;
-}
-.day-section:nth-child(6) {
-    animation-delay: 0.6s;
-}
-.day-section:nth-child(7) {
-    animation-delay: 0.7s;
 }

@@ -1,15 +1,3 @@
-/**
- * Solar calculation utilities for astronomy applications
- * Provides functions to calculate solar elevation angles and related twilight parameters
- */
-
-export interface SolarPosition {
-  elevation: number; // Solar elevation angle in degrees (above horizon)
-  azimuth: number; // Solar azimuth angle in degrees (from north)
-  declination: number; // Solar declination angle in degrees
-  hourAngle: number; // Hour angle in degrees
-}
-
 export interface TwilightData {
   twilight: "civil" | "nautical" | "astronomical";
   dawn: Date | null;

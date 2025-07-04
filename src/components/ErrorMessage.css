@@ -13,11 +13,6 @@
   backdrop-filter: blur(10px);
 }
 
-.error-message.warning {
-  background: rgba(245, 158, 11, 0.1);
-  border-color: rgba(245, 158, 11, 0.3);
-}
-
 .error-message.info {
   background: rgba(59, 130, 246, 0.1);
   border-color: rgba(59, 130, 246, 0.3);

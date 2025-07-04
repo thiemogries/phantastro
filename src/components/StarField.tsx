@@ -66,7 +66,6 @@ const processedStars: ProcessedStar[] = starCatalog.stars.map(star => ({
 const StarField: React.FC<StarFieldProps> = ({
   width: propWidth,
   height: propHeight,
-  showConstellations = true,
   animate = true,
   rotation = 0,
   useTimeBasedRotation = false

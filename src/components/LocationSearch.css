@@ -174,60 +174,11 @@
   color: rgba(255, 255, 255, 0.4);
 }
 
-/* Quick locations */
-.quick-locations {
-  margin-top: 15px;
-  padding: 15px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.quick-locations-title {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 10px;
-}
-
-.quick-locations-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.quick-location {
-  background: rgba(124, 58, 237, 0.2);
-  border: 1px solid rgba(124, 58, 237, 0.3);
-  border-radius: 8px;
-  padding: 6px 12px;
-  color: white;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.quick-location:hover {
-  background: rgba(124, 58, 237, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.2);
-}
-
 /* Responsive */
 @media (max-width: 480px) {
   .location-search .search-input {
     padding: 10px 40px 10px 12px;
     font-size: 0.9rem;
-  }
-
-  .quick-locations-list {
-    flex-direction: column;
-  }
-
-  .quick-location {
-    width: 100%;
-    text-align: center;
   }
 }
 

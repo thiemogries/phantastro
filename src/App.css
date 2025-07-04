@@ -157,21 +157,6 @@ button:disabled {
     }
 }
 
-/* Card and panel shadows */
-.card,
-.panel {
-    box-shadow:
-        0 4px 6px -1px rgba(0, 0, 0, 0.1),
-        0 2px 4px -1px rgba(0, 0, 0, 0.06),
-        0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-/* Loading states */
-.loading {
-    opacity: 0.7;
-    pointer-events: none;
-}
-
 /* State colors using CSS custom properties */
 :root {
     --color-error: #ef4444;
@@ -186,18 +171,6 @@ button:disabled {
     background-color: rgba(239, 68, 68, 0.1);
 }
 
-/* Success states */
-.success {
-    border-color: var(--color-success);
-    background-color: rgba(34, 197, 94, 0.1);
-}
-
-/* Warning states */
-.warning {
-    border-color: var(--color-warning);
-    background-color: rgba(245, 158, 11, 0.1);
-}
-
 /* Info states */
 .info {
     border-color: var(--color-info);
@@ -205,7 +178,7 @@ button:disabled {
 }
 
 /* High contrast mode support */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
     :root {
         --border-color: rgba(255, 255, 255, 0.3);
         --border-hover: rgba(255, 255, 255, 0.5);

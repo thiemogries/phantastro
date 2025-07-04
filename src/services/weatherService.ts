@@ -5,7 +5,6 @@ import {
   Location,
   LocationSearchResult,
   PrecipitationData,
-  WeatherApiError,
   WeatherForecast
 } from '../types/weather';
 
@@ -36,79 +35,6 @@ class WeatherService {
     }
     return null;
   }
-
-  /**
-   * Validate API key and check service availability (for manual testing only)
-   */
-  async validateApiKey(): Promise<boolean> {
-    const apiKey = this.getApiKey();
-    if (!apiKey) {
-      return false;
-    }
-
-    try {
-      // Simple API test with minimal parameters using only basic package
-      const params = {
-        apikey: apiKey,
-        lat: 53.5511, // Hamburg coordinates for test
-        lon: 9.9937,
-        format: "json",
-      };
-
-      await axios.get(`${this.baseUrl}/basic-1h`, {
-        params,
-        timeout: 10000, // 10 second timeout for API validation
-      });
-
-      return true;
-    } catch (error: any) {
-      console.error("API key validation failed:", error.response?.data || error.message);
-      return false;
-    }
-  }
-
-  /**
-   * Fetch weather forecast for given coordinates
-   */
-  async getWeatherForecast(
-    lat: number,
-    lon: number,
-    locationName?: string,
-  ): Promise<WeatherForecast> {
-    return this.performWeatherRequest(lat, lon, locationName);
-  }
-
-  /**
-   * Perform the actual weather API request
-   */
-  private async performWeatherRequest(
-    lat: number,
-    lon: number,
-    locationName?: string,
-  ): Promise<WeatherForecast> {
-    try {
-      // Fetch both basic weather data and cloud data in parallel
-      const [basicData, cloudData] = await Promise.all([
-        this.fetchBasicWeatherData(lat, lon),
-        this.fetchCloudData(lat, lon)
-      ]);
-
-      const location: Location = {
-        lat,
-        lon,
-        name: locationName || `${lat.toFixed(2)}, ${lon.toFixed(2)}`,
-        timezone: basicData.metadata?.timezone_abbreviation,
-        utcOffset: basicData.metadata?.utc_timeoffset,
-      };
-
-      return this.transformMeteoblueData(basicData, location, cloudData);
-    } catch (error) {
-      // Return unavailable data structure instead of throwing
-      return this.getUnavailableWeatherData(lat, lon, locationName);
-    }
-  }
-
-
 
   /**
    * Search for locations by name using OpenStreetMap Nominatim API
@@ -156,7 +82,7 @@ class WeatherService {
         const address = item.address || {};
 
         // Build a clean location name
-        let name = '';
+        let name: string;
         if (address.city) {
           name = address.city;
         } else if (address.town) {
@@ -455,19 +381,6 @@ class WeatherService {
   }
 
   /**
-   * Get API request statistics
-   */
-  getRequestStats(): { totalRequests: number } {
-    return {
-      totalRequests: this.requestCounter
-    };
-  }
-
-
-
-
-
-  /**
    * Transform Meteoblue API response to our internal format
    */
   transformMeteoblueData(
@@ -760,51 +673,6 @@ class WeatherService {
       hourlyForecast,
       dailyForecast,
       lastUpdated: new Date().toISOString(),
-    };
-  }
-
-  /**
-   * Get unavailable weather data structure
-   */
-  private getUnavailableWeatherData(lat: number, lon: number, locationName?: string): WeatherForecast {
-    const location: Location = {
-      lat,
-      lon,
-      name: locationName || `${lat.toFixed(2)}, ${lon.toFixed(2)}`,
-    };
-
-    const currentTime = new Date().toISOString();
-
-    return {
-      location,
-      currentWeather: {
-        time: currentTime,
-        temperature: null,
-        humidity: null,
-        windSpeed: null,
-        windDirection: null,
-        cloudCover: {
-          totalCloudCover: null,
-          lowCloudCover: null,
-          midCloudCover: null,
-          highCloudCover: null,
-        },
-        precipitation: {
-          precipitation: null,
-          precipitationProbability: null,
-        },
-        moonlight: {
-          moonlightActual: null,
-          moonlightClearSky: null,
-          nightSkyBrightnessActual: null,
-          nightSkyBrightnessClearSky: null,
-          zenithAngle: null,
-        },
-        visibility: null,
-      },
-      hourlyForecast: [],
-      dailyForecast: [],
-      lastUpdated: currentTime,
     };
   }
 

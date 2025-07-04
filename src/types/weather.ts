@@ -26,8 +26,6 @@ export interface CloudData {
   highCloudCover: number | null;  // 0-100%
 }
 
-
-
 // Precipitation data
 export interface PrecipitationData {
   precipitation: number | null;    // mm
@@ -42,15 +40,6 @@ export interface MoonlightData {
   nightSkyBrightnessActual: number | null; // lux (actual conditions)
   nightSkyBrightnessClearSky: number | null; // lux (clear sky)
   zenithAngle: number | null;            // degrees (solar zenith angle)
-}
-
-// Solar position data
-export interface SolarData {
-  elevation: number | null;              // degrees (solar elevation angle above horizon)
-  azimuth: number | null;                // degrees (solar azimuth angle, 0° = north)
-  declination: number | null;            // degrees (solar declination angle)
-  hourAngle: number | null;              // degrees (hour angle, 0° = solar noon)
-  period: 'day' | 'civil-twilight' | 'nautical-twilight' | 'astronomical-twilight' | 'night' | null;
 }
 
 // Sun and Moon rise/set data
@@ -97,84 +86,6 @@ export interface WeatherForecast {
   dailyForecast: DailyForecast[];
   lastUpdated: string;
 }
-
-// Meteoblue API specific response structure
-export interface MeteoblueResponse {
-  metadata: {
-    modelrun_updatetime_utc: string;
-    name: string;
-    height: number;
-    timezone_abbrevation: string;
-    latitude: number;
-    modelrun_utc: string;
-    longitude: number;
-    utc_timeoffset: number;
-    generation_time_ms: number;
-  };
-  units: {
-    precipitation: string;
-    windspeed: string;
-    precipitation_probability: string;
-    relativehumidity: string;
-    temperature: string;
-    time: string;
-    pressure: string;
-    winddirection: string;
-  };
-  data_1h?: {
-    time: string[];
-    snowfraction: number[];
-    windspeed: number[];
-    temperature: number[];
-    precipitation_probability: number[];
-    convective_precipitation: number[];
-    rainspot: string[];
-    precipitation: number[];
-    isdaylight: number[];
-    // Cloud data from clouds-1h_clouds-day API
-    totalcloudcover?: number[];
-    lowclouds?: number[];
-    midclouds?: number[];
-    highclouds?: number[];
-    visibility?: number[];
-    fog_probability?: number[];
-    sunshinetime?: number[];
-    // Moonlight data from moonlight-1h API
-    moonlight_actual?: number[];
-    moonlight_clearsky?: number[];
-    nightskybrightness_actual?: number[];
-    nightskybrightness_clearsky?: number[];
-    zenithangle?: number[];
-  };
-  // Sun and Moon data from sunmoon API
-  data_day?: {
-    time: string[];
-    temperature_max?: number[];
-    temperature_min?: number[];
-    sunrise: string[];
-    sunset: string[];
-    precipitation_sum?: number[];
-    precipitation_probability_max?: number[];
-    windspeed_max?: number[];
-    cloudcover_mean?: number[];
-    moonrise: string[];
-    moonset: string[];
-    moonphaseangle: number[];
-    moonilluminatedfraction: number[];
-    moonphasename: string[];
-    moonage: number[];
-    moonphasetransittime?: string[];
-  };
-}
-
-// API Error interface
-export interface WeatherApiError {
-  message: string;
-  code?: number;
-  details?: string;
-}
-
-
 
 // Location search result
 export interface LocationSearchResult {

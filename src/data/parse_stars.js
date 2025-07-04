@@ -154,13 +154,9 @@ function parseStarsFile(filename) {
             // Extract data
             const starId = parts[0].trim();
             const identifier = parts[1].trim();
-            const starType = parts[2].trim();
             const coordinates = parts[3].trim();
-            const magU = parts[4].trim();
             const magB = parts[5].trim();
             const magV = parts[6].trim();
-            const magR = parts[7].trim();
-            const magI = parts.length > 8 ? parts[8].trim() : '~';
             const spectralType = parts.length > 9 ? parts[9].trim() : '';
             
             // Skip if no V magnitude
@@ -201,7 +197,6 @@ function parseStarsFile(filename) {
             
         } catch (e) {
             console.error(`Error parsing line: ${trimmedLine.substring(0, 50)}... - ${e.message}`);
-            continue;
         }
     }
     
@@ -259,8 +254,5 @@ if (require.main === module) {
 }
 
 module.exports = {
-    parseCoordinates,
-    getStarColor,
-    parseStarsFile,
     main
 };

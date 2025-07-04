@@ -87,5 +87,3 @@ export function useLocationsStorage(): [
 
   return [validatedLocations, setLocations, clearLocations];
 }
-
-export default useLocationsStorage;

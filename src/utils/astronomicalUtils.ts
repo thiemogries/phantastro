@@ -18,12 +18,6 @@ export interface Star {
   };
 }
 
-export interface ConstellationLine {
-  id: string;
-  name: string;
-  lines: number[][][]; // Array of line segments, each containing coordinate pairs
-}
-
 export interface ScreenCoordinate {
   x: number;
   y: number;
@@ -100,13 +94,6 @@ export function degreesToRadians(degrees: number): number {
 }
 
 /**
- * Convert hours to radians (for right ascension)
- */
-export function hoursToRadians(hours: number): number {
-  return hours * Math.PI / 12;
-}
-
-/**
  * Calculate star size based on magnitude
  * Brighter stars (lower magnitude) appear larger
  */
@@ -159,18 +146,4 @@ export function getTimeBasedRotation(): number {
   const now = new Date();
   const totalSeconds = now.getTime() / 1000; // Total seconds since epoch
   return ((totalSeconds % ROTATION_SPEED) / ROTATION_SPEED) * 2 * Math.PI;
-}
-
-/**
- * Filter stars by magnitude limit
- */
-export function filterStarsByMagnitude(stars: Star[], maxMagnitude: number): Star[] {
-  return stars.filter(star => star.magnitude <= maxMagnitude);
-}
-
-/**
- * Sort stars by brightness (magnitude)
- */
-export function sortStarsByBrightness(stars: Star[]): Star[] {
-  return [...stars].sort((a, b) => a.magnitude - b.magnitude);
 }

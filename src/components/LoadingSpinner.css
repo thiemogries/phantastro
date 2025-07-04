@@ -105,35 +105,6 @@
   }
 }
 
-/* Size variations */
-.loading-spinner.small {
-  padding: 10px;
-}
-
-.loading-spinner.small .spinner-container {
-  width: 40px;
-  height: 40px;
-}
-
-.loading-spinner.small .star {
-  font-size: 0.8rem;
-  transform-origin: 20px 20px; /* Center of the 40px container */
-}
-
-.loading-spinner.large {
-  padding: 40px;
-}
-
-.loading-spinner.large .spinner-container {
-  width: 120px;
-  height: 120px;
-}
-
-.loading-spinner.large .star {
-  font-size: 1.8rem;
-  transform-origin: 60px 60px; /* Center of the 120px container */
-}
-
 /* Message styling */
 .spinner-message {
   color: rgba(255, 255, 255, 0.8);

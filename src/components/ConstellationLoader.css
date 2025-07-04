@@ -23,31 +23,6 @@
   filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
 }
 
-/* Size variations */
-.constellation-loader.small {
-  padding: 10px;
-}
-
-.constellation-loader.small .constellation-container {
-  padding: 15px;
-}
-
-.constellation-loader.medium {
-  padding: 20px;
-}
-
-.constellation-loader.medium .constellation-container {
-  padding: 20px;
-}
-
-.constellation-loader.large {
-  padding: 30px;
-}
-
-.constellation-loader.large .constellation-container {
-  padding: 25px;
-}
-
 /* Message styling */
 .constellation-message {
   color: rgba(255, 255, 255, 0.8);
