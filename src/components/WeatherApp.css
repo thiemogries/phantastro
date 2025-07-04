@@ -25,14 +25,14 @@
   z-index: 10;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  /*padding: 20px;*/
+  /*background: rgba(255, 255, 255, 0.05);*/
+  /*border-radius: 20px;*/
+  /*backdrop-filter: blur(10px);*/
+  /*border: 1px solid rgba(255, 255, 255, 0.1);*/
 }
 
+.api-key-login__header h1,
 .weather-app__title h1 {
   font-size: 2.5rem;
   margin: 0;
@@ -41,6 +41,7 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: 0 0 30px rgba(124, 58, 237, 0.5);
+  font-weight: 300;
 }
 
 .weather-app__title p {
@@ -227,6 +228,7 @@
     text-align: center;
   }
 
+  .api-key-login__header h1,
   .weather-app__title h1 {
     font-size: 2rem;
   }
@@ -237,6 +239,7 @@
     padding: 10px;
   }
 
+  .api-key-login__header h1,
   .weather-app__title h1 {
     font-size: 1.8rem;
   }

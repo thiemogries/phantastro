@@ -88,12 +88,11 @@ const ApiKeyLogin: React.FC = () => {
     <div className="api-key-login">
       <div className="api-key-login__container">
         <div className="api-key-login__header">
-          <h1>🌌 Phantastro</h1>
+          <h1>Phantastro</h1>
           <p>Astronomical Weather Forecast</p>
         </div>
 
         <div className="api-key-login__content">
-          <h2>Welcome to Phantastro</h2>
           <p>
             To get started, you'll need a free Meteoblue API key for weather data.
           </p>
