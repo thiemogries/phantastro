@@ -2,7 +2,7 @@ import { addIcon } from '@iconify/react';
 
 // Import specific icons from bundled packages
 import dotsVertical from '@iconify-icons/mdi/dots-vertical';
-import brush from '@iconify-icons/mdi/brush';
+import broom from '@iconify-icons/mdi/broom';
 import search from '@iconify-icons/mdi/search';
 import close from '@iconify-icons/mdi/close';
 import mapMarker from '@iconify-icons/mdi/map-marker';
@@ -60,7 +60,7 @@ import moonWaningCrescent6 from '@iconify-icons/wi/moon-waning-crescent-6';
 export const preloadIcons = () => {
   // Add MDI icons
   addIcon('mdi:dots-vertical', dotsVertical);
-  addIcon('mdi:brush', brush);
+  addIcon('mdi:broom', broom);
   addIcon('mdi:search', search);
   addIcon('mdi:close', close);
   addIcon('mdi:map-marker', mapMarker);

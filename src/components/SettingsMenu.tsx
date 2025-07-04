@@ -80,7 +80,7 @@ const SettingsMenu: React.FC = () => {
             role="menuitem"
           >
             <span className="menu-icon">
-              <Icon icon="mdi:brush" width="16" height="16" />
+              <Icon icon="mdi:broom" width="16" height="16" />
             </span>
             Clear API Key
           </button>
