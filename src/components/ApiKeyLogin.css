@@ -1,11 +1,12 @@
 .api-key-login {
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.8) 0%, rgba(22, 33, 62, 0.8) 50%, rgba(15, 52, 96, 0.8) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
   color: white;
+  position: relative;
+  z-index: 1;
 }
 
 .api-key-login__container {
@@ -17,6 +18,8 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 3rem;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 2;
 }
 
 .api-key-login__header {

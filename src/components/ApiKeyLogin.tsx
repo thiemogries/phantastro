@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApiKey } from '../contexts/ApiKeyContext';
 import LoadingSpinner from './LoadingSpinner';
+import StarField from './StarField';
 import './ApiKeyLogin.css';
 
 const ApiKeyLogin: React.FC = () => {
@@ -86,6 +87,12 @@ const ApiKeyLogin: React.FC = () => {
 
   return (
     <div className="api-key-login">
+      {/* Star Field Background */}
+      <StarField
+        animate={false}
+        useTimeBasedRotation={true}
+      />
+
       <div className="api-key-login__container">
         <div className="api-key-login__header">
           <h1>Phantastro</h1>
