@@ -280,7 +280,7 @@ const ConstellationLoader: React.FC<ConstellationLoaderProps> = ({
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress(prev => {
-        const newProgress = prev + 0.008; // Slower increment for smoother animation
+        const newProgress = prev + 0.025; // Slower increment for smoother animation
         if (newProgress >= 1) {
           // Complete transition: move to next constellation pair
           setFromIndex(toIndex);

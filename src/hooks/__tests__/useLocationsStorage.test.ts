@@ -40,8 +40,8 @@ describe('useLocationsStorage', () => {
     const { result } = renderHook(() => useLocationsStorage());
     
     const testLocations: WeatherQueryParams[] = [
-      { lat: 53.5511, lon: 9.9937, locationName: 'Hamburg, Germany' },
-      { lat: 40.7128, lon: -74.0060, locationName: 'New York, USA' }
+      { lat: 53.5511, lon: 9.9937, name: 'Hamburg, Germany' },
+      { lat: 40.7128, lon: -74.0060, name: 'New York, USA' }
     ];
 
     act(() => {
@@ -55,7 +55,7 @@ describe('useLocationsStorage', () => {
 
   it('should persist locations across hook instances', () => {
     const testLocations: WeatherQueryParams[] = [
-      { lat: 51.5074, lon: -0.1278, locationName: 'London, UK' }
+      { lat: 51.5074, lon: -0.1278, name: 'London, UK' }
     ];
 
     // First hook instance
@@ -76,11 +76,11 @@ describe('useLocationsStorage', () => {
   it('should validate location data and filter invalid entries', () => {
     // Manually set invalid data in localStorage
     localStorageMock.setItem('phantastro-locations', JSON.stringify([
-      { lat: 53.5511, lon: 9.9937, locationName: 'Hamburg, Germany' }, // valid
-      { lat: 'invalid', lon: 9.9937, locationName: 'Invalid' }, // invalid lat
-      { lat: 91, lon: 9.9937, locationName: 'Invalid' }, // invalid lat range
-      { lat: 53.5511, lon: 181, locationName: 'Invalid' }, // invalid lon range
-      { lat: 40.7128, lon: -74.0060 }, // valid without locationName
+      { lat: 53.5511, lon: 9.9937, name: 'Hamburg, Germany' }, // valid
+      { lat: 'invalid', lon: 9.9937, name: 'Invalid' }, // invalid lat
+      { lat: 91, lon: 9.9937, name: 'Invalid' }, // invalid lat range
+      { lat: 53.5511, lon: 181, name: 'Invalid' }, // invalid lon range
+      { lat: 40.7128, lon: -74.0060 }, // valid without name
     ]));
 
     const { result } = renderHook(() => useLocationsStorage());
@@ -88,7 +88,7 @@ describe('useLocationsStorage', () => {
     
     // Should only have the 2 valid locations
     expect(locations).toHaveLength(2);
-    expect(locations[0]).toEqual({ lat: 53.5511, lon: 9.9937, locationName: 'Hamburg, Germany' });
+    expect(locations[0]).toEqual({ lat: 53.5511, lon: 9.9937, name: 'Hamburg, Germany' });
     expect(locations[1]).toEqual({ lat: 40.7128, lon: -74.0060 });
   });
 
@@ -96,7 +96,7 @@ describe('useLocationsStorage', () => {
     const { result } = renderHook(() => useLocationsStorage());
     
     const testLocations: WeatherQueryParams[] = [
-      { lat: 53.5511, lon: 9.9937, locationName: 'Hamburg, Germany' }
+      { lat: 53.5511, lon: 9.9937, name: 'Hamburg, Germany' }
     ];
 
     act(() => {
@@ -116,7 +116,7 @@ describe('useLocationsStorage', () => {
   it('should handle functional updates', () => {
     const { result } = renderHook(() => useLocationsStorage());
     
-    const initialLocation: WeatherQueryParams = { lat: 53.5511, lon: 9.9937, locationName: 'Hamburg, Germany' };
+    const initialLocation: WeatherQueryParams = { lat: 53.5511, lon: 9.9937, name: 'Hamburg, Germany' };
 
     act(() => {
       const [, setLocations] = result.current;
@@ -125,11 +125,11 @@ describe('useLocationsStorage', () => {
 
     act(() => {
       const [, setLocations] = result.current;
-      setLocations(prev => [...prev, { lat: 40.7128, lon: -74.0060, locationName: 'New York, USA' }]);
+      setLocations(prev => [...prev, { lat: 40.7128, lon: -74.0060, name: 'New York, USA' }]);
     });
 
     const [locations] = result.current;
     expect(locations).toHaveLength(2);
-    expect(locations[1].locationName).toBe('New York, USA');
+    expect(locations[1].name).toBe('New York, USA');
   });
 });

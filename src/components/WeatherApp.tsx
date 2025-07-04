@@ -31,7 +31,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
       const newLocation: WeatherQueryParams = {
         lat: location.lat,
         lon: location.lon,
-        locationName: location.name,
+        name: location.name,
       };
       setLocations(prev => [...prev, newLocation]);
     }

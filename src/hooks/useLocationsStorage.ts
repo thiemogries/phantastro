@@ -19,7 +19,7 @@ function isValidLocation(location: any): location is WeatherQueryParams {
     location.lat <= 90 &&
     location.lon >= -180 &&
     location.lon <= 180 &&
-    (location.locationName === undefined || typeof location.locationName === 'string')
+    (location.name === undefined || typeof location.name === 'string')
   );
 }
 

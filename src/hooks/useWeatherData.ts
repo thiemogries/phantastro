@@ -5,7 +5,7 @@ import weatherService from '../services/weatherService';
 export interface WeatherQueryParams {
   lat: number;
   lon: number;
-  locationName?: string;
+  name?: string;
 }
 
 export const WEATHER_QUERY_KEYS = {
@@ -44,7 +44,7 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
       const location: Location = {
         lat: params.lat,
         lon: params.lon,
-        name: params.locationName || `${params.lat.toFixed(2)}, ${params.lon.toFixed(2)}`
+        name: params.name || `${params.lat.toFixed(2)}, ${params.lon.toFixed(2)}`
       };
 
       return weatherService.transformMeteoblueData(

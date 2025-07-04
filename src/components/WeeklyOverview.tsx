@@ -80,23 +80,16 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
   // Handle loading state
   if (isLoading && !forecast) {
-    const mockLocation = {
-      name: location.locationName || 'Unknown Location',
-      country: '',
-      lat: location.lat,
-      lon: location.lon
-    };
-
     return (
       <div className={`weekly-overview ${className || ""}`}>
         <LocationHeader
-          location={mockLocation}
+          location={{...location, name: location.name || 'Unknown Location'}}
           lastUpdated="Loading weather data..."
           isFetching={false}
           onRemove={onRemove}
         />
         <div className="loading-container">
-          <ConstellationLoader size="medium" message="Loading weather data..." />
+          <ConstellationLoader size="medium"/>
         </div>
       </div>
     );
@@ -104,17 +97,10 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
   // Handle error state
   if (queryError && !forecast) {
-    const mockLocation = {
-      name: location.locationName || 'Unknown Location',
-      country: '',
-      lat: location.lat,
-      lon: location.lon
-    };
-
     return (
       <div className={`weekly-overview ${className || ""}`}>
         <LocationHeader
-          location={mockLocation}
+          location={{...location, name: location.name || 'Unknown Location'}}
           lastUpdated="Error loading data"
           isFetching={false}
           onRemove={onRemove}
@@ -129,17 +115,10 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
   // Handle no data state
   if (!forecast) {
-    const mockLocation = {
-      name: location.locationName || 'Unknown Location',
-      country: '',
-      lat: location.lat,
-      lon: location.lon
-    };
-
     return (
       <div className={`weekly-overview ${className || ""}`}>
         <LocationHeader
-          location={mockLocation}
+          location={location}
           lastUpdated="No data available"
           isFetching={false}
           onRemove={onRemove}
