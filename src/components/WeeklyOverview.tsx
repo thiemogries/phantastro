@@ -44,7 +44,7 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
     const dailyData = forecast.dailyForecast;
 
     const days: { [key: string]: HourlyForecast[] } = {};
-    hourlyData.slice(0, 168).forEach((hour, index) => {
+    hourlyData.slice(0, 168).forEach((hour) => {
       // 7 days * 24 hours = 168
       const date = hour.time.split("T")[0];
       if (!days[date]) days[date] = [];

@@ -1,18 +1,17 @@
 import axios from "axios";
 import {
-  WeatherForecast,
-  HourlyForecast,
   DailyForecast,
+  HourlyForecast,
   Location,
-  PrecipitationData,
   LocationSearchResult,
-  WeatherApiError
+  PrecipitationData,
+  WeatherApiError,
+  WeatherForecast
 } from '../types/weather';
 
 class WeatherService {
-  private baseUrl: string;
+  private readonly baseUrl: string;
   private requestCounter = 0;
-  private currentLocationSearchController: AbortController | null = null;
 
   constructor() {
     this.baseUrl =
@@ -102,9 +101,7 @@ class WeatherService {
         utcOffset: basicData.metadata?.utc_timeoffset,
       };
 
-      const forecast = this.transformMeteoblueData(basicData, location, cloudData);
-
-      return forecast;
+      return this.transformMeteoblueData(basicData, location, cloudData);
     } catch (error) {
       // Return unavailable data structure instead of throwing
       return this.getUnavailableWeatherData(lat, lon, locationName);
@@ -150,7 +147,7 @@ class WeatherService {
       }
 
       // Transform Nominatim response to our LocationSearchResult format
-      const results: LocationSearchResult[] = response.data.map((item: any) => {
+      return response.data.map((item: any) => {
         const lat = parseFloat(item.lat);
         const lon = parseFloat(item.lon);
 
@@ -195,11 +192,9 @@ class WeatherService {
       }).filter((result: LocationSearchResult) => {
         // Filter out invalid coordinates
         return !isNaN(result.lat) && !isNaN(result.lon) &&
-               result.lat >= -90 && result.lat <= 90 &&
-               result.lon >= -180 && result.lon <= 180;
+          result.lat >= -90 && result.lat <= 90 &&
+          result.lon >= -180 && result.lon <= 180;
       });
-
-      return results;
 
     } catch (error: any) {
       // Don't log errors for aborted requests (user is typing)
@@ -586,7 +581,7 @@ class WeatherService {
         };
 
         // Safe data extraction with fallbacks
-        const safeExtractValue = (dataPath: any, index: number, fieldName: string): number | null => {
+        const safeExtractValue = (dataPath: any, index: number): number | null => {
           try {
             const value = dataPath?.[index];
 
@@ -602,36 +597,36 @@ class WeatherService {
 
         const hourData = {
           time: data.data_1h.time[i],
-          temperature: safeExtractValue(data.data_1h.temperature, i, 'temperature'),
+          temperature: safeExtractValue(data.data_1h.temperature, i),
           humidity: null, // Not available in this API response
-          windSpeed: safeExtractValue(data.data_1h.windspeed, i, 'windspeed'),
+          windSpeed: safeExtractValue(data.data_1h.windspeed, i),
           windDirection: null, // Not available in this API response
           cloudCover: {
             totalCloudCover: (() => {
               // Try dedicated cloud data first
-              const cloudValue = safeExtractValue(cloudData?.data_1h?.totalcloudcover, i, 'totalcloudcover');
+              const cloudValue = safeExtractValue(cloudData?.data_1h?.totalcloudcover, i);
               if (cloudValue !== null) return cloudValue;
 
               // Fallback to basic weather data
-              return safeExtractValue(data.data_1h?.cloudcover, i, 'cloudcover_fallback');
+              return safeExtractValue(data.data_1h?.cloudcover, i);
             })(),
-            lowCloudCover: safeExtractValue(cloudData?.data_1h?.lowclouds, i, 'lowclouds'),
-            midCloudCover: safeExtractValue(cloudData?.data_1h?.midclouds, i, 'midclouds'),
-            highCloudCover: safeExtractValue(cloudData?.data_1h?.highclouds, i, 'highclouds'),
+            lowCloudCover: safeExtractValue(cloudData?.data_1h?.lowclouds, i),
+            midCloudCover: safeExtractValue(cloudData?.data_1h?.midclouds, i),
+            highCloudCover: safeExtractValue(cloudData?.data_1h?.highclouds, i),
           },
           precipitation: {
-            precipitation: safeExtractValue(data.data_1h.precipitation, i, 'precipitation'),
-            precipitationProbability: safeExtractValue(data.data_1h.precipitation_probability, i, 'precipitation_probability'),
+            precipitation: safeExtractValue(data.data_1h.precipitation, i),
+            precipitationProbability: safeExtractValue(data.data_1h.precipitation_probability, i),
           },
           moonlight: moonlightData ? {
-            moonlightActual: safeExtractValue(moonlightData.data_1h?.moonlight_actual, i, 'moonlight_actual'),
-            moonlightClearSky: safeExtractValue(moonlightData.data_1h?.moonlight_clearsky, i, 'moonlight_clearsky'),
-            nightSkyBrightnessActual: safeExtractValue(moonlightData.data_1h?.nightskybrightness_actual, i, 'nightskybrightness_actual'),
-            nightSkyBrightnessClearSky: safeExtractValue(moonlightData.data_1h?.nightskybrightness_clearsky, i, 'nightskybrightness_clearsky'),
-            zenithAngle: safeExtractValue(moonlightData.data_1h?.zenithangle, i, 'zenithangle'),
+            moonlightActual: safeExtractValue(moonlightData.data_1h?.moonlight_actual, i),
+            moonlightClearSky: safeExtractValue(moonlightData.data_1h?.moonlight_clearsky, i),
+            nightSkyBrightnessActual: safeExtractValue(moonlightData.data_1h?.nightskybrightness_actual, i),
+            nightSkyBrightnessClearSky: safeExtractValue(moonlightData.data_1h?.nightskybrightness_clearsky, i),
+            zenithAngle: safeExtractValue(moonlightData.data_1h?.zenithangle, i),
           } : defaultMoonlightData,
           visibility: (() => {
-            const visibilityValue = safeExtractValue(cloudData?.data_1h?.visibility, i, 'visibility');
+            const visibilityValue = safeExtractValue(cloudData?.data_1h?.visibility, i);
             return visibilityValue !== null ? visibilityValue / 1000 : null;
           })(), // Convert from meters to kilometers
         };
@@ -810,25 +805,6 @@ class WeatherService {
       hourlyForecast: [],
       dailyForecast: [],
       lastUpdated: currentTime,
-    };
-  }
-
-  /**
-   * Handle API errors consistently
-   */
-  private handleApiError(error: any): WeatherApiError {
-    if (axios.isAxiosError(error)) {
-      return {
-        message:
-          error.response?.data?.message || "Failed to fetch weather data",
-        code: error.response?.status,
-        details: error.message,
-      };
-    }
-
-    return {
-      message: error.message || "Unknown error occurred",
-      details: error.toString(),
     };
   }
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import './ConstellationLoader.css';
 import constellationData from '../data/constellations.json';
 
@@ -227,8 +227,7 @@ const ConstellationLoader: React.FC<ConstellationLoaderProps> = ({
         drawStarLocal(fromStar.x * width, fromStar.y * height, opacity);
       } else if (!fromStar && toStar) {
         // Star appearing
-        const opacity = easedProgress;
-        drawStarLocal(toStar.x * width, toStar.y * height, opacity);
+        drawStarLocal(toStar.x * width, toStar.y * height, easedProgress);
       }
     }
 
