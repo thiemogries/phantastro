@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { LocationSearchResult } from '../types/weather';
 import { WeatherQueryParams } from '../hooks/useWeatherData';
 import { useLocationsStorage } from '../hooks/useLocationsStorage';
 import { useApiKey } from '../contexts/ApiKeyContext';
+import { useShareLocations } from '../hooks/useShareLocations';
 import LocationSearch from './LocationSearch';
 import WeeklyOverview from './WeeklyOverview';
 import ApiKeyLogin from './ApiKeyLogin';
@@ -18,6 +19,7 @@ interface WeatherAppProps {
 const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
   const { apiKey } = useApiKey();
   const [locations, setLocations] = useLocationsStorage();
+  const { getSharedLocations, clearSharedUrl } = useShareLocations();
 
   const handleLocationSelect = (location: LocationSearchResult) => {
     // Location selected - this is normal operation, no logging needed
@@ -43,6 +45,31 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
     setLocations(prev => prev.filter((_, i) => i !== index));
   };
 
+  // Load shared locations from URL on mount
+  useEffect(() => {
+    const sharedLocations = getSharedLocations();
+
+    if (sharedLocations.length > 0) {
+      setLocations(prev => {
+        // Filter out duplicates using the same logic as handleLocationSelect
+        const newLocations = sharedLocations.filter(sharedLocation => {
+          return !prev.some(
+            existingLocation =>
+              Math.abs(existingLocation.lat - sharedLocation.lat) < 0.001 &&
+              Math.abs(existingLocation.lon - sharedLocation.lon) < 0.001
+          );
+        });
+
+        // Clear URL parameters after loading
+        if (newLocations.length > 0) {
+          clearSharedUrl();
+        }
+
+        return [...prev, ...newLocations];
+      });
+    }
+  }, [getSharedLocations, setLocations, clearSharedUrl]);
+
   // Show login page if no API key is present
   if (!apiKey) {
     return <ApiKeyLogin />;
@@ -64,7 +91,7 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
             {locations.length > 0 && (
               <LocationSearch onLocationSelect={handleLocationSelect} />
             )}
-            <SettingsMenu />
+            <SettingsMenu locations={locations} />
           </div>
         </header>
 

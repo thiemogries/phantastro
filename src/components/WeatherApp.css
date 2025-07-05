@@ -260,6 +260,10 @@
   .weather-app__title h1 {
     font-size: 1.8rem;
   }
+
+  .weather-app__controls .location-search {
+    min-width: 280px; /* Minimum width to ensure usability */
+  }
 }
 
 .update-dot {

@@ -453,6 +453,7 @@ body > .react-tooltip[id*='hour-'] {
   .day-info-container {
     gap: 3px;
     flex-direction: column;
+    padding: 0
   }
 
   .day-text {

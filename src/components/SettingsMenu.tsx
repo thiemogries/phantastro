@@ -1,11 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Icon } from '@iconify/react';
 import { useApiKey } from '../contexts/ApiKeyContext';
+import { useShareLocations } from '../hooks/useShareLocations';
+import { WeatherQueryParams } from '../hooks/useWeatherData';
 import './SettingsMenu.css';
 
-const SettingsMenu: React.FC = () => {
+interface SettingsMenuProps {
+  locations?: WeatherQueryParams[];
+}
+
+const SettingsMenu: React.FC<SettingsMenuProps> = ({ locations = [] }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { clearApiKey } = useApiKey();
+  const { shareLocations } = useShareLocations();
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -57,6 +64,11 @@ const SettingsMenu: React.FC = () => {
     setIsOpen(false);
   };
 
+  const handleShareLocations = async () => {
+    await shareLocations(locations);
+    setIsOpen(false);
+  };
+
   return (
     <div className="settings-menu">
       <button
@@ -72,6 +84,18 @@ const SettingsMenu: React.FC = () => {
 
       {isOpen && (
         <div ref={menuRef} className="settings-dropdown" role="menu">
+          {locations.length > 0 && (
+            <button
+              className="settings-menu-item share-locations-button"
+              onClick={handleShareLocations}
+              role="menuitem"
+            >
+              <span className="menu-icon">
+                <Icon icon="mdi:share-variant" width="16" height="16" />
+              </span>
+              Share Locations
+            </button>
+          )}
           <button
             className="settings-menu-item clear-api-key-button"
             onClick={handleClearApiKey}
