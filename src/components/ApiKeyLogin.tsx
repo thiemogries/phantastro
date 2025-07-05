@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useApiKey } from '../contexts/ApiKeyContext';
 import LoadingSpinner from './LoadingSpinner';
 import StarField from './StarField';
@@ -69,6 +70,7 @@ const ApiKeyLogin: React.FC = () => {
       const cleanedInput = inputValue.trim().replace(/^["']|["']$/g, '');
 
       // First check basic format and store
+      // Note: setApiKey will show toast for format errors and throw
       setApiKey(cleanedInput);
 
       // Then validate with actual API call
@@ -77,14 +79,19 @@ const ApiKeyLogin: React.FC = () => {
       if (isValid) {
         // The context will automatically update and WeatherApp will re-render
       } else {
-        setError('Invalid API key. Please check your key and try again.');
+        const errorMessage =
+          'Invalid API key. Please check your key and try again.';
+        setError(errorMessage);
+        toast.error(errorMessage);
         // Clear the invalid key from storage
         clearApiKey();
       }
     } catch (error) {
-      setError(
-        error instanceof Error ? error.message : 'Invalid API key format'
-      );
+      // Handle all errors from setApiKey and API validation
+      const errorMessage =
+        error instanceof Error ? error.message : 'Invalid API key format';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsValidating(false);
     }

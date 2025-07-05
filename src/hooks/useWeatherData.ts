@@ -1,4 +1,6 @@
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import {
   Location,
   LocationSearchResult,
@@ -28,7 +30,7 @@ export const WEATHER_QUERY_KEYS = {
  * Custom hook for fetching weather data - simplified to avoid race conditions
  */
 export const useWeatherData = (params: WeatherQueryParams | null) => {
-  return useQuery<WeatherForecast>({
+  const query = useQuery<WeatherForecast>({
     queryKey: params
       ? WEATHER_QUERY_KEYS.weather(params.lat, params.lon)
       : ['weather', 'disabled'],
@@ -81,13 +83,26 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
     retry: 1,
     retryDelay: 1000,
   });
+
+  // Show toast notification for weather data fetch errors
+  React.useEffect(() => {
+    if (query.error && !query.isFetching) {
+      const error = query.error as Error;
+      const errorMessage = error.message.includes('No API key')
+        ? 'API key required to fetch weather data'
+        : `Failed to fetch weather data: ${error.message}`;
+      toast.error(errorMessage);
+    }
+  }, [query.error, query.isFetching]);
+
+  return query;
 };
 
 /**
  * Custom hook for searching locations using TanStack Query for caching
  */
 export const useLocationSearch = (query: string) => {
-  return useQuery({
+  const searchQuery = useQuery({
     queryKey: ['locationSearch', query.trim().toLowerCase()],
     queryFn: async ({ signal }): Promise<LocationSearchResult[]> => {
       if (!query.trim() || query.trim().length < 3) return [];
@@ -111,4 +126,21 @@ export const useLocationSearch = (query: string) => {
     retryDelay: 1000, // 1 second delay between retries
     refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
+
+  // Show toast notification for location search errors
+  React.useEffect(() => {
+    if (searchQuery.error && !searchQuery.isFetching) {
+      const error = searchQuery.error as Error & { code?: string };
+      // Only show toast for non-aborted location search errors
+      if (
+        error.name !== 'AbortError' &&
+        error.code !== 'ERR_CANCELED' &&
+        error.code !== 'ECONNABORTED'
+      ) {
+        toast.error(`Location search failed: ${error.message}`);
+      }
+    }
+  }, [searchQuery.error, searchQuery.isFetching]);
+
+  return searchQuery;
 };
