@@ -586,7 +586,7 @@ class WeatherService {
           if (value === null || value === undefined || isNaN(value)) {
             return null;
           }
-          return typeof value === 'number' ? value : parseFloat(value);
+          return value;
         } catch (error) {
           return null;
         }

@@ -3,14 +3,12 @@ node_modules/
 
 # Build outputs
 build/
-dist/
 
 # Coverage reports
 coverage/
 
 # Package files
 package-lock.json
-yarn.lock
 
 # Environment files
 .env
@@ -18,13 +16,6 @@ yarn.lock
 .env.development.local
 .env.test.local
 .env.production.local
-
-# Logs
-*.log
-
-# Generated files
-*.min.js
-*.min.css
 
 # Documentation
 docs/
