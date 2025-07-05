@@ -1,6 +1,6 @@
 {
   "name": "phantastro",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "dependencies": {
     "@iconify-icons/mdi": "^1.2.48",

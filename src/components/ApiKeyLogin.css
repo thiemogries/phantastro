@@ -144,6 +144,44 @@
   margin-top: 0.5rem;
 }
 
+.ad-blocker-hint {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.ad-blocker-hint h4 {
+  color: #ffc107;
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.ad-blocker-hint p {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.ad-blocker-hint ul {
+  margin: 0 0 0.75rem 0;
+  padding-left: 1.25rem;
+}
+
+.ad-blocker-hint li {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.ad-blocker-hint small {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+}
+
 .submit-button {
   width: 100%;
   padding: 1rem;

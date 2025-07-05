@@ -13,7 +13,9 @@ const ApiKeyLogin: React.FC = () => {
   const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const validateApiKey = async (apiKey: string): Promise<boolean> => {
+  const validateApiKey = async (
+    apiKey: string
+  ): Promise<{ isValid: boolean; isAdBlockerIssue: boolean }> => {
     try {
       // Clean the API key before validation
       const cleanedKey = apiKey.trim().replace(/^["']|["']$/g, '');
@@ -33,20 +35,48 @@ const ApiKeyLogin: React.FC = () => {
         timeout: 10000, // 10 second timeout
       });
 
-      return response.status >= 200 && response.status < 300;
+      return {
+        isValid: response.status >= 200 && response.status < 300,
+        isAdBlockerIssue: false,
+      };
     } catch (error) {
-      // Log detailed error information for debugging
+      // Check if this could be an ad blocker issue
+      let isAdBlockerIssue = false;
+
       if (axios.isAxiosError(error)) {
+        // Common ad blocker error patterns
+        const isNetworkError =
+          error.code === 'ERR_NETWORK' || error.code === 'NETWORK_ERROR';
+        const isBlockedRequest = error.code === 'ERR_BLOCKED_BY_CLIENT';
+        const isCorsError =
+          error.message?.includes('CORS') ||
+          error.message?.includes('Access-Control');
+        const isConnectionRefused =
+          error.code === 'ECONNREFUSED' ||
+          error.message?.includes('ERR_CONNECTION_REFUSED');
+
+        // Ad blockers often cause these types of errors
+        isAdBlockerIssue =
+          isNetworkError ||
+          isBlockedRequest ||
+          isCorsError ||
+          isConnectionRefused;
+
         console.error(
           '❌ API validation failed with status:',
           error.response?.status,
-          'Response:',
-          error.response?.data
+          'Code:',
+          error.code,
+          'Message:',
+          error.message,
+          'Possible ad blocker issue:',
+          isAdBlockerIssue
         );
       } else {
         console.error('API key validation failed:', error);
       }
-      return false;
+
+      return { isValid: false, isAdBlockerIssue };
     }
   };
 
@@ -70,13 +100,19 @@ const ApiKeyLogin: React.FC = () => {
       setApiKey(cleanedInput);
 
       // Then validate with actual API call
-      const isValid = await validateApiKey(cleanedInput);
+      const { isValid, isAdBlockerIssue } = await validateApiKey(cleanedInput);
 
       if (isValid) {
         // The context will automatically update and WeatherApp will re-render
       } else {
-        const errorMessage =
+        let errorMessage =
           'Invalid API key. Please check your key and try again.';
+
+        if (isAdBlockerIssue) {
+          errorMessage =
+            'Network error: Unable to validate API key. This might be caused by an ad blocker or firewall. Try disabling your ad blocker or adding this site to your allowlist.';
+        }
+
         setError(errorMessage);
         toast.error(errorMessage);
         // Clear the invalid key from storage
