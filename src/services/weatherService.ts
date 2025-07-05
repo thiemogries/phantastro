@@ -27,6 +27,48 @@ interface NominatimResult {
   address: NominatimAddress;
 }
 
+// Meteoblue API response interfaces
+interface MeteoblueHourlyData {
+  time: string[];
+  temperature?: (number | null)[];
+  windspeed?: (number | null)[];
+  precipitation?: (number | null)[];
+  precipitation_probability?: (number | null)[];
+  cloudcover?: (number | null)[];
+}
+
+interface MeteoblueCloudData {
+  totalcloudcover?: (number | null)[];
+  lowclouds?: (number | null)[];
+  midclouds?: (number | null)[];
+  highclouds?: (number | null)[];
+  visibility?: (number | null)[];
+}
+
+interface MeteoblueBasicResponse {
+  data_1h: MeteoblueHourlyData;
+  data_day?: {
+    time?: string[];
+    [key: string]: unknown;
+  };
+}
+
+interface MeteoblueCloudResponse {
+  data_1h: MeteoblueCloudData;
+}
+
+interface MeteoblueSunMoonResponse {
+  data_day: {
+    time: string[];
+    sunrise: (string | null)[];
+    sunset: (string | null)[];
+    moonrise: (string | null)[];
+    moonset: (string | null)[];
+    moonphase: (number | null)[];
+    moonfraction: (number | null)[];
+  };
+}
+
 class WeatherService {
   private readonly baseUrl: string;
   private requestCounter = 0;
@@ -151,9 +193,10 @@ class WeatherService {
             result.lon <= 180
           );
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Don't log errors for aborted requests (user is typing)
-      if (error.name === 'AbortError' || error.code === 'ERR_CANCELED') {
+      const err = error as Error & { code?: string };
+      if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') {
         return []; // Return empty array for cancelled requests
       }
 
@@ -232,7 +275,10 @@ class WeatherService {
   /**
    * Fetch basic weather data from Meteoblue
    */
-  async fetchBasicWeatherData(lat: number, lon: number): Promise<any> {
+  async fetchBasicWeatherData(
+    lat: number,
+    lon: number
+  ): Promise<MeteoblueBasicResponse> {
     const apiKey = this.getApiKey();
     if (!apiKey) {
       throw new Error('No API key configured');
@@ -271,7 +317,10 @@ class WeatherService {
    * This data is essential for astronomical observations as different
    * cloud layers affect visibility differently.
    */
-  async fetchCloudData(lat: number, lon: number): Promise<any> {
+  async fetchCloudData(
+    lat: number,
+    lon: number
+  ): Promise<MeteoblueCloudResponse | null> {
     const apiKey = this.getApiKey();
     if (!apiKey) {
       throw new Error('No API key configured');
@@ -317,7 +366,7 @@ class WeatherService {
    * - nightskybrightness_clearsky: Illuminance of the nightsky in lux not considering cloud-cover
    * - zenithangle: Solar zenith angle for twilight estimates
    */
-  async fetchMoonlightData(lat: number, lon: number): Promise<any> {
+  async fetchMoonlightData(lat: number, lon: number): Promise<unknown> {
     const apiKey = this.getApiKey();
     if (!apiKey) {
       throw new Error('No API key configured');
@@ -372,7 +421,10 @@ class WeatherService {
    * - moonphasename: Descriptive moon phase name
    * - moonage: Days since new moon
    */
-  async fetchSunMoonData(lat: number, lon: number): Promise<any> {
+  async fetchSunMoonData(
+    lat: number,
+    lon: number
+  ): Promise<MeteoblueSunMoonResponse> {
     const apiKey = this.getApiKey();
     if (!apiKey) {
       throw new Error('No API key configured');
@@ -404,10 +456,8 @@ class WeatherService {
           sunset: [],
           moonrise: [],
           moonset: [],
-          moonphaseangle: [],
-          moonilluminatedfraction: [],
-          moonphasename: [],
-          moonage: [],
+          moonphase: [],
+          moonfraction: [],
         },
       };
     }
@@ -417,11 +467,11 @@ class WeatherService {
    * Transform Meteoblue API response to our internal format
    */
   transformMeteoblueData(
-    data: any,
+    data: MeteoblueBasicResponse,
     location: Location,
-    cloudData?: any,
-    moonlightData?: any,
-    sunMoonData?: any
+    cloudData?: MeteoblueCloudResponse | null,
+    moonlightData?: unknown, // Not used anymore
+    sunMoonData?: MeteoblueSunMoonResponse
   ): WeatherForecast {
     // Transform hourly data
     const hourlyForecast: HourlyForecast[] = [];
@@ -469,26 +519,7 @@ class WeatherService {
       }
     }
 
-    // Validate moonlight data arrays if available
-    if (moonlightData?.data_1h) {
-      const moonlightArrays = {
-        moonlight_actual: moonlightData.data_1h.moonlight_actual,
-        moonlight_clearsky: moonlightData.data_1h.moonlight_clearsky,
-        nightskybrightness_actual:
-          moonlightData.data_1h.nightskybrightness_actual,
-        nightskybrightness_clearsky:
-          moonlightData.data_1h.nightskybrightness_clearsky,
-        zenithangle: moonlightData.data_1h.zenithangle,
-      };
-
-      for (const [fieldName, array] of Object.entries(moonlightArrays)) {
-        if (array && array.length !== timeLength) {
-          console.warn(
-            `⚠️ Moonlight data length mismatch for ${fieldName}: expected ${timeLength}, got ${array.length}`
-          );
-        }
-      }
-    }
+    // Moonlight data is no longer used
 
     for (const [fieldName, array] of Object.entries(dataArrays)) {
       if (array && array.length !== timeLength) {
@@ -546,7 +577,7 @@ class WeatherService {
 
       // Safe data extraction with fallbacks
       const safeExtractValue = (
-        dataPath: any,
+        dataPath: (number | null | undefined)[] | undefined,
         index: number
       ): number | null => {
         try {
@@ -590,30 +621,7 @@ class WeatherService {
             i
           ),
         },
-        moonlight: moonlightData
-          ? {
-              moonlightActual: safeExtractValue(
-                moonlightData.data_1h?.moonlight_actual,
-                i
-              ),
-              moonlightClearSky: safeExtractValue(
-                moonlightData.data_1h?.moonlight_clearsky,
-                i
-              ),
-              nightSkyBrightnessActual: safeExtractValue(
-                moonlightData.data_1h?.nightskybrightness_actual,
-                i
-              ),
-              nightSkyBrightnessClearSky: safeExtractValue(
-                moonlightData.data_1h?.nightskybrightness_clearsky,
-                i
-              ),
-              zenithAngle: safeExtractValue(
-                moonlightData.data_1h?.zenithangle,
-                i
-              ),
-            }
-          : defaultMoonlightData,
+        moonlight: defaultMoonlightData, // Moonlight data is no longer used
         visibility: (() => {
           const visibilityValue = safeExtractValue(
             cloudData?.data_1h?.visibility,
@@ -843,7 +851,18 @@ class WeatherService {
             precips.length > 0 ? precips.reduce((sum, p) => sum + p, 0) : 0;
 
           // Add sun/moon data if available
-          let sunMoonDataForDay: any = undefined;
+          let sunMoonDataForDay:
+            | {
+                sunrise: string | null;
+                sunset: string | null;
+                moonrise: string | null;
+                moonset: string | null;
+                moonPhaseAngle: number | null;
+                moonIlluminatedFraction: number | null;
+                moonPhaseName: string | null;
+                moonAge: number | null;
+              }
+            | undefined = undefined;
           if (sunMoonData?.data_day) {
             const dayIndex = sunMoonData.data_day.time?.findIndex(
               (t: string) => t === dayHours[0].time.split('T')[0]
@@ -861,13 +880,11 @@ class WeatherService {
                     ? null
                     : sunMoonData.data_day.moonset?.[dayIndex] || null,
                 moonPhaseAngle:
-                  sunMoonData.data_day.moonphaseangle?.[dayIndex] || null,
+                  sunMoonData.data_day.moonphase?.[dayIndex] || null,
                 moonIlluminatedFraction:
-                  sunMoonData.data_day.moonilluminatedfraction?.[dayIndex] ||
-                  null,
-                moonPhaseName:
-                  sunMoonData.data_day.moonphasename?.[dayIndex] || null,
-                moonAge: sunMoonData.data_day.moonage?.[dayIndex] || null,
+                  sunMoonData.data_day.moonfraction?.[dayIndex] || null,
+                moonPhaseName: null, // Not available in this API response
+                moonAge: null, // Not available in this API response
               };
             }
           }

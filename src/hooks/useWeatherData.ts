@@ -66,7 +66,7 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
         location,
         cloudWeatherData,
         undefined, // No longer fetch moonlight data
-        sunMoonWeatherData
+        sunMoonWeatherData || undefined
       );
     },
     enabled: Boolean(params),

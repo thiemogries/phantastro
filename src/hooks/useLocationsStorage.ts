@@ -5,22 +5,41 @@ import useLocalStorage from './useLocalStorage';
 const LOCATIONS_STORAGE_KEY = 'phantastro-locations';
 
 /**
+ * Interface for raw location data from localStorage
+ */
+interface RawLocationData {
+  lat: unknown;
+  lon: unknown;
+  name?: unknown;
+}
+
+/**
+ * Type guard to check if an object has the basic structure of a location
+ */
+function hasLocationStructure(obj: unknown): obj is RawLocationData {
+  return (
+    typeof obj === 'object' && obj !== null && 'lat' in obj && 'lon' in obj
+  );
+}
+
+/**
  * Validates that a location object has the required properties
  */
 function isValidLocation(location: unknown): location is WeatherQueryParams {
-  const loc = location as any;
+  if (!hasLocationStructure(location)) {
+    return false;
+  }
+
   return (
-    typeof location === 'object' &&
-    location !== null &&
-    typeof loc.lat === 'number' &&
-    typeof loc.lon === 'number' &&
-    !isNaN(loc.lat) &&
-    !isNaN(loc.lon) &&
-    loc.lat >= -90 &&
-    loc.lat <= 90 &&
-    loc.lon >= -180 &&
-    loc.lon <= 180 &&
-    (loc.name === undefined || typeof loc.name === 'string')
+    typeof location.lat === 'number' &&
+    typeof location.lon === 'number' &&
+    !isNaN(location.lat) &&
+    !isNaN(location.lon) &&
+    location.lat >= -90 &&
+    location.lat <= 90 &&
+    location.lon >= -180 &&
+    location.lon <= 180 &&
+    (location.name === undefined || typeof location.name === 'string')
   );
 }
 
