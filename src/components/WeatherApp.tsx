@@ -8,6 +8,7 @@ import WeeklyOverview from './WeeklyOverview';
 import ApiKeyLogin from './ApiKeyLogin';
 import SettingsMenu from './SettingsMenu';
 import StarField from './StarField';
+import packageJson from '../../package.json';
 import './WeatherApp.css';
 
 interface WeatherAppProps {
@@ -97,6 +98,20 @@ const WeatherApp: React.FC<WeatherAppProps> = ({ className }) => {
             </div>
           </div>
         )}
+
+        {/* Version Footer */}
+        <footer
+          style={{
+            marginTop: '2rem',
+            padding: '1rem',
+            textAlign: 'center',
+            fontSize: '0.8rem',
+            opacity: 0.7,
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+          }}
+        >
+          Phantastro v{packageJson.version}
+        </footer>
       </div>
     </div>
   );
