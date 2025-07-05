@@ -44,17 +44,28 @@ const TwilightTimeline: React.FC<TwilightTimelineProps> = ({
   };
 
   const createTwilightSegments = (): TwilightSegment[] => {
-    try {
-      // Validate coordinates
-      if (
-        latitude < -90 ||
-        latitude > 90 ||
-        longitude < -180 ||
-        longitude > 180
-      ) {
-        throw new Error('Invalid coordinates');
-      }
+    // Validate coordinates - return fallback if invalid
+    if (
+      latitude < -90 ||
+      latitude > 90 ||
+      longitude < -180 ||
+      longitude > 180
+    ) {
+      console.warn(
+        'Invalid coordinates provided, using fallback night segments'
+      );
+      return dates.map((_, dayIndex) => ({
+        startDay: dayIndex,
+        startHour: 0,
+        endDay: dayIndex,
+        endHour: 24,
+        type: 'night' as const,
+        color: '#0f172a',
+        totalHours: 24,
+      }));
+    }
 
+    try {
       const segments: TwilightSegment[] = [];
       const allEvents: Array<{
         dayIndex: number;
