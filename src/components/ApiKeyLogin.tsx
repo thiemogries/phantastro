@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { useApiKey } from '../contexts/ApiKeyContext';
 import LoadingSpinner from './LoadingSpinner';
 import StarField from './StarField';
+import packageJson from '../../package.json';
 import './ApiKeyLogin.css';
 
 const ApiKeyLogin: React.FC = () => {
@@ -192,6 +193,18 @@ const ApiKeyLogin: React.FC = () => {
             </p>
           </div>
         </div>
+
+        {/* Version Footer */}
+        <footer
+          style={{
+            marginTop: '2rem',
+            textAlign: 'center',
+            fontSize: '0.8rem',
+            opacity: 0.7,
+          }}
+        >
+          Phantastro v{packageJson.version}
+        </footer>
       </div>
     </div>
   );
