@@ -1,7 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { Tooltip } from 'react-tooltip';
-import { HourlyForecast, Location } from '../types/weather';
+import { HourlyForecast, Location, SunMoonData } from '../types/weather';
 import {
   calculateTwilightForDate,
   calculateSunriseSunset,
@@ -10,7 +10,7 @@ import {
 interface DayData {
   date: string;
   hours: HourlyForecast[];
-  sunMoon?: any;
+  sunMoon?: SunMoonData;
 }
 
 interface HourTooltipsProps {
@@ -89,7 +89,7 @@ const getSolarTwilightAndMoonData = (
   date: string,
   hourTime: string,
   location: Location,
-  groupedByDay: any[]
+  groupedByDay: DayData[]
 ) => {
   const formatTimeOnly = (timeStr: string | null | undefined) => {
     if (!timeStr || timeStr === '---' || timeStr === '----') return 'N/A';
@@ -142,7 +142,7 @@ const getSolarTwilightAndMoonData = (
     currentDayIndex > 0 ? groupedByDay[currentDayIndex - 1] : null;
 
   // Helper to get sunrise time for a day
-  const getSunriseTime = (dayData: any) => {
+  const getSunriseTime = (dayData: DayData) => {
     if (!dayData?.sunMoon?.sunrise || dayData.sunMoon.sunrise === 'N/A') {
       try {
         const targetDate = new Date(`${dayData.date}T12:00:00`);
@@ -162,7 +162,7 @@ const getSolarTwilightAndMoonData = (
   };
 
   // Helper to get sunset time for a day
-  const getSunsetTime = (dayData: any) => {
+  const getSunsetTime = (dayData: DayData) => {
     if (!dayData?.sunMoon?.sunset || dayData.sunMoon.sunset === 'N/A') {
       try {
         const targetDate = new Date(`${dayData.date}T12:00:00`);

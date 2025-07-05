@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import StarField from '../StarField';
 
 describe('StarField Component', () => {
@@ -8,8 +8,8 @@ describe('StarField Component', () => {
   });
 
   test('creates canvas element with correct dimensions', () => {
-    const { container } = render(<StarField width={800} height={600} />);
-    const canvas = container.querySelector('canvas');
+    render(<StarField width={800} height={600} />);
+    const canvas = screen.getByTestId('star-field-canvas');
 
     expect(canvas).toBeInTheDocument();
     expect(canvas).toHaveStyle({

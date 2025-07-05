@@ -8,6 +8,25 @@ import {
   WeatherForecast,
 } from '../types/weather';
 
+// Nominatim API response interfaces
+interface NominatimAddress {
+  city?: string;
+  town?: string;
+  village?: string;
+  hamlet?: string;
+  county?: string;
+  state?: string;
+  country?: string;
+  country_code?: string;
+}
+
+interface NominatimResult {
+  lat: string;
+  lon: string;
+  display_name: string;
+  address: NominatimAddress;
+}
+
 class WeatherService {
   private readonly baseUrl: string;
   private requestCounter = 0;
@@ -78,7 +97,7 @@ class WeatherService {
 
       // Transform Nominatim response to our LocationSearchResult format
       return response.data
-        .map((item: any) => {
+        .map((item: NominatimResult) => {
           const lat = parseFloat(item.lat);
           const lon = parseFloat(item.lon);
 

@@ -189,7 +189,12 @@ const TwilightTimeline: React.FC<TwilightTimelineProps> = ({
             startHour,
             endDay,
             endHour,
-            type: currentState as any,
+            type: currentState as
+              | 'day'
+              | 'civil'
+              | 'nautical'
+              | 'astronomical'
+              | 'night',
             color: getColorForState(currentState),
             totalHours: event.absoluteTime - lastAbsoluteTime,
           });
@@ -239,7 +244,12 @@ const TwilightTimeline: React.FC<TwilightTimelineProps> = ({
           startHour,
           endDay,
           endHour,
-          type: currentState as any,
+          type: currentState as
+            | 'day'
+            | 'civil'
+            | 'nautical'
+            | 'astronomical'
+            | 'night',
           color: getColorForState(currentState),
           totalHours: weekEndTime - lastAbsoluteTime,
         });

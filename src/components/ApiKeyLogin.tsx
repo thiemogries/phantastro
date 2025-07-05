@@ -35,7 +35,6 @@ const ApiKeyLogin: React.FC = () => {
       });
 
       clearTimeout(timeoutId);
-      console.log('📡 API validation response status:', response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -76,7 +75,6 @@ const ApiKeyLogin: React.FC = () => {
       const isValid = await validateApiKey(cleanedInput);
 
       if (isValid) {
-        console.log('✅ API key validated successfully');
         // The context will automatically update and WeatherApp will re-render
       } else {
         setError('Invalid API key. Please check your key and try again.');

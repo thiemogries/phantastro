@@ -242,6 +242,7 @@ const StarField: React.FC<StarFieldProps> = ({
   return (
     <canvas
       ref={canvasRef}
+      data-testid="star-field-canvas"
       style={{
         position: 'absolute',
         top: 0,

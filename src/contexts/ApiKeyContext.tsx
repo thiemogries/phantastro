@@ -44,10 +44,8 @@ export const ApiKeyProvider: React.FC<ApiKeyProviderProps> = ({ children }) => {
       // Clean the API key: trim whitespace and remove any surrounding quotes
       const cleanedKey = apiKey.trim().replace(/^["']|["']$/g, '');
       if (isValidApiKeyFormat(cleanedKey)) {
-        console.log('🔑 ApiKeyContext: Setting valid API key');
         setStoredApiKey(cleanedKey);
       } else {
-        console.warn('🔑 ApiKeyContext: Invalid API key format provided');
         throw new Error(
           'Invalid API key format. Please check your key and try again.'
         );
@@ -57,7 +55,6 @@ export const ApiKeyProvider: React.FC<ApiKeyProviderProps> = ({ children }) => {
   );
 
   const clearApiKey = useCallback(() => {
-    console.log('🗑️ ApiKeyContext: Clearing stored API key');
     setStoredApiKey(null);
   }, [setStoredApiKey]);
 

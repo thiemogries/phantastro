@@ -76,7 +76,7 @@ export const useWeatherData = (params: WeatherQueryParams | null) => {
     refetchOnReconnect: true, // Refetch when connection is restored
     refetchOnWindowFocus: false, // Prevent flicker on focus
     // Use placeholder data to prevent loading states
-    placeholderData: (previousData: any) => previousData,
+    // placeholderData: (previousData: WeatherForecast | undefined) => previousData,
     // Reduce retry attempts to prevent delays
     retry: 1,
     retryDelay: 1000,
@@ -96,12 +96,13 @@ export const useLocationSearch = (query: string) => {
     enabled: Boolean(query.trim() && query.trim().length >= 3),
     staleTime: 5 * 60 * 1000, // 5 minutes - location data doesn't change often
     gcTime: 10 * 60 * 1000, // 10 minutes
-    retry: (failureCount, error: any) => {
+    retry: (failureCount: number, error: Error) => {
       // Don't retry on aborted requests or network errors
+      const err = error as Error & { code?: string };
       if (
-        error.name === 'AbortError' ||
-        error.code === 'ERR_CANCELED' ||
-        error.code === 'ECONNABORTED'
+        err.name === 'AbortError' ||
+        err.code === 'ERR_CANCELED' ||
+        err.code === 'ECONNABORTED'
       ) {
         return false;
       }

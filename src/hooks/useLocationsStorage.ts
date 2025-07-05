@@ -7,26 +7,27 @@ const LOCATIONS_STORAGE_KEY = 'phantastro-locations';
 /**
  * Validates that a location object has the required properties
  */
-function isValidLocation(location: any): location is WeatherQueryParams {
+function isValidLocation(location: unknown): location is WeatherQueryParams {
+  const loc = location as any;
   return (
     typeof location === 'object' &&
     location !== null &&
-    typeof location.lat === 'number' &&
-    typeof location.lon === 'number' &&
-    !isNaN(location.lat) &&
-    !isNaN(location.lon) &&
-    location.lat >= -90 &&
-    location.lat <= 90 &&
-    location.lon >= -180 &&
-    location.lon <= 180 &&
-    (location.name === undefined || typeof location.name === 'string')
+    typeof loc.lat === 'number' &&
+    typeof loc.lon === 'number' &&
+    !isNaN(loc.lat) &&
+    !isNaN(loc.lon) &&
+    loc.lat >= -90 &&
+    loc.lat <= 90 &&
+    loc.lon >= -180 &&
+    loc.lon <= 180 &&
+    (loc.name === undefined || typeof loc.name === 'string')
   );
 }
 
 /**
  * Validates and filters an array of locations
  */
-function validateLocations(locations: any): WeatherQueryParams[] {
+function validateLocations(locations: unknown): WeatherQueryParams[] {
   if (!Array.isArray(locations)) {
     console.warn('Stored locations is not an array, returning empty array');
     return [];
@@ -92,7 +93,6 @@ export function useLocationsStorage(): [
   );
 
   const clearLocations = useCallback(() => {
-    console.log('🗑️ useLocationsStorage: Clearing all stored locations');
     setStoredLocations([]);
   }, [setStoredLocations]);
 

@@ -1,11 +1,11 @@
 import React from 'react';
-import { HourlyForecast } from '../types/weather';
+import { HourlyForecast, SunMoonData } from '../types/weather';
 import { getCloudCoverageInfo, getRainState } from '../utils/weatherUtils';
 
 interface DayData {
   date: string;
   hours: HourlyForecast[];
-  sunMoon?: any;
+  sunMoon?: SunMoonData;
 }
 
 interface HourGridProps {

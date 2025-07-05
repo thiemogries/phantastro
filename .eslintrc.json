@@ -28,6 +28,12 @@
         "@typescript-eslint/no-explicit-any": "off",
         "no-console": "off"
       }
+    },
+    {
+      "files": ["src/data/**/*.js", "scripts/**/*.js"],
+      "rules": {
+        "no-console": "off"
+      }
     }
   ]
 }

@@ -1,13 +1,13 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
-import { Location, HourlyForecast } from '../types/weather';
+import { Location, HourlyForecast, SunMoonData } from '../types/weather';
 import { getMoonPhaseIcon } from '../utils/weatherUtils';
 import { calculateSunriseSunset } from '../utils/solarUtils';
 
 interface DayData {
   date: string;
   hours: HourlyForecast[];
-  sunMoon?: any;
+  sunMoon?: SunMoonData;
 }
 
 interface DayHeadersProps {
@@ -91,7 +91,7 @@ const calculateClearNightHours = (
 const formatDayHeader = (
   dateStr: string,
   location?: Location,
-  sunMoon?: any
+  sunMoon?: SunMoonData
 ) => {
   // For dates like "2025-06-23", create a date that represents the location's timezone
   // We'll use the first hour of the day from our hourly data to get the correct timezone context

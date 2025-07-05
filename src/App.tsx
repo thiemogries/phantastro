@@ -24,7 +24,7 @@ const queryClient = new QueryClient({
       // Use network-first approach but allow stale data
       networkMode: 'offlineFirst',
       // Keep previous data while fetching new data
-      placeholderData: (previousData: any) => previousData,
+      // placeholderData: previousData => previousData,
     },
     mutations: {
       retry: 1,
