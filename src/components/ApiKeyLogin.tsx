@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 import { useApiKey } from '../contexts/ApiKeyContext';
 import LoadingSpinner from './LoadingSpinner';
 import StarField from './StarField';
@@ -18,39 +19,33 @@ const ApiKeyLogin: React.FC = () => {
       const cleanedKey = apiKey.trim().replace(/^["']|["']$/g, '');
 
       // Simple validation request to Meteoblue API
-      const params = new URLSearchParams({
+      const params = {
         apikey: cleanedKey,
         lat: '53.5511', // Hamburg coordinates for test
         lon: '9.9937',
         format: 'json',
+      };
+
+      const url = 'https://my.meteoblue.com/packages/basic-1h';
+
+      const response = await axios.get(url, {
+        params,
+        timeout: 10000, // 10 second timeout
       });
 
-      // Create AbortController for timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
-      const url = `https://my.meteoblue.com/packages/basic-1h?${params}`;
-
-      const response = await fetch(url, {
-        method: 'GET',
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorText = await response.text();
+      return response.status >= 200 && response.status < 300;
+    } catch (error) {
+      // Log detailed error information for debugging
+      if (axios.isAxiosError(error)) {
         console.error(
           '❌ API validation failed with status:',
-          response.status,
+          error.response?.status,
           'Response:',
-          errorText
+          error.response?.data
         );
+      } else {
+        console.error('API key validation failed:', error);
       }
-
-      return response.ok;
-    } catch (error) {
-      console.error('API key validation failed:', error);
       return false;
     }
   };
