@@ -55,8 +55,6 @@
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   position: relative;
   overflow-x: hidden;
-  /* Prevent elastic scrolling on macOS */
-  overscroll-behavior: none;
 }
 
 /* Star field background is now handled by React components */
