@@ -64,8 +64,10 @@ interface MeteoblueSunMoonResponse {
     sunset: (string | null)[];
     moonrise: (string | null)[];
     moonset: (string | null)[];
-    moonphase: (number | null)[];
-    moonfraction: (number | null)[];
+    moonphaseangle: (number | null)[];
+    moonilluminatedfraction: (number | null)[];
+    moonphasename: (string | null)[];
+    moonage: (number | null)[];
   };
 }
 
@@ -456,8 +458,10 @@ class WeatherService {
           sunset: [],
           moonrise: [],
           moonset: [],
-          moonphase: [],
-          moonfraction: [],
+          moonphaseangle: [],
+          moonilluminatedfraction: [],
+          moonphasename: [],
+          moonage: [],
         },
       };
     }
@@ -880,11 +884,13 @@ class WeatherService {
                     ? null
                     : sunMoonData.data_day.moonset?.[dayIndex] || null,
                 moonPhaseAngle:
-                  sunMoonData.data_day.moonphase?.[dayIndex] || null,
+                  sunMoonData.data_day.moonphaseangle?.[dayIndex] || null,
                 moonIlluminatedFraction:
-                  sunMoonData.data_day.moonfraction?.[dayIndex] || null,
-                moonPhaseName: null, // Not available in this API response
-                moonAge: null, // Not available in this API response
+                  sunMoonData.data_day.moonilluminatedfraction?.[dayIndex] ||
+                  null,
+                moonPhaseName:
+                  sunMoonData.data_day.moonphasename?.[dayIndex] || null,
+                moonAge: sunMoonData.data_day.moonage?.[dayIndex] || null,
               };
             }
           }
