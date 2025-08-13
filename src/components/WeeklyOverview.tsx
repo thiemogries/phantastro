@@ -200,7 +200,10 @@ const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
       </div>
 
       {/* Summary Row */}
-      <WeatherSummary hourlyForecast={forecast.hourlyForecast} />
+      <WeatherSummary
+        hourlyForecast={forecast.hourlyForecast}
+        location={forecast.location}
+      />
     </div>
   );
 };

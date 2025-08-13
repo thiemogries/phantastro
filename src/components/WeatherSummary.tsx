@@ -1,14 +1,49 @@
 import React from 'react';
 import { Tooltip } from 'react-tooltip';
-import { HourlyForecast } from '../types/weather';
+import { HourlyForecast, Location } from '../types/weather';
+import { calculateSunriseSunset } from '../utils/solarUtils';
 
 interface WeatherSummaryProps {
   hourlyForecast: HourlyForecast[];
+  location: Location;
 }
 
-const WeatherSummary: React.FC<WeatherSummaryProps> = ({ hourlyForecast }) => {
+const WeatherSummary: React.FC<WeatherSummaryProps> = ({
+  hourlyForecast,
+  location,
+}) => {
+  // Helper function to check if an hour is during nighttime (sun is down)
+  const isNighttime = (hour: HourlyForecast): boolean => {
+    try {
+      const hourDate = new Date(hour.time);
+      const dayDate = new Date(hourDate);
+      dayDate.setHours(12, 0, 0, 0); // Set to noon for solar calculations
+
+      const sunTimes = calculateSunriseSunset(
+        location.lat,
+        location.lon,
+        dayDate
+      );
+
+      if (!sunTimes.sunrise || !sunTimes.sunset) {
+        // If no sunrise/sunset (polar regions), assume it's always night for astronomical purposes
+        return true;
+      }
+
+      const hourTime = hourDate.getTime();
+      const sunriseTime = sunTimes.sunrise.getTime();
+      const sunsetTime = sunTimes.sunset.getTime();
+
+      // Check if hour is before sunrise or after sunset
+      return hourTime < sunriseTime || hourTime > sunsetTime;
+    } catch (error) {
+      // If there's an error calculating solar times, include the hour to be safe
+      return true;
+    }
+  };
+
   // Calculate best hours for astronomical observation
-  // Conditions: <5% clouds, 0% rain, ≥15km visibility, <5 m/s wind
+  // Conditions: <5% clouds, 0% rain, ≥15km visibility, <5 m/s wind, AND nighttime (sun is down)
   const clearHoursData = hourlyForecast.filter(
     (hour: HourlyForecast) =>
       hour.cloudCover.totalCloudCover !== null &&
@@ -19,7 +54,8 @@ const WeatherSummary: React.FC<WeatherSummaryProps> = ({ hourlyForecast }) => {
       hour.cloudCover.totalCloudCover < 5 &&
       hour.precipitation.precipitation === 0 &&
       hour.visibility >= 15 &&
-      hour.windSpeed < 5
+      hour.windSpeed < 5 &&
+      isNighttime(hour)
   );
 
   const bestHours = clearHoursData.length;
@@ -128,7 +164,7 @@ const WeatherSummary: React.FC<WeatherSummaryProps> = ({ hourlyForecast }) => {
 
     // Format the tooltip content
     let content =
-      'Clear Hours (< 5% clouds, 0% rain, ≥ 15km visibility, < 5 m/s wind):\n\n';
+      'Clear Night Hours (< 5% clouds, 0% rain, ≥ 15km visibility, < 5 m/s wind, sun down):\n\n';
 
     Object.entries(groupedByDate).forEach(([date, hours]) => {
       content += `${date}:\n`;
