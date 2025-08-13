@@ -42,9 +42,7 @@ describe('urlUtils', () => {
     });
 
     it('should handle location without name', () => {
-      const locations: WeatherQueryParams[] = [
-        { lat: 53.5511, lon: 9.9937 },
-      ];
+      const locations: WeatherQueryParams[] = [{ lat: 53.5511, lon: 9.9937 }];
       const result = encodeLocationsToUrl(locations);
       expect(result).toBe('53.5511,9.9937,');
     });
@@ -57,7 +55,9 @@ describe('urlUtils', () => {
     });
 
     it('should decode single location', () => {
-      const result = decodeLocationsFromUrl('53.5511,9.9937,Hamburg%2C%20Germany');
+      const result = decodeLocationsFromUrl(
+        '53.5511,9.9937,Hamburg%2C%20Germany'
+      );
       expect(result).toEqual([
         { lat: 53.5511, lon: 9.9937, name: 'Hamburg, Germany' },
       ]);
