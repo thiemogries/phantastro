@@ -148,7 +148,7 @@ const WeatherSummary: React.FC<WeatherSummaryProps> = ({ hourlyForecast }) => {
         <span
           className="summary-value"
           data-tooltip-id="clear-hours-tooltip"
-          style={{ cursor: 'pointer', textDecoration: 'underline dotted' }}
+          style={{ cursor: 'pointer' }}
         >
           {bestHours} clear hour{bestHours === 1 ? '' : 's'}
         </span>
