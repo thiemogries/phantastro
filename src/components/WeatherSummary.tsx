@@ -152,24 +152,75 @@ const WeatherSummary: React.FC<WeatherSummaryProps> = ({
       return 'No clear hours found in the forecast period.';
     }
 
-    // Group clear hours by date
-    const groupedByDate: { [date: string]: HourlyForecast[] } = {};
+    // Group clear hours by astronomical night (sunset to sunrise)
+    const groupedByNight: { [date: string]: HourlyForecast[] } = {};
     clearHoursData.forEach(hour => {
-      const date = formatDate(hour.time);
-      if (!groupedByDate[date]) {
-        groupedByDate[date] = [];
+      try {
+        const hourDate = new Date(hour.time);
+        const dayDate = new Date(hourDate);
+        dayDate.setHours(12, 0, 0, 0);
+
+        const sunTimes = calculateSunriseSunset(
+          location.lat,
+          location.lon,
+          dayDate
+        );
+
+        let nightDate = formatDate(hour.time);
+
+        // If this hour is before sunrise, it belongs to the previous night
+        if (
+          sunTimes.sunrise &&
+          hourDate.getTime() < sunTimes.sunrise.getTime()
+        ) {
+          const previousDay = new Date(dayDate);
+          previousDay.setDate(previousDay.getDate() - 1);
+          nightDate = formatDate(previousDay.toISOString());
+        }
+
+        if (!groupedByNight[nightDate]) {
+          groupedByNight[nightDate] = [];
+        }
+        groupedByNight[nightDate].push(hour);
+      } catch (error) {
+        // Fallback to regular date grouping if solar calculation fails
+        const date = formatDate(hour.time);
+        if (!groupedByNight[date]) {
+          groupedByNight[date] = [];
+        }
+        groupedByNight[date].push(hour);
       }
-      groupedByDate[date].push(hour);
     });
 
     // Format the tooltip content
     let content =
       'Clear Night Hours (< 5% clouds, 0% rain, ≥ 15km visibility, < 5 m/s wind, sun down):\n\n';
 
-    Object.entries(groupedByDate).forEach(([date, hours]) => {
-      content += `${date}:\n`;
-      hours.forEach(hour => {
-        content += `  ${formatTime(hour.time)}\n`;
+    Object.entries(groupedByNight).forEach(([date, hours]) => {
+      // Sort hours by time to show them in chronological order
+      const sortedHours = hours.sort(
+        (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()
+      );
+
+      content += `${date} night:\n`;
+
+      let hasShownNextDayIndicator = false;
+      sortedHours.forEach(hour => {
+        const hourDate = new Date(hour.time);
+        const timeStr = formatTime(hour.time);
+
+        // Add date indicator only for the first hour that's in the next calendar day
+        if (hourDate.getHours() < 12 && !hasShownNextDayIndicator) {
+          const nextDay = new Date(hourDate);
+          const nextDayStr = nextDay.toLocaleDateString([], {
+            month: 'short',
+            day: 'numeric',
+          });
+          content += `  ${timeStr} (${nextDayStr})\n`;
+          hasShownNextDayIndicator = true;
+        } else {
+          content += `  ${timeStr}\n`;
+        }
       });
       content += '\n';
     });
