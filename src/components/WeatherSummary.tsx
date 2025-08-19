@@ -192,9 +192,10 @@ const WeatherSummary: React.FC<WeatherSummaryProps> = ({
       }
     });
 
-    // Format the tooltip content
-    let content =
-      'Clear Night Hours (< 5% clouds, 0% rain, ≥ 15km visibility, < 5 m/s wind, sun down):\n\n';
+    // Format the tooltip content as HTML for bold formatting
+    let content = `<div>
+      <div style="margin-bottom: 8px;">Clear Night Hours (&lt; 5% clouds, 0% rain, ≥ 15km visibility, &lt; 5 m/s wind, sun down):</div>
+    `;
 
     Object.entries(groupedByNight).forEach(([date, hours]) => {
       // Sort hours by time to show them in chronological order
@@ -202,7 +203,8 @@ const WeatherSummary: React.FC<WeatherSummaryProps> = ({
         (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()
       );
 
-      content += `${date} night:\n`;
+      // Format as a bold headline
+      content += `<div style="font-weight: bold; margin-top: 8px; margin-bottom: 4px;">${date} night:</div>`;
 
       let hasShownNextDayIndicator = false;
       sortedHours.forEach(hour => {
@@ -216,16 +218,16 @@ const WeatherSummary: React.FC<WeatherSummaryProps> = ({
             month: 'short',
             day: 'numeric',
           });
-          content += `  ${timeStr} (${nextDayStr})\n`;
+          content += `<div style="margin-left: 8px;">${timeStr} (${nextDayStr})</div>`;
           hasShownNextDayIndicator = true;
         } else {
-          content += `  ${timeStr}\n`;
+          content += `<div style="margin-left: 8px;">${timeStr}</div>`;
         }
       });
-      content += '\n';
     });
 
-    return content.trim();
+    content += '</div>';
+    return content;
   };
 
   return (
@@ -253,11 +255,9 @@ const WeatherSummary: React.FC<WeatherSummaryProps> = ({
             zIndex: 1000,
             borderRadius: '8px',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
-            whiteSpace: 'pre-line',
           }}
-        >
-          {generateClearHoursTooltip()}
-        </Tooltip>
+          html={generateClearHoursTooltip()}
+        />
       </div>
       <div className="summary-item">
         <span className="summary-label">Avg Clouds:</span>
